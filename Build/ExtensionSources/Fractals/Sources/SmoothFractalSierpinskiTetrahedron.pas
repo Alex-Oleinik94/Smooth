@@ -22,7 +22,7 @@ type
 			public
 		procedure Calculate;override;
 		procedure CalculateFromThread();
-		procedure PushIndexes(var ObjectId:LongWord;const n,v0,v1,v2:TSVertex3f;var FVertexIndex:LongWord);Inline;
+		procedure PushPoligonData(var ObjectId:LongWord;const n,v0,v1,v2:TSVertex3f;var FVertexIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSScreenLabel;
 		FBPD, FBMD : TSScreenButton;
@@ -48,7 +48,7 @@ begin
 Result:='Тетраэдр Серпинского';
 end;
 
-procedure TSFractalSierpinskiTetrahedron.PushIndexes(var ObjectId:LongWord;const n,v0,v1,v2:TSVertex3f;var FVertexIndex:LongWord);Inline;
+procedure TSFractalSierpinskiTetrahedron.PushPoligonData(var ObjectId:LongWord;const n,v0,v1,v2:TSVertex3f;var FVertexIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	c:TSColor3f;
 
@@ -87,7 +87,7 @@ if FEnableNormals then
 	end;
 FVertexIndex+=3;
 
-AfterPushIndexes(ObjectId,FThreadsEnable,FVertexIndex);
+AfterPushingPoligonData(ObjectId,FThreadsEnable,FVertexIndex);
 end;
 
 procedure TSFractalSierpinskiTetrahedron.CalculateFromThread();
@@ -100,10 +100,10 @@ procedure Rec(const t0,t1,t2,t3:TSVertex3f;const NowDepth:LongWord);
 begin
 if NowDepth=0 then
 	begin
-	PushIndexes(ObjectId,FArNor[3],t0,t1,t2,FVI);
-	PushIndexes(ObjectId,FArNor[0],t0,t1,t3,FVI);
-	PushIndexes(ObjectId,FArNor[2],t0,t2,t3,FVI);
-	PushIndexes(ObjectId,FArNor[1],t1,t2,t3,FVI);
+	PushPoligonData(ObjectId,FArNor[3],t0,t1,t2,FVI);
+	PushPoligonData(ObjectId,FArNor[0],t0,t1,t3,FVI);
+	PushPoligonData(ObjectId,FArNor[2],t0,t2,t3,FVI);
+	PushPoligonData(ObjectId,FArNor[1],t1,t2,t3,FVI);
 	end
 else
 	begin
@@ -153,12 +153,12 @@ end;
 
 procedure TSFractalSierpinskiTetrahedron.Calculate();
 var
-	Quantity:Int64;
+	NumberOfPolygons:Int64;
 begin
 inherited;
 Clear3dObject();
-Quantity:=(4**(1+FDepth));
-Calculate3dObjects(Quantity,SR_TRIANGLES,S3dObjectVertexType3f);
+NumberOfPolygons:=(4**(1+FDepth));
+Calculate3dObjects(NumberOfPolygons,SR_TRIANGLES,S3dObjectVertexType3f);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;

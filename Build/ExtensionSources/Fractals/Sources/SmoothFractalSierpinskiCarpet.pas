@@ -20,10 +20,10 @@ type
 		destructor Destroy();override;
 		class function ClassName():TSString;override;
 			public
-		function RecQuantity(const ThisDepth : TSUInt64) : TSUInt64;
+		class function CountingTheNumberOfPolygons(const ThisDepth : TSUInt64) : TSUInt64;
 		procedure Calculate();override;
 		procedure CalculateFromThread();
-		procedure PushIndexes(var ObjectId:LongWord;const v1,v2,v3,v4:TSVertex2f;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure PushPoligonData(var ObjectId:LongWord;const v1,v2,v3,v4:TSVertex2f;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSScreenLabel;
 		FBPD, FBMD : TSScreenButton;
@@ -43,7 +43,7 @@ begin
 Result := 'Ковёр (квадрат) Серпинского';
 end;
 
-procedure TSFractalSierpinskiCarpet.PushIndexes(var ObjectId:LongWord;const v1, v2, v3, v4 : TSVertex2f;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSFractalSierpinskiCarpet.PushPoligonData(var ObjectId:LongWord;const v1, v2, v3, v4 : TSVertex2f;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 FVertexIndex+=4;
 if not (Render.RenderType in [SRenderDirectX9, SRenderDirectX8]) then
@@ -64,7 +64,7 @@ else
 F3dObject.Objects[ObjectId].SetFaceQuad(0,FFaceIndex+0,FVertexIndex-1,FVertexIndex-2,FVertexIndex-3,FVertexIndex-4);
 FFaceIndex+=1;
 
-AfterPushIndexes(ObjectId,FThreadsEnable,FVertexIndex,FFaceIndex);
+AfterPushingPoligonData(ObjectId,FThreadsEnable,FVertexIndex,FFaceIndex);
 end;
 
 procedure TSFractalSierpinskiCarpet.CalculateFromThread();
@@ -77,7 +77,7 @@ var
 begin
 a := Abs(t1.x - t2.x) / 3;
 if NowDepth = 0 then
-	PushIndexes(
+	PushPoligonData(
 		ObjectId,
 		SVertex3fImport(t1.x, t1.y),
 		SVertex3fImport(t1.x, t2.y),
@@ -86,25 +86,25 @@ if NowDepth = 0 then
 		FVertexIndex, FFaceIndex)
 else if NowDepth = 1 then
 	begin
-	PushIndexes(ObjectId,
+	PushPoligonData(ObjectId,
 		SVertex3fImport(t1.x, t1.y),
 		SVertex3fImport(t1.x + a, t1.y),
 		SVertex3fImport(t1.x + a, t1.y + 3 * a),
 		SVertex3fImport(t1.x, t1.y + 3 * a),
 		FVertexIndex, FFaceIndex);
-	PushIndexes(ObjectId,
+	PushPoligonData(ObjectId,
 		SVertex3fImport(t1.x + a * 2, t1.y),
 		SVertex3fImport(t1.x + a * 3, t1.y),
 		SVertex3fImport(t1.x + a * 3, t1.y + 3 * a),
 		SVertex3fImport(t1.x + a * 2, t1.y + 3 * a),
 		FVertexIndex, FFaceIndex);
-	PushIndexes(ObjectId,
+	PushPoligonData(ObjectId,
 		SVertex3fImport(t1.x, t1.y),
 		SVertex3fImport(t1.x + a * 3, t1.y),
 		SVertex3fImport(t1.x + a * 3, t1.y + a),
 		SVertex3fImport(t1.x, t1.y + a),
 		FVertexIndex, FFaceIndex);
-	PushIndexes(ObjectId,
+	PushPoligonData(ObjectId,
 		SVertex3fImport(t1.x, t1.y + a * 2),
 		SVertex3fImport(t1.x + a * 3, t1.y + a * 2),
 		SVertex3fImport(t1.x + a * 3, t1.y + a * 3),
@@ -163,15 +163,15 @@ end;
 
 procedure TSFractalSierpinskiCarpet.Calculate();
 var
-	Quantity : TSUInt64;
+	NumberOfPolygons : TSUInt64;
 begin
 inherited;
 Clear3dObject;
-Quantity := RecQuantity(FDepth);
+NumberOfPolygons := CountingTheNumberOfPolygons(FDepth);
 if Render.RenderType in [SRenderDirectX9, SRenderDirectX8] then 
-	Calculate3dObjects(Quantity,SR_QUADS,S3dObjectVertexType3f)
+	Calculate3dObjects(NumberOfPolygons,SR_QUADS,S3dObjectVertexType3f)
 else
-	Calculate3dObjects(Quantity,SR_QUADS,S3dObjectVertexType2f);
+	Calculate3dObjects(NumberOfPolygons,SR_QUADS,S3dObjectVertexType2f);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;
@@ -186,14 +186,14 @@ else
 	end;
 end;
 
-function TSFractalSierpinskiCarpet.RecQuantity(const ThisDepth : TSUInt64):TSUInt64;
+class function TSFractalSierpinskiCarpet.CountingTheNumberOfPolygons(const ThisDepth : TSUInt64):TSUInt64;
 begin
 if ThisDepth = 0 then
 	Result := 1
 else if ThisDepth = 1 then
 	Result := 4
 else
-	Result := 8 * RecQuantity(ThisDepth - 1);
+	Result := 8 * CountingTheNumberOfPolygons(ThisDepth - 1);
 end;
 
 procedure FractalSierpinskiCarpetButtonDepthPlusOnChangeKT(Button:TSScreenButton);

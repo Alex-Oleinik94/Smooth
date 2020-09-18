@@ -40,11 +40,11 @@ type
 		procedure CalculateArray();
 		procedure Calculate();override;
 		procedure CalculateFromThread(var ObjectId,ThreadArB,ThreadArE:TSUInt32);
-		function RecQuantity(const ArTP:TSMengerSpongeBoolAr6;const NowDepth:LongInt):TSInt64;
-		function GetArTP(const OldArTP:TSMengerSpongeBoolAr6;const i,ii,iii: TSUInt8;const ThisDepth:TSUInt32 = 0):TSMengerSpongeBoolAr6;inline;
+		class function CountingTheNumberOfPolygons(const _FractalType : TSMengerType; const _BoolArray:TSMengerSpongeBoolAr6;const _Depth:TSInt32):TSInt64;
+		class function ConstructBoolArray(const _FractalType : TSMengerType; const _PreviousBoolArray:TSMengerSpongeBoolAr6;const i,j,k: TSUInt8;const _Depth:TSUInt32 = 0):TSMengerSpongeBoolAr6;
 		class function DoOrNotDo(const i,ii,iii:TSUInt8):TSBoolean;inline;
 		class function DoOrNotDoPlus(const i,ii,iii:TSUInt8):TSBoolean;inline;
-		procedure PushIndexes(const i1,i2,i3,i4:TSVertex3f;const ai:TSUInt32;const AllQ:Real;var ObjectId:TSUInt32;var FVertexIndex,FFaceIndex:TSUInt32);inline;
+		procedure PushPoligonData(const i1,i2,i3,i4:TSVertex3f;const ai:TSUInt32;const AllQ:Real;var ObjectId:TSUInt32;var FVertexIndex,FFaceIndex:TSUInt32);inline;
 		function DoAtThreads():TSBoolean;inline;
 		end;
 		
@@ -282,7 +282,7 @@ end;
 
 procedure TSFractalMengerSponge.Calculate;
 var
-	Quantity:TSInt64 = 0;
+	NumberOfPolygons:TSInt64 = 0;
 	Index,ii,iii:TSUInt32;
 begin
 Clear3dObject();
@@ -293,13 +293,13 @@ if DoAtThreads then
 		F3dObjectsReady:=False;
 		for Index:=0 to High(FThreadsData) do
 			begin
-			Quantity:=0;
+			NumberOfPolygons:=0;
 			for ii:=Index*(20 div Length(FThreadsData)) to (Index+1)*(20 div (Length(FThreadsData)))-1 do
 				begin
-				Quantity+=RecQuantity(FThreadsArray[ii].Arr6,FDepth-1);
+				NumberOfPolygons+=CountingTheNumberOfPolygons(FFractalType,FThreadsArray[ii].Arr6,FDepth-1);
 				end;
 			iii:=F3dObject.QuantityObjects;
-			Calculate3dObjects(Quantity,SR_QUADS);
+			Calculate3dObjects(NumberOfPolygons,SR_QUADS);
 			FThreadsData[Index].FData:=TSMengerSpongeFractalData.Create(iii,Index*(20 div Length(FThreadsData)),(Index+1)*(20 div Length(FThreadsData))-1,Self,Index);
 			FThreadsData[Index].FFinished:=False;
 			end;
@@ -314,7 +314,7 @@ if DoAtThreads then
 			FThreadsData[Index].FFinished:=True;
 			FThreadsData[Index].FData:=nil;
 			end;
-		Calculate3dObjects(RecQuantity(TSMengerSpongeBoolAr6True,FDepth),SR_QUADS);
+		Calculate3dObjects(CountingTheNumberOfPolygons(FFractalType,TSMengerSpongeBoolAr6True,FDepth),SR_QUADS);
 		Index := 0;
 		FThreadsData[Index].FFinished:=False;
 		FThreadsData[Index].FData:=TSMengerSpongeFractalData.Create(0,0,0,Self,Index);
@@ -323,8 +323,8 @@ if DoAtThreads then
 	end
 else
 	begin
-	Quantity:=RecQuantity(TSMengerSpongeBoolAr6True,FDepth);
-	Calculate3dObjects(Quantity,SR_QUADS);
+	NumberOfPolygons:=CountingTheNumberOfPolygons(FFractalType,TSMengerSpongeBoolAr6True,FDepth);
+	Calculate3dObjects(NumberOfPolygons,SR_QUADS);
 	Index:=0;ii:=0;iii:=0;
 	CalculateFromThread(Index,ii,iii);
 	end;
@@ -358,7 +358,7 @@ procedure TSFractalMengerSponge.CalculateFromThread(var ObjectId,ThreadArB,Threa
 var
 	i:LongInt;
 	ArVerts:packed array [1..8]of TSVertex3f;
-	NOfV,NOfF:LongWord;// Индекс вершин и полигонов в меше
+	NOfV,NOfF:LongWord;// Индекс количества вершин и полигонов в 3D обьекте
 
 procedure Rec(const ArTP:TSMengerSpongeBoolAr6;const T1:TSVertex3f;const NowQ:real; const AllQ:real;const NowDepth:LongInt);
 var
@@ -385,17 +385,17 @@ if NowDepth<=0 then
 			begin
 			case i of
 			0:
-				PushIndexes(ArVerts[1],ArVerts[2],ArVerts[3],ArVerts[4],i,AllQ,ObjectId,NOfV,NOfF);
+				PushPoligonData(ArVerts[1],ArVerts[2],ArVerts[3],ArVerts[4],i,AllQ,ObjectId,NOfV,NOfF);
 			1:
-				PushIndexes(ArVerts[1],ArVerts[2],ArVerts[6],ArVerts[5],i,AllQ,ObjectId,NOfV,NOfF);
+				PushPoligonData(ArVerts[1],ArVerts[2],ArVerts[6],ArVerts[5],i,AllQ,ObjectId,NOfV,NOfF);
 			2:
-				PushIndexes(ArVerts[2],ArVerts[3],ArVerts[7],ArVerts[6],i,AllQ,ObjectId,NOfV,NOfF);
+				PushPoligonData(ArVerts[2],ArVerts[3],ArVerts[7],ArVerts[6],i,AllQ,ObjectId,NOfV,NOfF);
 			3:
-				PushIndexes(ArVerts[3],ArVerts[4],ArVerts[8],ArVerts[7],i,AllQ,ObjectId,NOfV,NOfF);
+				PushPoligonData(ArVerts[3],ArVerts[4],ArVerts[8],ArVerts[7],i,AllQ,ObjectId,NOfV,NOfF);
 			4:
-				PushIndexes(ArVerts[4],ArVerts[1],ArVerts[5],ArVerts[8],i,AllQ,ObjectId,NOfV,NOfF);
+				PushPoligonData(ArVerts[4],ArVerts[1],ArVerts[5],ArVerts[8],i,AllQ,ObjectId,NOfV,NOfF);
 			5:
-				PushIndexes(ArVerts[7],ArVerts[8],ArVerts[5],ArVerts[6],i,AllQ,ObjectId,NOfV,NOfF);
+				PushPoligonData(ArVerts[7],ArVerts[8],ArVerts[5],ArVerts[6],i,AllQ,ObjectId,NOfV,NOfF);
 			end;
 			end;
 		end;
@@ -411,7 +411,7 @@ else
 				   ((FFractalType = SMengerSnowflake) and (DoOrNotDoPlus(i,ii,iii))) then
 					begin
 					Rec( 
-						(GetArTP(ArTP,i,ii,iii,NowDepth-1)),
+						(ConstructBoolArray(FFractalType,ArTP,i,ii,iii,NowDepth-1)),
 						(T1+SVertex3fImport(i*NewQ,ii*NewQ,iii*NewQ)),
 						NewQ,AllQ,
 						NowDepth-1);
@@ -463,16 +463,16 @@ else
 	end;
 end;
 
-function TSFractalMengerSponge.RecQuantity(const ArTP:TSMengerSpongeBoolAr6;const NowDepth:LongInt):int64;
+class function TSFractalMengerSponge.CountingTheNumberOfPolygons(const _FractalType : TSMengerType; const _BoolArray:TSMengerSpongeBoolAr6;const _Depth:TSInt32):TSInt64;
 var
-	i,ii,iii:Byte;
+	i,j,k:TSUInt8;
 begin
 Result:=0;
-if NowDepth=0 then
+if _Depth=0 then
 	begin
 	for i:=0 to 5 do
 		begin
-		if ArTP[i] then
+		if _BoolArray[i] then
 			begin
 			Result+=1;
 			end;
@@ -481,15 +481,15 @@ if NowDepth=0 then
 else
 	begin
 	for i:=0 to 2 do
-		for ii:=0 to 2 do
-			for iii:=0 to 2 do
-				if ((FFractalType = SMengerCube) and (DoOrNotDo(i,ii,iii))) or
-				((FFractalType = SMengerStar) and (not DoOrNotDo(i,ii,iii))) or
-				((FFractalType = SMengerSnowflake) and (DoOrNotDoPlus(i,ii,iii))) then
+		for j:=0 to 2 do
+			for k:=0 to 2 do
+				if ((_FractalType = SMengerCube) and (DoOrNotDo(i,j,k))) or
+				((_FractalType = SMengerStar) and (not DoOrNotDo(i,j,k))) or
+				((_FractalType = SMengerSnowflake) and (DoOrNotDoPlus(i,j,k))) then
 					begin
-					Result+=RecQuantity( 
-						(GetArTP(ArTP,i,ii,iii,NowDepth-1)),
-						NowDepth-1);
+					Result+=CountingTheNumberOfPolygons(_FractalType,
+						(ConstructBoolArray(_FractalType,_BoolArray,i,j,k,_Depth-1)),
+						_Depth-1);
 					end;
 	end;
 end;
@@ -507,7 +507,7 @@ for i:=0 to 2 do
 				((FFractalType = SMengerStar) and (not DoOrNotDo(i,ii,iii))) or
 				((FFractalType = SMengerSnowflake) and (DoOrNotDoPlus(i,ii,iii))) then
 				begin
-				FThreadsArray[i4].Arr6:=GetArTP(TSMengerSpongeBoolAr6True,i,ii,iii);
+				FThreadsArray[i4].Arr6:=ConstructBoolArray(FFractalType,TSMengerSpongeBoolAr6True,i,ii,iii);
 				FThreadsArray[i4].Point:=(SVertex3fImport(2.6,2.6,2.6)+SVertex3fImport(i*NewQ,ii*NewQ,iii*NewQ));
 				FThreadsArray[i4].Q:=NewQ;
 				FThreadsArray[i4].AllQ:=-5.2;
@@ -515,120 +515,120 @@ for i:=0 to 2 do
 				end;
 end;
 
-class function TSFractalMengerSponge.DoOrNotDo(const i,ii,iii:Byte):boolean;inline;
+class function TSFractalMengerSponge.DoOrNotDo(const i,ii,iii:Byte):boolean;
 begin
 Result:=((i=1) and (ii=1)) or ((i=1) and (iii=1)) or ((ii=1) and (iii=1));
 end;
 
-function TSFractalMengerSponge.GetArTP(const OldArTP:TSMengerSpongeBoolAr6;const i,ii,iii: byte;const ThisDepth:LongWord = 0):TSMengerSpongeBoolAr6;inline;
+class function TSFractalMengerSponge.ConstructBoolArray(const _FractalType : TSMengerType; const _PreviousBoolArray:TSMengerSpongeBoolAr6;const i,j,k: TSUInt8;const _Depth:TSUInt32 = 0):TSMengerSpongeBoolAr6;
 begin
-Result:=OldArTP;
+Result:=_PreviousBoolArray;
 
-if FFractalType = SMengerStar then
+if _FractalType = SMengerStar then
 	begin
-	if (i=1) or (ii=1) or (iii=1) then
+	if (i=1) or (j=1) or (k=1) then
 		begin
 		if i=1 then
 			begin
 			Result[2]:=False;
 			Result[4]:=False;
 			end;
-		if ii=1 then
+		if j=1 then
 			begin
 			Result[0]:=False;
 			Result[5]:=False;
 			end;
-		if iii=1 then
+		if k=1 then
 			begin
 			Result[1]:=False;
 			Result[3]:=False;
 			end;
-		if ii=0 then
+		if j=0 then
 			Result[5]:=True;
 		if i=0 then
 			Result[2]:=true;
-		if iii=0 then
+		if k=0 then
 			Result[3]:=True;
-		if ii=2 then
+		if j=2 then
 			Result[0]:=True;
 		if i=2 then
 			Result[4]:=True;
-		if iii=2 then
+		if k=2 then
 			Result[1]:=True;
 		end
 	else
 		begin
 		if i=0 then
 			Result[2]:=False;
-		if ii=0 then
+		if j=0 then
 			Result[5]:=False;
-		if iii=0 then
+		if k=0 then
 			Result[3]:=False;
 		if i=2 then
 			Result[4]:=False;
-		if ii=2 then
+		if j=2 then
 			Result[0]:=False;
-		if iii=2 then
+		if k=2 then
 			Result[1]:=False;
 		end;
 	end;
-if FFractalType = SMengerCube then
+if _FractalType = SMengerCube then
 	begin
-	if (ii=1) and (iii=1) and (i=1) then
+	if (j=1) and (k=1) and (i=1) then
 		Result:=TSMengerSpongeBoolAr6Null
 	else
 		begin
 		Result:=TSMengerSpongeBoolAr6True;
-		if iii=0 then
+		if k=0 then
 			begin
-			Result[1]:=OldArTP[1];
+			Result[1]:=_PreviousBoolArray[1];
 			Result[3]:=False;
 			end;
-		if iii=2 then
+		if k=2 then
 			begin
-			Result[3]:=OldArTP[3];
+			Result[3]:=_PreviousBoolArray[3];
 			Result[1]:=False;
 			end;
-		if ii=0 then
+		if j=0 then
 			begin
-			Result[0]:=OldArTP[0];
+			Result[0]:=_PreviousBoolArray[0];
 			Result[5]:=False;
 			end;
-		if ii=2 then
+		if j=2 then
 			begin
-			Result[5]:=OldArTP[5];
+			Result[5]:=_PreviousBoolArray[5];
 			Result[0]:=False;
 			end;
 		if i=0 then
 			begin
-			Result[4]:=OldArTP[4];
+			Result[4]:=_PreviousBoolArray[4];
 			Result[2]:=False;
 			end;
 		if i=2 then
 			begin
-			Result[2]:=OldArTP[2];
+			Result[2]:=_PreviousBoolArray[2];
 			Result[4]:=False;
 			end;
 		end;
 	end;
-if FFractalType = SMengerSnowflake then
+if _FractalType = SMengerSnowflake then
 	begin
-	if (i=0) and ((ThisDepth=0) or ((ThisDepth<>0) and (not ((iii=1) and (ii=1))))) then
+	if (i=0) and ((_Depth=0) or ((_Depth<>0) and (not ((k=1) and (j=1))))) then
 		Result[2]:=False;
-	if (i=2) and((ThisDepth=0) or ((ThisDepth<>0) and (not ((iii=1) and (ii=1))))) then
+	if (i=2) and((_Depth=0) or ((_Depth<>0) and (not ((k=1) and (j=1))))) then
 		Result[4]:=False;
-	if (ii=0) and((ThisDepth=0) or ((ThisDepth<>0) and (not ((iii=1) and (i=1))))) then
+	if (j=0) and((_Depth=0) or ((_Depth<>0) and (not ((k=1) and (i=1))))) then
 		Result[5]:=False;
-	if (ii=2) and((ThisDepth=0) or ((ThisDepth<>0) and (not ((iii=1) and (i=1))))) then
+	if (j=2) and((_Depth=0) or ((_Depth<>0) and (not ((k=1) and (i=1))))) then
 		Result[0]:=False;
-	if (iii=0) and((ThisDepth=0) or ((ThisDepth<>0) and (not ((i=1) and (ii=1))))) then
+	if (k=0) and((_Depth=0) or ((_Depth<>0) and (not ((i=1) and (j=1))))) then
 		Result[3]:=False;
-	if (iii=2) and((ThisDepth=0) or ((ThisDepth<>0) and (not ((i=1) and (ii=1))))) then
+	if (k=2) and((_Depth=0) or ((_Depth<>0) and (not ((i=1) and (j=1))))) then
 		Result[1]:=False;
 	end;
 end;
 
-procedure TSFractalMengerSponge.PushIndexes(const i1,i2,i3,i4:TSVertex3f;const ai:longword;const AllQ:real;var ObjectId:LongWord;var FVertexIndex,FFaceIndex:LongWord);inline;
+procedure TSFractalMengerSponge.PushPoligonData(const i1,i2,i3,i4:TSVertex3f;const ai:longword;const AllQ:real;var ObjectId:LongWord;var FVertexIndex,FFaceIndex:LongWord);inline;
 //var
 //abnu:	B:boolean = False;
 begin
@@ -657,7 +657,7 @@ if FEnableNormals then
 F3dObject.Objects[ObjectId].SetFaceQuad(0,FFaceIndex,FVertexIndex-1,FVertexIndex-2,FVertexIndex-3,FVertexIndex-4);
 FFaceIndex+=1;
 
-AfterPushIndexes(ObjectId,DoAtThreads,FVertexIndex,FFaceIndex);
+AfterPushingPoligonData(ObjectId,DoAtThreads,FVertexIndex,FFaceIndex);
 end;
 
 end.

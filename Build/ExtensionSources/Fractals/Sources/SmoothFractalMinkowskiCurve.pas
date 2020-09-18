@@ -22,7 +22,7 @@ type
 			public
 		procedure Calculate();override;
 		procedure CalculateFromThread();
-		procedure PushIndexes(var ObjectId : TSUInt32; const v : TSVertex2f; var FVertexIndex:TSUInt32); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure PushPoligonData(var ObjectId : TSUInt32; const v : TSVertex2f; var FVertexIndex:TSUInt32); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSScreenLabel;
 		FBPD, FBMD : TSScreenButton;
@@ -45,7 +45,7 @@ begin
 Result := 'Кривая Минковского';
 end;
 
-procedure TSFractalMinkowskiCurve.PushIndexes(var ObjectId:LongWord;const v:TSVertex2f;var FVertexIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSFractalMinkowskiCurve.PushPoligonData(var ObjectId:LongWord;const v:TSVertex2f;var FVertexIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Render.RenderType in [SRenderDirectX9,SRenderDirectX8] then
 	F3dObject.Objects[ObjectId].ArVertex3f[FVertexIndex]^.Import(v.x,v.y)
@@ -54,7 +54,7 @@ else
 
 FVertexIndex+=1;
 
-AfterPushIndexes(ObjectId,FThreadsEnable,FVertexIndex);
+AfterPushingPoligonData(ObjectId,FThreadsEnable,FVertexIndex);
 end;
 
 procedure TSFractalMinkowskiCurve.CalculateFromThread();
@@ -85,13 +85,13 @@ if NowDepth>0 then
 	Rec(e3,t2,NowDepth-1);
 	end
 else
-	PushIndexes(ObjectId,t2,FVI);
+	PushPoligonData(ObjectId,t2,FVI);
 end;
 
 begin
 ObjectId:=0;
 FVI:=0;
-PushIndexes(ObjectId,SVertex2fImport(-6,-3.5),FVI);
+PushPoligonData(ObjectId,SVertex2fImport(-6,-3.5),FVI);
 Rec(SVertex2fImport(-6,-3.5),SVertex2fImport(6,3.5),Depth);
 if FThreadsEnable then
 	if (ObjectId>=0) and (ObjectId<=F3dObject.QuantityObjects-1) then
@@ -101,15 +101,15 @@ end;
 
 procedure TSFractalMinkowskiCurve.Calculate();
 var
-	Quantity:TSMaxEnum;
+	NumberOfPolygons:TSMaxEnum;
 begin
 inherited;
 Clear3dObject();
-Quantity:=(8**FDepth)+1;
+NumberOfPolygons:=(8**FDepth)+1;
 if Render.RenderType in [SRenderDirectX9,SRenderDirectX8] then 
-	Calculate3dObjects(Quantity,SR_LINE_STRIP,S3dObjectVertexType3f)
+	Calculate3dObjects(NumberOfPolygons,SR_LINE_STRIP,S3dObjectVertexType3f)
 else
-	Calculate3dObjects(Quantity,SR_LINE_STRIP,S3dObjectVertexType2f);
+	Calculate3dObjects(NumberOfPolygons,SR_LINE_STRIP,S3dObjectVertexType2f);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;

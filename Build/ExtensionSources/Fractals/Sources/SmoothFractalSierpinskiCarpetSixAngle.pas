@@ -23,10 +23,10 @@ type
 		destructor Destroy();override;
 		class function ClassName():TSString;override;
 			protected
-		function RecQuantity(const RecDepth : TSMaxEnum) : TSMaxEnum; override;
+		class function CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum; override;
 			public
 		procedure CalculateFromThread(); override;
-		procedure PushIndexes(var ObjectId : TSUInt32; const v1, v2, v3, v4, v5, v6 : TSVector2f; var FVertexIndex, FFaceIndex : TSUInt32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure PushPoligonData(var ObjectId : TSUInt32; const v1, v2, v3, v4, v5, v6 : TSVector2f; var FVertexIndex, FFaceIndex : TSUInt32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SetType(const NewType : TSFractalSierpinskiCarpetSixAngleType);
 			protected
 		FTypeComboBox : TSScreenComboBox;
@@ -136,28 +136,28 @@ begin
 Result := 'Шестиугольники Серпинского';
 end;
 
-function TSFractalSierpinskiCarpetSixAngle.RecQuantity(const RecDepth : TSMaxEnum) : TSMaxEnum;
+class function TSFractalSierpinskiCarpetSixAngle.CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum;
 begin
-Result := 6 * (3 ** RecDepth);
+Result := 6 * (3 ** _Depth);
 end;
 
 procedure TSFractalSierpinskiCarpetSixAngle.CalculateFromThread();
 type
-	TListRecProcedure = procedure (const List : TSVector2fList6; const CountSwap : TSByte; const RecDepth : TSUInt32) is nested;
+	TListRecProcedure = procedure (const List : TSVector2fList6; const CountSwap : TSByte; const _Depth : TSUInt32) is nested;
 var 
 	ObjectId : TSUInt32; 
 	FVertexIndex, FFaceIndex : TSUInt32;
 	RecList : TListRecProcedure = nil;
 
-procedure Rec(const v1, v2, v3, v4, v5, v6 : TSVector2f; const RecDepth : TSUInt32); overload;
+procedure Rec(const v1, v2, v3, v4, v5, v6 : TSVector2f; const _Depth : TSUInt32); overload;
 var
 	Center,
 	v12, v23, v34, v45, v56, v61,
 	v13, v35, v51
 		: TSVector2f;
 begin
-if RecDepth = 0 then
-	PushIndexes(ObjectId, v1, v2, v3, v4, v5, v6, FVertexIndex, FFaceIndex)
+if _Depth = 0 then
+	PushPoligonData(ObjectId, v1, v2, v3, v4, v5, v6, FVertexIndex, FFaceIndex)
 else
 	begin
 	Center := (v1 + v3 + v5) / 3;
@@ -173,51 +173,51 @@ else
 	case FType of
 	0 : // 1 Triangle
 		begin
-		Rec(v1, v12, v13, Center, v51, v61, RecDepth - 1);
-		Rec(v3, v34, v35, Center, v13, v23, RecDepth - 1);
-		Rec(v5, v56, v51, Center, v35, v45, RecDepth - 1);
+		Rec(v1, v12, v13, Center, v51, v61, _Depth - 1);
+		Rec(v3, v34, v35, Center, v13, v23, _Depth - 1);
+		Rec(v5, v56, v51, Center, v35, v45, _Depth - 1);
 		end;
 	1 : // 2 Лист клена
 		begin
-		Rec(v1, v12, v13, Center, v51, v61, RecDepth - 1);
-		Rec(v23, v3, v34, v35, Center, v13, RecDepth - 1);
-		Rec(v56, v51, Center, v35, v45, v5, RecDepth - 1);
+		Rec(v1, v12, v13, Center, v51, v61, _Depth - 1);
+		Rec(v23, v3, v34, v35, Center, v13, _Depth - 1);
+		Rec(v56, v51, Center, v35, v45, v5, _Depth - 1);
 		end;
 	2 : // 3 Забавная штука
 		begin
-		Rec(v1, v12, v13, Center, v51, v61, RecDepth - 1);
-		Rec(v34, v35, Center, v13, v23, v3, RecDepth - 1);
-		Rec(v45, v5, v56, v51, Center, v35, RecDepth - 1);
+		Rec(v1, v12, v13, Center, v51, v61, _Depth - 1);
+		Rec(v34, v35, Center, v13, v23, v3, _Depth - 1);
+		Rec(v45, v5, v56, v51, Center, v35, _Depth - 1);
 		end;
 	3 : // 4 Star
 		begin
-		Rec(Center, v51, v61, v1, v12, v13, RecDepth - 1);
-		Rec(v34, v35, Center, v13, v23, v3, RecDepth - 1);
-		Rec(v45, v5, v56, v51, Center, v35, RecDepth - 1);
+		Rec(Center, v51, v61, v1, v12, v13, _Depth - 1);
+		Rec(v34, v35, Center, v13, v23, v3, _Depth - 1);
+		Rec(v45, v5, v56, v51, Center, v35, _Depth - 1);
 		end;
 	4 : // 5 Nothing
 		begin
-		Rec(v61, v1, v12, v13, Center, v51, RecDepth - 1);
-		Rec(v3, v34, v35, Center, v13, v23, RecDepth - 1);
-		Rec(v5, v56, v51, Center, v35, v45, RecDepth - 1);
+		Rec(v61, v1, v12, v13, Center, v51, _Depth - 1);
+		Rec(v3, v34, v35, Center, v13, v23, _Depth - 1);
+		Rec(v5, v56, v51, Center, v35, v45, _Depth - 1);
 		end;
 	5 : // 6 ?
 		begin
-		Rec(Center, v51, v61, v1, v12, v13, RecDepth - 1);
-		Rec(v13, v23, v3, v34, v35, Center, RecDepth - 1);
-		Rec(v51, Center, v35, v45, v5, v56, RecDepth - 1);
+		Rec(Center, v51, v61, v1, v12, v13, _Depth - 1);
+		Rec(v13, v23, v3, v34, v35, Center, _Depth - 1);
+		Rec(v51, Center, v35, v45, v5, v56, _Depth - 1);
 		end;
 	6 : // 7 Random
 		begin
-		RecList(SVector2fList6Import(Center, v51, v61, v1, v12, v13), Random(6), RecDepth - 1);
-		RecList(SVector2fList6Import(v34, v35, Center, v13, v23, v3), Random(6), RecDepth - 1);
-		RecList(SVector2fList6Import(v45, v5, v56, v51, Center, v35), Random(6), RecDepth - 1);
+		RecList(SVector2fList6Import(Center, v51, v61, v1, v12, v13), Random(6), _Depth - 1);
+		RecList(SVector2fList6Import(v34, v35, Center, v13, v23, v3), Random(6), _Depth - 1);
+		RecList(SVector2fList6Import(v45, v5, v56, v51, Center, v35), Random(6), _Depth - 1);
 		end;
 	end;
 	end;
 end;
 
-procedure RecListProcedure(const List : TSVector2fList6; const CountSwap : TSByte; const RecDepth : TSUInt32);
+procedure RecListProcedure(const List : TSVector2fList6; const CountSwap : TSByte; const _Depth : TSUInt32);
 var
 	SwapedList : TSVector2fList6;
 begin
@@ -229,10 +229,10 @@ Rec(
 	SwapedList[3],
 	SwapedList[4],
 	SwapedList[5],
-	RecDepth);
+	_Depth);
 end;
 
-procedure Rec(const PointCenter : TSVector2f; const Radius : TSFloat64; const RecDepth : TSUInt32); overload;
+procedure Rec(const PointCenter : TSVector2f; const Radius : TSFloat64; const _Depth : TSUInt32); overload;
 var
 	PointList : array[0..5] of TSVector2f;
 	Index : TSUInt32;
@@ -247,7 +247,7 @@ Rec(PointList[0],
 	PointList[3],
 	PointList[4],
 	PointList[5],
-	RecDepth);
+	_Depth);
 end;
 
 begin
@@ -261,7 +261,7 @@ Rec(SVertex2fImport(0, 0),
 FinalizeCalculateFromThread(ObjectId);
 end;
 
-procedure TSFractalSierpinskiCarpetSixAngle.PushIndexes(var ObjectId : TSUInt32; const v1, v2, v3, v4, v5, v6 : TSVector2f; var FVertexIndex, FFaceIndex : TSUInt32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSFractalSierpinskiCarpetSixAngle.PushPoligonData(var ObjectId : TSUInt32; const v1, v2, v3, v4, v5, v6 : TSVector2f; var FVertexIndex, FFaceIndex : TSUInt32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 F3dObject.Objects[ObjectId].SetVertex(FVertexIndex + 0, v1);
 F3dObject.Objects[ObjectId].SetVertex(FVertexIndex + 1, v2);
@@ -279,7 +279,7 @@ F3dObject.Objects[ObjectId].SetFaceLine(0, FFaceIndex + 4, FVertexIndex + 4, FVe
 F3dObject.Objects[ObjectId].SetFaceLine(0, FFaceIndex + 5, FVertexIndex + 5, FVertexIndex + 0);
 FFaceIndex += 6;
 
-AfterPushIndexes(ObjectId, FThreadsEnable, FVertexIndex);
+AfterPushingPoligonData(ObjectId, FThreadsEnable, FVertexIndex);
 end;
 
 end.

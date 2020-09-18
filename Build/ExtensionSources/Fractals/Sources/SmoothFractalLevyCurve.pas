@@ -21,7 +21,7 @@ type
 			public
 		procedure Calculate;override;
 		procedure CalculateFromThread();
-		procedure PushIndexes(var ObjectId:LongWord;const v:TSVertex2f;var FVertexIndex:LongWord);Inline;
+		procedure PushPoligonData(var ObjectId:LongWord;const v:TSVertex2f;var FVertexIndex:LongWord);Inline;
 			protected
 		FLD, FLDC : TSScreenLabel;
 		FBPD, FBMD : TSScreenButton;
@@ -43,7 +43,7 @@ begin
 Result := 'Кривая Леви (дракон Хартера)';
 end;
 
-procedure TSFractalLevyCurve.PushIndexes(var ObjectId:LongWord;const v:TSVertex2f;var FVertexIndex:LongWord);Inline;
+procedure TSFractalLevyCurve.PushPoligonData(var ObjectId:LongWord;const v:TSVertex2f;var FVertexIndex:LongWord);Inline;
 begin
 if Render.RenderType in [SRenderDirectX9,SRenderDirectX8] then
 	F3dObject.Objects[ObjectId].ArVertex3f[FVertexIndex]^.Import(v.x,v.y)
@@ -52,7 +52,7 @@ else
 
 FVertexIndex+=1;
 
-AfterPushIndexes(ObjectId,FThreadsEnable,FVertexIndex);
+AfterPushingPoligonData(ObjectId,FThreadsEnable,FVertexIndex);
 end;
 
 procedure TSFractalLevyCurve.CalculateFromThread();
@@ -77,16 +77,16 @@ if NowDepth>0 then
 		Rec(v,t2,NowDepth-1,-1);
 	end
 else
-	PushIndexes(ObjectId,t2,FVI);
+	PushPoligonData(ObjectId,t2,FVI);
 end;
 
 begin
 ObjectId:=0;
 FVI:=0;
-PushIndexes(ObjectId,SVertex2fImport(-3,-2),FVI);
+PushPoligonData(ObjectId,SVertex2fImport(-3,-2),FVI);
 if FDepth=0 then
 	begin
-	PushIndexes(ObjectId,SVertex2fImport(3,-2),FVI);
+	PushPoligonData(ObjectId,SVertex2fImport(3,-2),FVI);
 	end;
 if FDepth>0 then
 	begin
@@ -108,15 +108,15 @@ end;
 
 procedure TSFractalLevyCurve.Calculate;
 var
-	Quantity:Int64;
+	NumberOfPolygons:Int64;
 begin
 inherited;
 Clear3dObject;
-Quantity:=(2**FDepth)+1;
+NumberOfPolygons:=(2**FDepth)+1;
 if Render.RenderType in [SRenderDirectX9,SRenderDirectX8] then 
-	Calculate3dObjects(Quantity,SR_LINE_STRIP,S3dObjectVertexType3f)
+	Calculate3dObjects(NumberOfPolygons,SR_LINE_STRIP,S3dObjectVertexType3f)
 else
-	Calculate3dObjects(Quantity,SR_LINE_STRIP,S3dObjectVertexType2f);
+	Calculate3dObjects(NumberOfPolygons,SR_LINE_STRIP,S3dObjectVertexType2f);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;

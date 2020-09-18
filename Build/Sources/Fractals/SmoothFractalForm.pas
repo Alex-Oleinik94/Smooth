@@ -23,7 +23,7 @@ type
 		procedure CalculateFromThread(); virtual;
 			protected
 		procedure FinalizeCalculateFromThread(const ObjectId : TSUInt32); virtual;
-		function RecQuantity(const RecDepth : TSMaxEnum) : TSMaxEnum; virtual; abstract;
+		class function CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum; virtual; abstract;
 			protected
 		FLD, FLDC : TSScreenLabel;
 		FBPD, FBMD : TSScreenButton;
@@ -44,18 +44,18 @@ uses
 
 procedure TS3DFractalForm.Calculate();
 var
-	Quantity : TSUInt64;
+	NumberOfPolygons : TSUInt64;
 begin
 inherited;
 Clear3dObject();
-Quantity := RecQuantity(FDepth);
+NumberOfPolygons := CountingTheNumberOfPolygons(FDepth);
 if FIs2D then
 	if (Render.RenderType in [SRenderDirectX9, SRenderDirectX8]) then 
-		Calculate3dObjects(Quantity, FPrimetiveType, S3dObjectVertexType3f, FPrimetiveParam)
+		Calculate3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType3f, FPrimetiveParam)
 	else
-		Calculate3dObjects(Quantity, FPrimetiveType, S3dObjectVertexType2f, FPrimetiveParam)
+		Calculate3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType2f, FPrimetiveParam)
 else
-	Calculate3dObjects(Quantity, FPrimetiveType, S3dObjectVertexType3f, FPrimetiveParam);
+	Calculate3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType3f, FPrimetiveParam);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished := False;
@@ -164,10 +164,10 @@ end;
 
 destructor TS3DFractalForm.Destroy();
 begin
-FBMD.Destroy();
-FLD.Destroy();
-FLDC.Destroy();
-FBPD.Destroy();
+SKill(FBMD);
+SKill(FLD);
+SKill(FLDC);
+SKill(FBPD);
 inherited Destroy();
 end;
 

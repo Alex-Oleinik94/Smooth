@@ -20,10 +20,10 @@ type
 		destructor Destroy();override;
 		class function ClassName():TSString;override;
 			public
-		function RecQuantity(const ThisDepth:Int64):Int64;
+		class function CountingTheNumberOfPolygons(const ThisDepth:Int64):Int64;
 		procedure Calculate;override;
 		procedure CalculateFromThread();
-		procedure PushIndexes(var ObjectId:LongWord;const v1,v2,v3:TSVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
+		procedure PushPoligonData(var ObjectId:LongWord;const v1,v2,v3:TSVertex2f;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSScreenLabel;
 		FBPD, FBMD : TSScreenButton;
@@ -43,7 +43,7 @@ begin
 Result := 'Треугольник Серпинского';
 end;
 
-procedure TSFractalSierpinskiTriangle.PushIndexes(var ObjectId:LongWord;const v1,v2,v3:TSVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
+procedure TSFractalSierpinskiTriangle.PushPoligonData(var ObjectId:LongWord;const v1,v2,v3:TSVertex2f;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 FVertexIndex+=3;
 if not (Render.RenderType in [SRenderDirectX9,SRenderDirectX8]) then
@@ -64,7 +64,7 @@ F3dObject.Objects[ObjectId].SetFaceLine(0,FFaceIndex+1,FVertexIndex-3,FVertexInd
 F3dObject.Objects[ObjectId].SetFaceLine(0,FFaceIndex+2,FVertexIndex-1,FVertexIndex-3);
 FFaceIndex+=3;
 
-AfterPushIndexes(ObjectId,FThreadsEnable,FVertexIndex,FFaceIndex);
+AfterPushingPoligonData(ObjectId,FThreadsEnable,FVertexIndex,FFaceIndex);
 end;
 
 procedure TSFractalSierpinskiTriangle.CalculateFromThread();
@@ -73,7 +73,7 @@ var
 	FVertexIndex,FFaceIndex:LongWord;
 procedure Rec(const t1,t2,t3:TSVertex3f;const NowDepth:LongWord);
 begin
-PushIndexes(
+PushPoligonData(
 	ObjectId,
 	(t1+t2)/2,
 	(t3+t2)/2,
@@ -91,7 +91,7 @@ begin
 ObjectId:=0;
 FFaceIndex:=0;
 FVertexIndex:=0;
-PushIndexes(
+PushPoligonData(
 	ObjectId,
 	SVertex3fImport(cos(pi/2),sin(pi/2))*4,
 	SVertex3fImport(cos(pi/2+2*pi/3),sin(pi/2+2*pi/3))*4,
@@ -121,15 +121,15 @@ end;
 
 procedure TSFractalSierpinskiTriangle.Calculate();
 var
-	Quantity:Int64;
+	NumberOfPolygons:Int64;
 begin
 inherited;
 Clear3dObject;
-Quantity:=RecQuantity(FDepth);
+NumberOfPolygons:=CountingTheNumberOfPolygons(FDepth);
 if Render.RenderType in [SRenderDirectX9,SRenderDirectX8] then 
-	Calculate3dObjects(Quantity,SR_LINES,S3dObjectVertexType3f,1)
+	Calculate3dObjects(NumberOfPolygons,SR_LINES,S3dObjectVertexType3f,1)
 else
-	Calculate3dObjects(Quantity,SR_LINES,S3dObjectVertexType2f,1);
+	Calculate3dObjects(NumberOfPolygons,SR_LINES,S3dObjectVertexType2f,1);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;
@@ -144,7 +144,7 @@ else
 	end;
 end;
 
-function TSFractalSierpinskiTriangle.RecQuantity(const ThisDepth:Int64):Int64;
+class function TSFractalSierpinskiTriangle.CountingTheNumberOfPolygons(const ThisDepth:Int64):Int64;
 var
 	i,ii:LongWord;
 begin
