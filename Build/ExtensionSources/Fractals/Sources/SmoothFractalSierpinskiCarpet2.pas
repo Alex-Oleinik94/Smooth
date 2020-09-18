@@ -42,7 +42,7 @@ type
 	procedure Generate2(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32);
 	procedure Generate1(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32);
 		public
-	procedure CalculateFromThread(); override; // fractal construction
+	procedure PolygonsConstruction(); override; // fractal construction
 	procedure PushPoligonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32; const v1, v2, v3, v4 : TSVector2f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF} // adding data to array
 	end;
 
@@ -63,7 +63,7 @@ FPrimetiveType := SR_QUADS;
 FPrimetiveParam := 0;
 FDepth := 3;
 
-Calculate();
+Construct();
 end;
 
 destructor TSFractalSierpinskiCarpet2.Destroy();
@@ -144,13 +144,17 @@ begin
 Result := Counting4(_Depth);
 end;
 
-procedure TSFractalSierpinskiCarpet2.CalculateFromThread();
+procedure TSFractalSierpinskiCarpet2.PolygonsConstruction();
 var
 	ObjectNumber, VertexIndex, FaceIndex : TSUInt32;
 begin
+ObjectNumber := 0;
+VertexIndex := 0;
+FaceIndex := 0;
 Generate4(FDepth, TSVector2f.Create(1, 1), TSVector2f.Create(1, -1), TSVector2f.Create(-1, -1), TSVector2f.Create(-1, 1), 
 	TSColor3f.Create(1, 0, 0), TSColor3f.Create(0, 1, 0), TSColor3f.Create(0, 0, 1), TSColor3f.Create(1, 1, 0),
 	ObjectNumber, VertexIndex, FaceIndex);
+EndOfPolygonsConstruction(ObjectNumber);
 end;
 
 procedure TSFractalSierpinskiCarpet2.PushPoligonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32; const v1, v2, v3, v4 : TSVector2f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

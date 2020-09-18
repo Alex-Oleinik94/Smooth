@@ -20,8 +20,8 @@ type
 		destructor Destroy();override;
 		class function ClassName():TSString;override;
 			public
-		procedure Calculate();override;
-		procedure CalculateFromThread();
+		procedure Construct();override;
+		procedure PolygonsConstruction();
 		procedure PushPoligonData(var ObjectId : TSUInt32; const v : TSVertex2f; var FVertexIndex:TSUInt32); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSScreenLabel;
@@ -57,7 +57,7 @@ FVertexIndex+=1;
 AfterPushingPoligonData(ObjectId,FThreadsEnable,FVertexIndex);
 end;
 
-procedure TSFractalMinkowskiCurve.CalculateFromThread();
+procedure TSFractalMinkowskiCurve.PolygonsConstruction();
 var
 	ObjectId:LongWord;
 	FVI:LongWord;
@@ -99,7 +99,7 @@ if FThreadsEnable then
 			F3dObjectsInfo[ObjectId]:=S_TRUE;
 end;
 
-procedure TSFractalMinkowskiCurve.Calculate();
+procedure TSFractalMinkowskiCurve.Construct();
 var
 	NumberOfPolygons:TSMaxEnum;
 begin
@@ -107,18 +107,18 @@ inherited;
 Clear3dObject();
 NumberOfPolygons:=(8**FDepth)+1;
 if Render.RenderType in [SRenderDirectX9,SRenderDirectX8] then 
-	Calculate3dObjects(NumberOfPolygons,SR_LINE_STRIP,S3dObjectVertexType3f)
+	Construct3dObjects(NumberOfPolygons,SR_LINE_STRIP,S3dObjectVertexType3f)
 else
-	Calculate3dObjects(NumberOfPolygons,SR_LINE_STRIP,S3dObjectVertexType2f);
+	Construct3dObjects(NumberOfPolygons,SR_LINE_STRIP,S3dObjectVertexType2f);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;
 	FThreadsData[0].FData:=nil;
-	CalculateFromThread();
+	PolygonsConstruction();
 	end
 else
 	begin
-	CalculateFromThread();
+	PolygonsConstruction();
 	if FEnableVBO and (not F3dObject.LastObject().EnableVBO) then
 		F3dObject.LastObject().LoadToVBO();
 	end;
@@ -129,7 +129,7 @@ begin
 with TSFractalMinkowskiCurve(Button.FUserPointer1) do
 	begin
 	FDepth+=1;
-	Calculate();
+	Construct();
 	FLD.Caption:=SStringToPChar(SStr(Depth));
 	FBMD.Active:=True;
 	end;
@@ -143,7 +143,7 @@ with TSFractalMinkowskiCurve(Button.FUserPointer1) do
 	if Depth>0 then
 		begin
 		FDepth-=1;
-		Calculate();
+		Construct();
 		FLD.Caption:=SStringToPChar(SStr(Depth));
 		if FDepth=0 then
 			FBMD.Active:=False;
@@ -200,7 +200,7 @@ Screen.LastChild.BoundsMakeReal();
 
 FLD.Caption:=SStringToPChar(SStr(Depth));
 
-Calculate();
+Construct();
 end;
 
 destructor TSFractalMinkowskiCurve.Destroy();

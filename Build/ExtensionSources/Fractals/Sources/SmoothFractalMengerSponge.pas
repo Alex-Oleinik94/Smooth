@@ -37,9 +37,9 @@ type
 			Arr6:TSMengerSpongeBoolAr6;
 			Point:TSVertex3f;
 			end;
-		procedure CalculateArray();
-		procedure Calculate();override;
-		procedure CalculateFromThread(var ObjectId,ThreadArB,ThreadArE:TSUInt32);
+		procedure ConstructArray();
+		procedure Construct();override;
+		procedure PolygonsConstruction(var ObjectId,ThreadArB,ThreadArE:TSUInt32);
 		class function CountingTheNumberOfPolygons(const _FractalType : TSMengerType; const _BoolArray:TSMengerSpongeBoolAr6;const _Depth:TSInt32):TSInt64;
 		class function ConstructBoolArray(const _FractalType : TSMengerType; const _PreviousBoolArray:TSMengerSpongeBoolAr6;const i,j,k: TSUInt8;const _Depth:TSUInt32 = 0):TSMengerSpongeBoolAr6;
 		class function DoOrNotDo(const i,ii,iii:TSUInt8):TSBoolean;inline;
@@ -66,7 +66,7 @@ type
 		FButtonDepthPlus,FButtonDepthMinus:TSScreenButton;
 		FLabelDepth, FLabelDepthCaption : TSScreenLabel;
 		FFont1:TSFont;
-		procedure Calculate;override;
+		procedure Construct;override;
 		procedure Paint();override;
 		end;
 
@@ -89,7 +89,7 @@ with TSFractalMengerSpongeRelease(VButton.FUserPointer1) do
 	if (not DoAtThreads) or (DoAtThreads and F3dObjectsReady) then
 		begin
 		FDepth+=1;
-		Calculate;
+		Construct;
 		FButtonDepthMinus.Active:=True;
 		end;
 	end;
@@ -102,7 +102,7 @@ with TSFractalMengerSpongeRelease(VButton.FUserPointer1) do
 	if (Depth>0) and (not DoAtThreads) or (DoAtThreads and F3dObjectsReady) then
 		begin
 		FDepth-=1;
-		Calculate;
+		Construct;
 		if Depth=0 then
 			FButtonDepthMinus.Active:=False;
 		end;
@@ -122,7 +122,7 @@ with TSFractalMengerSpongeRelease(VComboBox.FUserPointer1) do
 			0:FFractalType:=SMengerStar;
 			2:FFractalType:=SMengerSnowflake;
 			end;
-			Calculate;
+			Construct;
 			end;
 		end;
 	end;
@@ -138,7 +138,7 @@ with TSFractalMengerSpongeRelease(VComboBox.FUserPointer1) do
 			FEnableNormals:=(b=0) or (b=1);
 			FEnableColors:=(b=0) or (b=2);
 			FLightingEnable:=FEnableNormals;
-			Calculate;
+			Construct;
 			end;
 	end;
 end;
@@ -148,10 +148,10 @@ begin
 inherited;
 end;
 
-procedure TSFractalMengerSpongeRelease.Calculate;
+procedure TSFractalMengerSpongeRelease.Construct;
 begin
 FLabelDepth.Caption:=SStringToPChar(SStr(FDepth));
-inherited Calculate;
+inherited Construct;
 FSizeLabelFlag := False;
 end;
 
@@ -222,7 +222,7 @@ FFractalType := SDefaultMengerType;
 {$IFNDEF ANDROID}
 	Threads:=1;
 	{$ENDIF}
-Calculate();
+Construct();
 end;
 
 destructor TSFractalMengerSpongeRelease.Destroy();
@@ -256,7 +256,7 @@ end;
 
 procedure NewMengerThread(MengerSpongeFractalData:TSMengerSpongeFractalData) ;
 begin
-(MengerSpongeFractalData.FFractal as TSFractalMengerSponge).CalculateFromThread(MengerSpongeFractalData.a1,MengerSpongeFractalData.b1,MengerSpongeFractalData.c1);
+(MengerSpongeFractalData.FFractal as TSFractalMengerSponge).PolygonsConstruction(MengerSpongeFractalData.a1,MengerSpongeFractalData.b1,MengerSpongeFractalData.c1);
 MengerSpongeFractalData.FFractal.FThreadsData[MengerSpongeFractalData.FThreadID].FFinished:=True;
 MengerSpongeFractalData.FFractal.FThreadsData[MengerSpongeFractalData.FThreadID].FData:=nil;
 MengerSpongeFractalData.Destroy();
@@ -280,7 +280,7 @@ begin
 Result := 'Губка Менгера и подобное (beta)';
 end;
 
-procedure TSFractalMengerSponge.Calculate;
+procedure TSFractalMengerSponge.Construct;
 var
 	NumberOfPolygons:TSInt64 = 0;
 	Index,ii,iii:TSUInt32;
@@ -299,7 +299,7 @@ if DoAtThreads then
 				NumberOfPolygons+=CountingTheNumberOfPolygons(FFractalType,FThreadsArray[ii].Arr6,FDepth-1);
 				end;
 			iii:=F3dObject.QuantityObjects;
-			Calculate3dObjects(NumberOfPolygons,SR_QUADS);
+			Construct3dObjects(NumberOfPolygons,SR_QUADS);
 			FThreadsData[Index].FData:=TSMengerSpongeFractalData.Create(iii,Index*(20 div Length(FThreadsData)),(Index+1)*(20 div Length(FThreadsData))-1,Self,Index);
 			FThreadsData[Index].FFinished:=False;
 			end;
@@ -314,7 +314,7 @@ if DoAtThreads then
 			FThreadsData[Index].FFinished:=True;
 			FThreadsData[Index].FData:=nil;
 			end;
-		Calculate3dObjects(CountingTheNumberOfPolygons(FFractalType,TSMengerSpongeBoolAr6True,FDepth),SR_QUADS);
+		Construct3dObjects(CountingTheNumberOfPolygons(FFractalType,TSMengerSpongeBoolAr6True,FDepth),SR_QUADS);
 		Index := 0;
 		FThreadsData[Index].FFinished:=False;
 		FThreadsData[Index].FData:=TSMengerSpongeFractalData.Create(0,0,0,Self,Index);
@@ -324,9 +324,9 @@ if DoAtThreads then
 else
 	begin
 	NumberOfPolygons:=CountingTheNumberOfPolygons(FFractalType,TSMengerSpongeBoolAr6True,FDepth);
-	Calculate3dObjects(NumberOfPolygons,SR_QUADS);
+	Construct3dObjects(NumberOfPolygons,SR_QUADS);
 	Index:=0;ii:=0;iii:=0;
-	CalculateFromThread(Index,ii,iii);
+	PolygonsConstruction(Index,ii,iii);
 	end;
 end;
 
@@ -351,10 +351,10 @@ if FEnableNormals then
 	Ar6Normals[5].Import(0,-1,0);
 	Ar6Normals[5] := Ar6Normals[5].Normalized();
 	end;
-CalculateArray();
+ConstructArray();
 end;
 
-procedure TSFractalMengerSponge.CalculateFromThread(var ObjectId,ThreadArB,ThreadArE:TSUInt32);
+procedure TSFractalMengerSponge.PolygonsConstruction(var ObjectId,ThreadArB,ThreadArE:TSUInt32);
 var
 	i:LongInt;
 	ArVerts:packed array [1..8]of TSVertex3f;
@@ -494,7 +494,7 @@ else
 	end;
 end;
 
-procedure TSFractalMengerSponge.CalculateArray;
+procedure TSFractalMengerSponge.ConstructArray;
 var
 	i,ii,iii,i4:Byte;
 	NewQ:real = -5.2/3;

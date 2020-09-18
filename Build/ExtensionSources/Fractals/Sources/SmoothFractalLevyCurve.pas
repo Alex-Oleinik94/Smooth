@@ -19,8 +19,8 @@ type
 		destructor Destroy; override;
 		class function ClassName() : TSString; override;
 			public
-		procedure Calculate;override;
-		procedure CalculateFromThread();
+		procedure Construct();override;
+		procedure PolygonsConstruction();
 		procedure PushPoligonData(var ObjectId:LongWord;const v:TSVertex2f;var FVertexIndex:LongWord);Inline;
 			protected
 		FLD, FLDC : TSScreenLabel;
@@ -55,7 +55,7 @@ FVertexIndex+=1;
 AfterPushingPoligonData(ObjectId,FThreadsEnable,FVertexIndex);
 end;
 
-procedure TSFractalLevyCurve.CalculateFromThread();
+procedure TSFractalLevyCurve.PolygonsConstruction();
 var
 	ObjectId:LongWord;
 	FVI:LongWord;
@@ -100,13 +100,13 @@ end;
 
 procedure NewLevyCurveThread(Klass:TSFractalData) ;
 begin
-(Klass.FFractal as TSFractalLevyCurve).CalculateFromThread();
+(Klass.FFractal as TSFractalLevyCurve).PolygonsConstruction();
 Klass.FFractal.FThreadsData[Klass.FThreadID].FFinished:=True;
 Klass.FFractal.FThreadsData[Klass.FThreadID].FData:=nil;
 Klass.Destroy;
 end;
 
-procedure TSFractalLevyCurve.Calculate;
+procedure TSFractalLevyCurve.Construct;
 var
 	NumberOfPolygons:Int64;
 begin
@@ -114,18 +114,18 @@ inherited;
 Clear3dObject;
 NumberOfPolygons:=(2**FDepth)+1;
 if Render.RenderType in [SRenderDirectX9,SRenderDirectX8] then 
-	Calculate3dObjects(NumberOfPolygons,SR_LINE_STRIP,S3dObjectVertexType3f)
+	Construct3dObjects(NumberOfPolygons,SR_LINE_STRIP,S3dObjectVertexType3f)
 else
-	Calculate3dObjects(NumberOfPolygons,SR_LINE_STRIP,S3dObjectVertexType2f);
+	Construct3dObjects(NumberOfPolygons,SR_LINE_STRIP,S3dObjectVertexType2f);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;
 	FThreadsData[0].FData:=nil;
-	CalculateFromThread;
+	PolygonsConstruction;
 	end
 else
 	begin
-	CalculateFromThread;
+	PolygonsConstruction;
 	if FEnableVBO and (not F3dObject.LastObject().EnableVBO) then
 		F3dObject.LastObject().LoadToVBO();
 	end;
@@ -136,7 +136,7 @@ begin
 with TSFractalLevyCurve(Button.FUserPointer1) do
 	begin
 	FDepth+=1;
-	Calculate;
+	Construct;
 	FLD.Caption:=SStringToPChar(SStr(Depth));
 	FBMD.Active:=True;
 	end;
@@ -150,7 +150,7 @@ with TSFractalLevyCurve(Button.FUserPointer1) do
 	if Depth>0 then
 		begin
 		FDepth-=1;
-		Calculate;
+		Construct;
 		FLD.Caption:=SStringToPChar(SStr(Depth));
 		if Depth=0 then
 			FBMD.Active:=False;
@@ -165,7 +165,7 @@ with TSFractalLevyCurve(Button.FUserPointer1) do
 	if a<>b then
 		begin
 		FTCB.SelectItem:=b;
-		Calculate;
+		Construct;
 		end;
 	end;
 end;
@@ -226,7 +226,7 @@ FTCB.BoundsMakeReal();
 
 FLD.Caption:=SStringToPChar(SStr(Depth));
 
-Calculate();
+Construct();
 end;
 
 destructor TSFractalLevyCurve.Destroy;

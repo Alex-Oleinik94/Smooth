@@ -25,7 +25,7 @@ type
 			protected
 		class function CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum; override;
 			public
-		procedure CalculateFromThread(); override;
+		procedure PolygonsConstruction(); override;
 		procedure PushPoligonData(var ObjectId : TSUInt32; const v1, v2, v3, v4, v5, v6 : TSVector2f; var FVertexIndex, FFaceIndex : TSUInt32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SetType(const NewType : TSFractalSierpinskiCarpetSixAngleType);
 			protected
@@ -34,8 +34,8 @@ type
 		end;
 
 function SVector2fList6Import(const v1, v2, v3, v4, v5, v6 : TSVector2f): TSVector2fList6;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SVector2fList6Swap(var List : TSVector2fList6); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SVector2fList6Spining(Count : TSByte; const List : TSVector2fList6): TSVector2fList6; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SVector2fList6Spin(var List : TSVector2fList6; const AboveZero : TSBool = True); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SVector2fList6Spining(Count : TSInt8; const List : TSVector2fList6): TSVector2fList6; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -45,26 +45,39 @@ uses
 	,SmoothScreenBase
 	;
 
-function SVector2fList6Spining(Count : TSByte; const List : TSVector2fList6): TSVector2fList6; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SVector2fList6Spining(Count : TSInt8; const List : TSVector2fList6): TSVector2fList6; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Count := Count mod 6;
 Result := List;
-while Count > 0 do
+while Count <> 0 do
 	begin
-	SVector2fList6Swap(Result);
-	Count -= 1;
+	SVector2fList6Spin(Result, Count > 0);
+	if Count < 0 then
+		Count += 1
+	else
+		Count -= 1;
 	end;
 end;
 
-procedure SVector2fList6Swap(var List : TSVector2fList6); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SVector2fList6Spin(var List : TSVector2fList6; const AboveZero : TSBool = True); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Vector : TSVector2f;
-	i : TSByte;
+	Index : TSByte;
 begin
-Vector := List[0];
-for i := 0 to 5 do
-	List[i] := List[i + 1];
-List[5] := Vector;
+if AboveZero then
+	begin
+	Vector := List[5];
+	for Index := 4 downto 0 do
+		List[Index + 1] := List[Index];
+	List[0] := Vector;
+	end
+else
+	begin
+	Vector := List[0];
+	for Index := 0 to 4 do
+		List[Index] := List[Index + 1];
+	List[5] := Vector;
+	end;
 end;
 
 function SVector2fList6Import(const v1, v2, v3, v4, v5, v6 : TSVector2f): TSVector2fList6;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -82,7 +95,7 @@ begin
 if (NewType >= 0) and (NewType <= SFractalSierpinskiCarpetSixAngleTypesCount - 1) and (NewType <> FType) then
 	begin
 	FType := NewType;
-	Calculate();
+	Construct();
 	end;
 end;
 
@@ -122,7 +135,7 @@ with FTypeComboBox do
 	Active := True;
 	end;
 
-Calculate();
+Construct();
 end;
 
 destructor TSFractalSierpinskiCarpetSixAngle.Destroy();
@@ -141,13 +154,13 @@ begin
 Result := 6 * (3 ** _Depth);
 end;
 
-procedure TSFractalSierpinskiCarpetSixAngle.CalculateFromThread();
+procedure TSFractalSierpinskiCarpetSixAngle.PolygonsConstruction();
 var 
 	ObjectId : TSUInt32; 
 	FVertexIndex, FFaceIndex : TSUInt32;
 	SpinCount0, SpinCount1, SpinCount2 : TSInt8;
 
-procedure RecList(const _List : TSVector2fList6; const _SpinCount : TSByte; const _Depth : TSUInt32);forward;
+procedure RecList(const _List : TSVector2fList6; const _SpinCount : TSInt8; const _Depth : TSUInt32);forward;
 
 procedure Rec(const v1, v2, v3, v4, v5, v6 : TSVector2f; const _Depth : TSUInt32); overload;
 var
@@ -217,7 +230,7 @@ else
 	end;
 end;
 
-procedure RecList(const _List : TSVector2fList6; const _SpinCount : TSByte; const _Depth : TSUInt32);
+procedure RecList(const _List : TSVector2fList6; const _SpinCount : TSInt8; const _Depth : TSUInt32);
 var
 	SpinedList : TSVector2fList6;
 begin
@@ -261,7 +274,7 @@ if FType = 6 then
 	SpinCount2 := Random(6) - 2;
 	end;
 Rec(SVertex2fImport(0, 0), 4, Depth);
-FinalizeCalculateFromThread(ObjectId);
+EndOfPolygonsConstruction(ObjectId);
 end;
 
 procedure TSFractalSierpinskiCarpetSixAngle.PushPoligonData(var ObjectId : TSUInt32; const v1, v2, v3, v4, v5, v6 : TSVector2f; var FVertexIndex, FFaceIndex : TSUInt32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

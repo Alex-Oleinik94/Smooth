@@ -22,7 +22,7 @@ type
 			public
 		FFunction:string;
 		FExpression:TSExpression;
-		procedure Calculate();override;
+		procedure Construct();override;
 		end;
 
 implementation
@@ -37,14 +37,14 @@ begin
 inherited;
 end;
 
-procedure TSGraphViewer3D.Calculate();
+procedure TSGraphViewer3D.Construct();
 var
 	i,ii:LongWord;
 	rx,ry,rd:single;
 begin
 inherited;
 Clear3dObject();
-Calculate3dObjects(Sqr(Depth),SR_QUADS,S3dObjectVertexType3f);
+Construct3dObjects(Sqr(Depth),SR_QUADS,S3dObjectVertexType3f);
 rx:=-4;
 rd:=8/Depth;
 for i:=0 to Depth-1 do
@@ -73,7 +73,7 @@ FEnableColors:=True;
 FFunction:='x*y';
 FExpression:=TSExpression.Create();
 FExpression.Expression:=SStringToPChar(FFunction);
-Calculate();
+Construct();
 end;
 
 destructor TSGraphViewer3D.Destroy();

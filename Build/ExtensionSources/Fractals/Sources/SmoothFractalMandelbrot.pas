@@ -45,11 +45,11 @@ type
 		function MandelbrotRec(const Number:TSComplexNumber;const dx,dy:single):Word;inline;
 			public
 		function GetPixelColor(const VColorSceme:TSByte;const RecNumber:Word):TSMandelbrotPixel;inline;
-		procedure CalculateFromThread(Data:TSFractalMandelbrotThreadData);
-		procedure Calculate;override;
+		procedure PolygonsConstruction(Data:TSFractalMandelbrotThreadData);
+		procedure Construct();override;
 		procedure Paint();override;
-		procedure AfterCalculate;override;
-		procedure BeginCalculate;override;
+		procedure AfterConstruct();override;
+		procedure BeginConstruct();override;
 		procedure BeginThread(const Number:LongInt;const Real:Pointer);
 			public
 		property ZNumber:TSComplexNumber read FZNumber write FZNumber;
@@ -548,7 +548,7 @@ Mandelbrot.FZMand:=False;
 Mandelbrot.FZDegree:=2;
 Mandelbrot.FView.Import(-2.5,-2.5*(Render.Height/Render.Width),2.5,2.5*(Render.Height/Render.Width));
 Mandelbrot.CreateThreads(QuantityThreads);
-Mandelbrot.BeginCalculate;
+Mandelbrot.BeginConstruct;
 Mandelbrot.FImage.FileName:=SImagesDirectory+DirectorySeparator+'Mandelbrot new.' + TSImageFormatDeterminer.DetermineFileExtensionFromFormat(SDefaultSaveImageFormat(3));
 
 FBeginCalc.Get;
@@ -1000,7 +1000,7 @@ if MandelbrotInitialized then
 	if Mandelbrot.ThreadsReady  then
 		begin
 		Sleep(5);
-		Mandelbrot.AfterCalculate();
+		Mandelbrot.AfterConstruct();
 		
 		for i:=0 to QuantityThreads-1 do
 			begin
@@ -1293,7 +1293,7 @@ if MandelbrotInitialized then
 				GetPointOnPosOnMand(Context.CursorPosition(SNowCursorPosition)).x,
 				GetPointOnPosOnMand(Context.CursorPosition(SNowCursorPosition)).y));
 		FBezierCurve.Detalization:=FBezierCurve.VertexQuantity*10;
-		FBezierCurve.Calculate();
+		FBezierCurve.Construct();
 		Context.SetKey(SNullKey, Context.KeyPressedByte());
 		FBezierCurveLabelPoints.Caption:='Количество точек: '+SStr(FBezierCurve.VertexQuantity);
 		FBezierCurveGoButton.Active:=(FBezierCurve.VertexQuantity>=2) and (TSEditTextTypeFunctionNumber(FBezierCurveEditKadr));
@@ -1379,7 +1379,7 @@ if MandelbrotInitialized then
 			Mandelbrot.Width:=StartDepth;
 			Mandelbrot.Height:=StartDepth;
 			end;
-		Mandelbrot.BeginCalculate();
+		Mandelbrot.BeginConstruct();
 		Mandelbrot.FImage.FileName := SFreeFileName(SImagesDirectory + DirectorySeparator + 'Mandelbrot.' + TSImageFormatDeterminer.DetermineFileExtensionFromFormat(SDefaultSaveImageFormat(3)));
 		LabelProcent.Visible:=True;
 		LblProcent.Visible:=True;
@@ -1412,7 +1412,7 @@ procedure TSFractalMandelbrotThreadProcedure(Data:TSFractalMandelbrotThreadData)
 begin
 with data do
 	begin
-	(FFractal as TSFractalMandelbrot).CalculateFromThread(Data);
+	(FFractal as TSFractalMandelbrot).PolygonsConstruction(Data);
 	FFractal.FThreadsData[FNumber].FFinished:=True;
 	end;
 end;
@@ -1444,7 +1444,7 @@ FThreadsData[Number].FThread:=
 		FThreadsData[Number].FData);
 end;
 
-procedure TSFractalMandelbrot.AfterCalculate;
+procedure TSFractalMandelbrot.AfterConstruct;
 var
 	i:LongInt;
 begin
@@ -1465,7 +1465,7 @@ for i:=0 to High(FThreadsData) do
 inherited;
 end;
 
-procedure TSFractalMandelbrot.BeginCalculate;
+procedure TSFractalMandelbrot.BeginConstruct;
 begin
 inherited;
 end;
@@ -1710,7 +1710,7 @@ if Result>FZQuantityRec then
 	Result:=FZQuantityRec;
 end;
 
-procedure TSFractalMandelbrot.CalculateFromThread(Data:TSFractalMandelbrotThreadData);
+procedure TSFractalMandelbrot.PolygonsConstruction(Data:TSFractalMandelbrotThreadData);
 var
 	i,ii:Word;
 	rY,rX,dX,dY:System.Real;//По идее это Wight и Height
@@ -1806,11 +1806,11 @@ While (Depth2<FZQuantityRec) and(sqrt(sqr(Number.x)+sqr(Number.y))<2) do
 Result:=Depth2;
 end;
 
-procedure TSFractalMandelbrot.Calculate;
+procedure TSFractalMandelbrot.Construct;
 begin
 inherited;
-BeginCalculate();
-CalculateFromThread(TSFractalMandelbrotThreadData.Create(Self,0,Depth-1,nil,-1));
+BeginConstruct();
+PolygonsConstruction(TSFractalMandelbrotThreadData.Create(Self,0,Depth-1,nil,-1));
 ToTexture();
 end;
 

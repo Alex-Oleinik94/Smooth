@@ -55,13 +55,13 @@ type
 		
 			public
 		function ThreadsReady():Boolean;virtual;
-		procedure Calculate();virtual;
+		procedure Construct();virtual;
 		procedure Paint();override;
 		procedure CreateThreads(const a:Byte);virtual;
 		procedure ThreadsBoolean(const b:boolean = false);virtual;
 		procedure DestroyThreads();virtual;
-		procedure AfterCalculate();virtual;
-		procedure BeginCalculate();virtual;
+		procedure AfterConstruct();virtual;
+		procedure BeginConstruct();virtual;
 		procedure SetThreadsQuantity(NewQuantity:LongWord);
 		function GetThreadsQuantity():LongWord;inline;
 			public
@@ -96,9 +96,9 @@ type
 		procedure DeleteRenderResources();override;
 		procedure LoadRenderResources();override;
 		procedure Paint();override;
-		procedure Calculate();override;
+		procedure Construct();override;
 		procedure Set3dObjectArLength(const MID,LFaces,LVertexes:int64);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure Calculate3dObjects(NumberOfPolygons:Int64;const PoligoneType:LongWord;const VVertexType:TS3dObjectVertexType = S3dObjectVertexType3f;const VertexMn : TSByte = 0);
+		procedure Construct3dObjects(NumberOfPolygons:Int64;const PoligoneType:LongWord;const VVertexType:TS3dObjectVertexType = S3dObjectVertexType3f;const VertexMn : TSByte = 0);
 		procedure Clear3dObject();inline;
 		procedure AfterPushingPoligonData(var ObjectID:LongWord;const DoAtThreads:Boolean;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		procedure AfterPushingPoligonData(var ObjectID:LongWord;const DoAtThreads:Boolean;var FVertexIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -135,7 +135,7 @@ type
 		class function GetColor(const a,b,color:LongInt):byte;inline;
 		class function GetColorOne(const a,b,color:LongInt):byte;inline;
 		procedure ToTexture();virtual;
-		procedure BeginCalculate();override;
+		procedure BeginConstruct();override;
 			public
 		property Width:LongInt read FDepth write FDepth;
 		property Height:LongWord read FDepthHeight write FDepthHeight;
@@ -157,10 +157,10 @@ end;
 
 procedure TS3DFractal.LoadRenderResources();
 begin
-Calculate();
+Construct();
 end;
 
-procedure TS3DFractal.Calculate();
+procedure TS3DFractal.Construct();
 begin
 FSizeLabelFlag:=False;
 inherited;
@@ -203,7 +203,7 @@ with TS3DFractal(VComboBox.FUserPointer1) do
 		FEnableColors:=(b=2) or (b=0);
 		FEnableNormals:=(b=1) or (b=0);
 		FLightingEnable:=FEnableNormals;
-		Calculate();
+		Construct();
 		end;
 	end;
 end;
@@ -306,7 +306,7 @@ if FFaceIndex>=FShift then
 	end;
 end;
 
-procedure TS3DFractal.Calculate3dObjects(NumberOfPolygons:Int64;const PoligoneType:LongWord;const VVertexType:TS3dObjectVertexType = S3dObjectVertexType3f;const VertexMn : TSByte = 0);
+procedure TS3DFractal.Construct3dObjects(NumberOfPolygons:Int64;const PoligoneType:LongWord;const VVertexType:TS3dObjectVertexType = S3dObjectVertexType3f;const VertexMn : TSByte = 0);
 begin
 if (Render = nil) or (Render.RenderType in [SRenderDirectX9,SRenderDirectX8]) then
 	FShift := 4608*2
@@ -542,11 +542,11 @@ if (FSizeLabel<>nil) and (not FSizeLabelFlag)  and (F3dObject<>nil) then
 	{$ENDIF}
 end;
 
-procedure TSFractal.AfterCalculate; 
+procedure TSFractal.AfterConstruct(); 
 begin 
 end;
 
-procedure TSFractal.BeginCalculate(); 
+procedure TSFractal.BeginConstruct(); 
 begin 
 end;
 
@@ -652,7 +652,7 @@ FDepthHeight:=0;
 FImage:=nil;
 end;
 
-procedure TSImageFractal.BeginCalculate;
+procedure TSImageFractal.BeginConstruct();
 begin
 inherited;
 if (FImage = nil) then FImage := TSImage.Create() else FImage.FreeAll();
@@ -711,7 +711,7 @@ begin
 Render.Color3f(1,1,1);
 end;
 
-procedure TSFractal.Calculate;
+procedure TSFractal.Construct();
 begin
 end;
 

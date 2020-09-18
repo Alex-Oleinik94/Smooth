@@ -21,8 +21,8 @@ type
 		class function ClassName():TSString;override;
 			public
 		class function CountingTheNumberOfPolygons(const ThisDepth : TSUInt64) : TSUInt64;
-		procedure Calculate();override;
-		procedure CalculateFromThread();
+		procedure Construct();override;
+		procedure PolygonsConstruction();
 		procedure PushPoligonData(var ObjectId:LongWord;const v1,v2,v3,v4:TSVertex2f;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSScreenLabel;
@@ -67,7 +67,7 @@ FFaceIndex+=1;
 AfterPushingPoligonData(ObjectId,FThreadsEnable,FVertexIndex,FFaceIndex);
 end;
 
-procedure TSFractalSierpinskiCarpet.CalculateFromThread();
+procedure TSFractalSierpinskiCarpet.PolygonsConstruction();
 var
 	ObjectId:LongWord;
 	FVertexIndex,FFaceIndex:LongWord;
@@ -155,13 +155,13 @@ end;
 
 procedure NewMengerThread(FractalData:TSFractalData);
 begin
-(FractalData.FFractal as TSFractalSierpinskiCarpet).CalculateFromThread();
+(FractalData.FFractal as TSFractalSierpinskiCarpet).PolygonsConstruction();
 FractalData.FFractal.FThreadsData[FractalData.FThreadID].FFinished:=True;
 FractalData.FFractal.FThreadsData[FractalData.FThreadID].FData:=nil;
 FractalData.Destroy;
 end;
 
-procedure TSFractalSierpinskiCarpet.Calculate();
+procedure TSFractalSierpinskiCarpet.Construct();
 var
 	NumberOfPolygons : TSUInt64;
 begin
@@ -169,18 +169,18 @@ inherited;
 Clear3dObject;
 NumberOfPolygons := CountingTheNumberOfPolygons(FDepth);
 if Render.RenderType in [SRenderDirectX9, SRenderDirectX8] then 
-	Calculate3dObjects(NumberOfPolygons,SR_QUADS,S3dObjectVertexType3f)
+	Construct3dObjects(NumberOfPolygons,SR_QUADS,S3dObjectVertexType3f)
 else
-	Calculate3dObjects(NumberOfPolygons,SR_QUADS,S3dObjectVertexType2f);
+	Construct3dObjects(NumberOfPolygons,SR_QUADS,S3dObjectVertexType2f);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;
 	FThreadsData[0].FData:=nil;
-	CalculateFromThread;
+	PolygonsConstruction;
 	end
 else
 	begin
-	CalculateFromThread;
+	PolygonsConstruction;
 	if FEnableVBO and (not F3dObject.LastObject().EnableVBO) then
 		F3dObject.LastObject().LoadToVBO();
 	end;
@@ -201,7 +201,7 @@ begin
 with TSFractalSierpinskiCarpet(Button.FUserPointer1) do
 	begin
 	FDepth+=1;
-	Calculate();
+	Construct();
 	FLD.Caption:=SStr(Depth);
 	FBMD.Active:=True;
 	end;
@@ -214,7 +214,7 @@ with TSFractalSierpinskiCarpet(Button.FUserPointer1) do
 	if Depth>0 then
 		begin
 		FDepth-=1;
-		Calculate();
+		Construct();
 		FLD.Caption:=SStr(Depth);
 		if Depth=0 then
 			FBMD.Active:=False;
@@ -263,7 +263,7 @@ Screen.LastChild.BoundsMakeReal();
 
 FLD.Caption:=SStringToPChar(SStr(Depth));
 
-Calculate;
+Construct;
 end;
 
 destructor TSFractalSierpinskiCarpet.Destroy;

@@ -20,8 +20,8 @@ type
 		destructor Destroy(); override;
 		class function ClassName() : TSString; override;
 			public
-		procedure Calculate;override;
-		procedure CalculateFromThread();
+		procedure Construct();override;
+		procedure PolygonsConstruction();
 		procedure PushPoligonData(var ObjectId:LongWord;const n,v0,v1,v2:TSVertex3f;var FVertexIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSScreenLabel;
@@ -90,7 +90,7 @@ FVertexIndex+=3;
 AfterPushingPoligonData(ObjectId,FThreadsEnable,FVertexIndex);
 end;
 
-procedure TSFractalSierpinskiTetrahedron.CalculateFromThread();
+procedure TSFractalSierpinskiTetrahedron.PolygonsConstruction();
 var
 	ObjectId:LongWord;
 	FVI:LongWord;
@@ -151,23 +151,23 @@ if FThreadsEnable then
 			F3dObjectsInfo[ObjectId]:=S_TRUE;
 end;
 
-procedure TSFractalSierpinskiTetrahedron.Calculate();
+procedure TSFractalSierpinskiTetrahedron.Construct();
 var
 	NumberOfPolygons:Int64;
 begin
 inherited;
 Clear3dObject();
 NumberOfPolygons:=(4**(1+FDepth));
-Calculate3dObjects(NumberOfPolygons,SR_TRIANGLES,S3dObjectVertexType3f);
+Construct3dObjects(NumberOfPolygons,SR_TRIANGLES,S3dObjectVertexType3f);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;
 	FThreadsData[0].FData:=nil;
-	CalculateFromThread();
+	PolygonsConstruction();
 	end
 else
 	begin
-	CalculateFromThread();
+	PolygonsConstruction();
 	if FEnableVBO and (not F3dObject.LastObject().EnableVBO) then
 		F3dObject.LastObject().LoadToVBO();
 	end;
@@ -178,7 +178,7 @@ begin
 with TSFractalSierpinskiTetrahedron(Button.FUserPointer1) do
 	begin
 	FDepth+=1;
-	Calculate;
+	Construct;
 	FLD.Caption:=SStringToPChar(SStr(Depth));
 	FBMD.Active:=True;
 	end;
@@ -192,7 +192,7 @@ with TSFractalSierpinskiTetrahedron(Button.FUserPointer1) do
 	if Depth>0 then
 		begin
 		FDepth-=1;
-		Calculate;
+		Construct;
 		FLD.Caption:=SStringToPChar(SStr(Depth));
 		if Depth=0 then
 			FBMD.Active:=False;
@@ -251,7 +251,7 @@ Screen.LastChild.BoundsMakeReal();
 
 FLD.Caption:=SStringToPChar(SStr(Depth));
 
-Calculate();
+Construct();
 end;
 
 destructor TSFractalSierpinskiTetrahedron.Destroy();

@@ -33,7 +33,7 @@ type
 		property LowAttitude:Real read FLowAttitude;
 		property LowIndex:LongWord read FLowIndex;
 		function GetResultVertex(const Attitude:real):TSVertex3f;inline;overload;
-		procedure Calculate();
+		procedure Construct();
 		procedure AddVertex(const VVertex:TSVertex3f);
 		property Vertexes[Index : TSMaxEnum]:TSVertex3f read GetVertex write SetVertex;
 		property Detalization:LongWord read FDetalization write FDetalization;
@@ -125,7 +125,7 @@ else
 		GetResultVertex((StN-(Trunc(StN)))/2		,@FStartArray[trunc(StN)]		,3))/2;
 end;
 
-procedure TSBezierCurve.Calculate();
+procedure TSBezierCurve.Construct();
 var
 	i:TSMaxEnum;
 begin

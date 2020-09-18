@@ -19,10 +19,10 @@ type
 		destructor Destroy();override;
 		class function ClassName():TSString;override;
 			public
-		procedure Calculate();override;
-		procedure CalculateFromThread(); virtual;
+		procedure Construct();override;
+		procedure PolygonsConstruction(); virtual; // polygons construction
 			protected
-		procedure FinalizeCalculateFromThread(const ObjectId : TSUInt32); virtual;
+		procedure EndOfPolygonsConstruction(const ObjectId : TSUInt32); virtual;
 		class function CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum; virtual; abstract;
 			protected
 		FLD, FLDC : TSScreenLabel;
@@ -42,7 +42,7 @@ uses
 	,SmoothScreenBase
 	;
 
-procedure TS3DFractalForm.Calculate();
+procedure TS3DFractalForm.Construct();
 var
 	NumberOfPolygons : TSUInt64;
 begin
@@ -51,31 +51,30 @@ Clear3dObject();
 NumberOfPolygons := CountingTheNumberOfPolygons(FDepth);
 if FIs2D then
 	if (Render.RenderType in [SRenderDirectX9, SRenderDirectX8]) then 
-		Calculate3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType3f, FPrimetiveParam)
+		Construct3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType3f, FPrimetiveParam)
 	else
-		Calculate3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType2f, FPrimetiveParam)
+		Construct3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType2f, FPrimetiveParam)
 else
-	Calculate3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType3f, FPrimetiveParam);
+	Construct3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType3f, FPrimetiveParam);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished := False;
 	FThreadsData[0].FData     := nil;
-	CalculateFromThread();
+	PolygonsConstruction();
 	end
 else
 	begin
-	CalculateFromThread();
+	PolygonsConstruction();
 	if FEnableVBO and (not F3dObject.LastObject().EnableVBO) then
 		F3dObject.LastObject().LoadToVBO();
 	end;
 end;
 
-procedure TS3DFractalForm.CalculateFromThread();
+procedure TS3DFractalForm.PolygonsConstruction();
 begin
-
 end;
 
-procedure TS3DFractalForm.FinalizeCalculateFromThread(const ObjectId : TSUInt32);
+procedure TS3DFractalForm.EndOfPolygonsConstruction(const ObjectId : TSUInt32);
 begin
 if FThreadsEnable then
 	if (ObjectId>=0) and (ObjectId<=F3dObject.QuantityObjects-1) then
@@ -83,25 +82,25 @@ if FThreadsEnable then
 			F3dObjectsInfo[ObjectId]:=S_TRUE;
 end;
 
-procedure mmmFButtonDepthPlusOnChangeKT(Button:TSScreenButton);
+procedure S3DFractalFormButtonDepthPlus(Button:TSScreenButton);
 begin
 with TS3DFractalForm(Button.FUserPointer1) do
 	begin
 	FDepth += 1;
-	Calculate();
+	Construct();
 	FLD.Caption := SStr(Depth);
 	FBMD.Active := True;
 	end;
 end;
 
-procedure mmmFButtonDepthMinusOnChangeKT(Button:TSScreenButton);
+procedure S3DFractalFormButtonDepthMinus(Button:TSScreenButton);
 begin
 with TS3DFractalForm(Button.FUserPointer1) do
 	begin
 	if Depth > 0 then
 		begin
 		FDepth -= 1;
-		Calculate();
+		Construct();
 		FLD.Caption := SStr(Depth);
 		if Depth = 0 then
 			FBMD.Active:=False;
@@ -143,7 +142,7 @@ Screen.LastChild.SetBounds(Render.Width-160-30,5,20,30);
 Screen.LastChild.Anchors:=[SAnchRight];
 Screen.LastChild.Caption:='+';
 Screen.LastChild.FUserPointer1:=Self;
-FBPD.OnChange:=TSScreenComponentProcedure(@mmmFButtonDepthPlusOnChangeKT);
+FBPD.OnChange:=TSScreenComponentProcedure(@S3DFractalFormButtonDepthPlus);
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsMakeReal();
 
@@ -154,7 +153,7 @@ Screen.CreateChild(FBMD);
 Screen.LastChild.SetBounds(Render.Width-160-90,5,20,30);
 Screen.LastChild.Anchors:=[SAnchRight];
 Screen.LastChild.Caption:='-';
-FBMD.OnChange:=TSScreenComponentProcedure(@mmmFButtonDepthMinusOnChangeKT);
+FBMD.OnChange:=TSScreenComponentProcedure(@S3DFractalFormButtonDepthMinus);
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsMakeReal();
