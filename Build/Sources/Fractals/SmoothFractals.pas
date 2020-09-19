@@ -97,8 +97,8 @@ type
 		procedure LoadRenderResources();override;
 		procedure Paint();override;
 		procedure Construct();override;
-		procedure Set3dObjectArLength(const MID,LFaces,LVertexes:int64);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure Construct3dObjects(NumberOfPolygons:Int64;const PoligoneType:LongWord;const VVertexType:TS3dObjectVertexType = S3dObjectVertexType3f;const VertexMn : TSByte = 0);
+		procedure Set3dObjectArLength(const ObjectNumber,LFaces,LVertexes:int64);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Construct3dObjects(NumberOfPolygons:Int64;const PoligoneType:LongWord;const VVertexType:TS3dObjectVertexType = S3dObjectVertexType3f;const VertexMultiplier : TSByte = 0);
 		procedure Clear3dObject();inline;
 		procedure AfterPushingPoligonData(var ObjectID:LongWord;const DoAtThreads:Boolean;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		procedure AfterPushingPoligonData(var ObjectID:LongWord;const DoAtThreads:Boolean;var FVertexIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -306,7 +306,8 @@ if FFaceIndex>=FShift then
 	end;
 end;
 
-procedure TS3DFractal.Construct3dObjects(NumberOfPolygons:Int64;const PoligoneType:LongWord;const VVertexType:TS3dObjectVertexType = S3dObjectVertexType3f;const VertexMn : TSByte = 0);
+procedure TS3DFractal.Construct3dObjects(NumberOfPolygons:Int64;const PoligoneType:LongWord;const VVertexType:TS3dObjectVertexType = S3dObjectVertexType3f;const VertexMultiplier : TSByte = 0);
+// VertexMultiplier ?
 begin
 if (Render = nil) or (Render.RenderType in [SRenderDirectX9,SRenderDirectX8]) then
 	FShift := 4608*2
@@ -336,50 +337,50 @@ while NumberOfPolygons<>0 do
 	if NumberOfPolygons<=FShift then
 		begin
 		if (PoligoneType=SR_QUADS) and (Render.RenderType<>SRenderOpenGL) then
-			if VertexMn = 0 then
+			if VertexMultiplier = 0 then
 				Set3dObjectArLength(F3dObject.QuantityObjects-1,NumberOfPolygons*2,
 					TS3DObject.GetFaceLength(NumberOfPolygons,SR_QUADS))
 			else
 				Set3dObjectArLength(F3dObject.QuantityObjects-1,NumberOfPolygons*2,
-					NumberOfPolygons*VertexMn)
+					NumberOfPolygons*VertexMultiplier)
 		else
-			if VertexMn = 0 then
+			if VertexMultiplier = 0 then
 				Set3dObjectArLength(F3dObject.QuantityObjects-1,NumberOfPolygons,
 					TS3DObject.GetFaceLength(NumberOfPolygons,F3dObject.Objects[F3dObject.QuantityObjects-1].ObjectPoligonesType))
 			else
 				Set3dObjectArLength(F3dObject.QuantityObjects-1,NumberOfPolygons,
-					NumberOfPolygons*VertexMn);
+					NumberOfPolygons*VertexMultiplier);
 		NumberOfPolygons:=0;
 		end
 	else
 		begin
 		if (PoligoneType=SR_QUADS) and (Render.RenderType<>SRenderOpenGL) then
-			if VertexMn = 0 then
+			if VertexMultiplier = 0 then
 				Set3dObjectArLength(F3dObject.QuantityObjects-1,FShift*2,
 					TS3DObject.GetFaceLength(FShift,SR_QUADS))
 			else
 				Set3dObjectArLength(F3dObject.QuantityObjects-1,FShift*2,
-					FShift*VertexMn)
+					FShift*VertexMultiplier)
 		else
-			if VertexMn = 0 then
+			if VertexMultiplier = 0 then
 				Set3dObjectArLength(F3dObject.QuantityObjects-1,FShift,
 					TS3DObject.GetFaceLength(FShift,F3dObject.Objects[F3dObject.QuantityObjects-1].ObjectPoligonesType))
 			else
 				Set3dObjectArLength(F3dObject.QuantityObjects-1,FShift,
-					FShift*VertexMn);
+					FShift*VertexMultiplier);
 		NumberOfPolygons-=FShift;
 		end;
 	end;
 end;
 
-procedure TS3DFractal.Set3dObjectArLength(const MID,LFaces,LVertexes:int64);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TS3DFractal.Set3dObjectArLength(const ObjectNumber,LFaces,LVertexes:int64);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if FHasIndexes then
 	begin
-	F3dObject.Objects[MID].AutoSetIndexFormat(0,LVertexes);
-	F3dObject.Objects[MID].SetFaceLength(0,LFaces);
+	F3dObject.Objects[ObjectNumber].AutoSetIndexFormat(0,LVertexes);
+	F3dObject.Objects[ObjectNumber].SetFaceLength(0,LFaces);
 	end;
-F3dObject.Objects[MID].SetVertexLength(LVertexes);
+F3dObject.Objects[ObjectNumber].SetVertexLength(LVertexes);
 end;
 
 constructor TSFractalData.Create(const Fractal:TSFractal; const ThreadID:LongWord);

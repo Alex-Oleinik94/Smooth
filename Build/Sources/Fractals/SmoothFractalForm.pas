@@ -25,8 +25,8 @@ type
 		procedure EndOfPolygonsConstruction(const ObjectId : TSUInt32); virtual;
 		class function CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum; virtual; abstract;
 			protected
-		FLD, FLDC : TSScreenLabel;
-		FBPD, FBMD : TSScreenButton;
+		FLD, FLDC : TSScreenLabel; // Label depth and caption of depth label "Итерация"
+		FBPD, FBMD : TSScreenButton; // Buttons of change depth (plus and minus)
 			protected
 		FIs2D : TSBoolean;
 		FPrimetiveType : TSUInt32; // SR_LINES, SR_QUADS ...

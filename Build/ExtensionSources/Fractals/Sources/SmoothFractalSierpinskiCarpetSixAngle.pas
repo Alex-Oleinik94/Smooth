@@ -285,7 +285,6 @@ F3dObject.Objects[ObjectId].SetVertex(FVertexIndex + 2, v3);
 F3dObject.Objects[ObjectId].SetVertex(FVertexIndex + 3, v4);
 F3dObject.Objects[ObjectId].SetVertex(FVertexIndex + 4, v5);
 F3dObject.Objects[ObjectId].SetVertex(FVertexIndex + 5, v6);
-FVertexIndex += 6;
 
 F3dObject.Objects[ObjectId].SetFaceLine(0, FFaceIndex + 0, FVertexIndex + 0, FVertexIndex + 1);
 F3dObject.Objects[ObjectId].SetFaceLine(0, FFaceIndex + 1, FVertexIndex + 1, FVertexIndex + 2);
@@ -293,6 +292,8 @@ F3dObject.Objects[ObjectId].SetFaceLine(0, FFaceIndex + 2, FVertexIndex + 2, FVe
 F3dObject.Objects[ObjectId].SetFaceLine(0, FFaceIndex + 3, FVertexIndex + 3, FVertexIndex + 4);
 F3dObject.Objects[ObjectId].SetFaceLine(0, FFaceIndex + 4, FVertexIndex + 4, FVertexIndex + 5);
 F3dObject.Objects[ObjectId].SetFaceLine(0, FFaceIndex + 5, FVertexIndex + 5, FVertexIndex + 0);
+
+FVertexIndex += 6;
 FFaceIndex += 6;
 
 AfterPushingPoligonData(ObjectId, FThreadsEnable, FVertexIndex);
