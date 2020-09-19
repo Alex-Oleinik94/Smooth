@@ -39,3 +39,4 @@ Data/Examples/14/model.bin
 Data/Examples/Kraft/SandBox.bin
 Data/Fonts/*.sf
 Build/ExtensionSources/Rep*
+Build/Platforms/Windows/ExecutableResourse/ProgramIconImage.ico

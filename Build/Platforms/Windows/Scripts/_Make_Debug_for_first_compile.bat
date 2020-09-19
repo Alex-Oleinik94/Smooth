@@ -1,6 +1,6 @@
 @echo off
 CALL _Create_Output_Directoryes
-CALL _Restore_Registration_Files.bat false
+CALL _Restore_Registration_Files.bat WithoutPause
 cd ..\Platforms\Windows\ExecutableResourse
 call _Make_resourse.cmd WithoutPause
 cd ..\..\..\Scripts

@@ -147,12 +147,14 @@ end;
 
 procedure TSFractalSierpinskiCarpet2.PolygonsConstruction();
 var
-	ObjectNumber, VertexIndex, FaceIndex : TSUInt32;
+	ObjectNumber, VertexIndex, FaceIndex, ObjectSize : TSUInt32;
 begin
 ObjectNumber := 0;
 VertexIndex := 0;
 FaceIndex := 0;
-Generate4(FDepth, TSVector2f.Create(1, 1), TSVector2f.Create(1, -1), TSVector2f.Create(-1, -1), TSVector2f.Create(-1, 1), 
+ObjectSize := 4;
+Generate4(FDepth,
+	TSVector2f.Create(1, 1) * ObjectSize, TSVector2f.Create(1, -1) * ObjectSize, TSVector2f.Create(-1, -1) * ObjectSize, TSVector2f.Create(-1, 1) * ObjectSize, 
 	TSColor3f.Create(1, 0, 0), TSColor3f.Create(0, 1, 0), TSColor3f.Create(0, 0, 1), TSColor3f.Create(1, 1, 1),
 	ObjectNumber, VertexIndex, FaceIndex);
 EndOfPolygonsConstruction(ObjectNumber);
@@ -241,10 +243,8 @@ begin
 if (_Depth = 0) or (_Depth = 1) then
 	PushPoligonData(_ObjectNumber, _VertexIndex, _FaceIndex, _v1, _v2, _v3, _v4, _c1, _c2, _c3, _c4)
 else
-	begin
 	// constructing...
 	Generate(_Depth, _Depth - 1, _v1, _v2, _v3, _v4, _c1, _c2, _c3, _c4);
-	end;
 end;
 
 end.
