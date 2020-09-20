@@ -6,7 +6,7 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothFractal
+	,Smooth3DFractal
 	,SmoothCommonStructs
 	,SmoothContextInterface
 	,SmoothScreen
@@ -22,7 +22,7 @@ type
 			public
 		procedure Construct();override;
 		procedure PolygonsConstruction();
-		procedure PushPoligonData(var ObjectId : TSUInt32; const v : TSVertex2f; var FVertexIndex:TSUInt32); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure PushPoligonData(var ObjectId : TSFractalIndexInt; const v : TSVertex2f; var FVertexIndex:TSFractalIndexInt); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSScreenLabel;
 		FBPD, FBMD : TSScreenButton;
@@ -45,7 +45,7 @@ begin
 Result := 'Кривая Минковского';
 end;
 
-procedure TSFractalMinkowskiCurve.PushPoligonData(var ObjectId:LongWord;const v:TSVertex2f;var FVertexIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSFractalMinkowskiCurve.PushPoligonData(var ObjectId:TSFractalIndexInt;const v:TSVertex2f;var FVertexIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 F3dObject.Objects[ObjectId].SetVertex(FVertexIndex, v);
 FVertexIndex+=1;
@@ -55,8 +55,8 @@ end;
 
 procedure TSFractalMinkowskiCurve.PolygonsConstruction();
 var
-	ObjectId:LongWord;
-	FVI:LongWord;
+	ObjectId:TSFractalIndexInt;
+	FVI:TSFractalIndexInt;
 
 procedure Rec(const t1,t2:TSVertex2f;const NowDepth:LongWord);
 var
@@ -155,20 +155,15 @@ c27:=2/7;
 c37:=3/7;
 c57:=5/7;
 
+HasIndexes := False;
+LightingEnable:=False;
 EnableColors:=False;
 EnableNormals:=False;
-{$IFNDEF ANDROID}
-	Threads:=1;
-	{$ENDIF}
+Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
 Depth:=3;
-LightingEnable:=False;
-HasIndexes := False;
 
-InitProjectionComboBox(Render.Width-160,5,150,30,[SAnchRight]);
-Screen.LastChild.BoundsMakeReal();
-
-InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]);
-Screen.LastChild.BoundsMakeReal();
+InitProjectionComboBox(Render.Width-160,5,150,30,[SAnchRight]).BoundsMakeReal();
+InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]).BoundsMakeReal();
 
 FLDC := SCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SAnchRight], True, True, Self);
 

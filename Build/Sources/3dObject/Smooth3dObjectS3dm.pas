@@ -245,9 +245,9 @@ O.WriteInfo();
 
 O.SetVertexLength(ReadEnum(Stream));
 {$IFDEF SM3D_D_R}
-SHint(['VertSize=',O.VertexesSize()]);
+SHint(['VertSize=',O.VerticesSize()]);
 {$ENDIF}
-Stream.ReadBuffer(O.GetArVertexes()^, O.VertexesSize());
+Stream.ReadBuffer(O.GetArVertices()^, O.VerticesSize());
 
 O.QuantityFaceArrays := ReadEnum(Stream);
 {$IFDEF SM3D_D_R}
@@ -292,8 +292,8 @@ WriteBool(Stream, O.ObjectMatrixEnabled);
 if O.ObjectMatrixEnabled then
 	WriteMatrix(Stream, O.ObjectMatrix);
 
-WriteEnum(Stream, O.QuantityVertexes);
-Stream.WriteBuffer(O.GetArVertexes()^, O.VertexesSize());
+WriteEnum(Stream, O.QuantityVertices);
+Stream.WriteBuffer(O.GetArVertices()^, O.VerticesSize());
 
 WriteEnum(Stream, O.QuantityFaceArrays);
 if O.QuantityFaceArrays <> 0 then

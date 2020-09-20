@@ -7,7 +7,7 @@ interface
 uses 
 	 SmoothBase
 	,SmoothContextInterface
-	,SmoothFractal
+	,Smooth3DFractal
 	,SmoothMath
 	,SmoothRenderBase
 	;

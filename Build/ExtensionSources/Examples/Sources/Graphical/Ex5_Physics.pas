@@ -469,8 +469,8 @@ if Mesh.QuantityFaceArrays<>0 then
 	end
 else
 	begin
-	if Mesh.QuantityVertexes<>0 then
-		for i:=0 to Mesh.QuantityVertexes-1 do
+	if Mesh.QuantityVertices<>0 then
+		for i:=0 to Mesh.QuantityVertices-1 do
 			if ((i+1) mod 3 = 0) then
 				Ex5_PAPPE.PhysicsObjectMeshAddTriangle(FObject.Meshs^[ii]^,
 					TPhysicsVector3(Mesh.ArVertex3f[i+0]^),

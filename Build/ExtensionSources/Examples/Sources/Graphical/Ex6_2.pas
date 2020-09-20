@@ -78,7 +78,7 @@ F3dObject.LastObject().HasNormals := True;
 F3dObject.LastObject().HasTexture := True;
 F3dObject.LastObject().HasColors  := False;
 F3dObject.LastObject().VertexType := S3dObjectVertexType3f;
-F3dObject.LastObject().Vertexes   := n * 2;
+F3dObject.LastObject().Vertices   := n * 2;
 
 F3dObject.LastObject().AddFaceArray();
 F3dObject.LastObject().AutoSetIndexFormat(0, n * 2);

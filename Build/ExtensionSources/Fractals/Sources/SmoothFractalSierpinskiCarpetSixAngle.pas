@@ -8,7 +8,8 @@ uses
 	 SmoothBase
 	,SmoothCommonStructs
 	,SmoothContextInterface
-	,SmoothFractalForm
+	,Smooth3DFractal
+	,Smooth3DFractalForm
 	,SmoothScreenClasses
 	;
 
@@ -26,7 +27,7 @@ type
 		class function CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum; override;
 			public
 		procedure PolygonsConstruction(); override;
-		procedure PushPoligonData(var ObjectId : TSUInt32; const v1, v2, v3, v4, v5, v6 : TSVector2f; var FVertexIndex, FFaceIndex : TSUInt32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure PushPoligonData(var ObjectId : TSFractalIndexInt; const v1, v2, v3, v4, v5, v6 : TSVector2f; var FVertexIndex, FFaceIndex : TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SetType(const NewType : TSFractalSierpinskiCarpetSixAngleType);
 			protected
 		FTypeComboBox : TSScreenComboBox;
@@ -112,7 +113,9 @@ FIs2D := True;
 FPrimetiveType := SR_LINES;
 FPrimetiveParam := 0;
 FType := Random(SFractalSierpinskiCarpetSixAngleTypesCount);
-FDepth := 7;
+//Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
+Threads := 0; // why runtime error?
+Depth := 6;
 
 FTypeComboBox := TSScreenComboBox.Create();
 Screen.CreateChild(FTypeComboBox);
@@ -156,8 +159,8 @@ end;
 
 procedure TSFractalSierpinskiCarpetSixAngle.PolygonsConstruction();
 var 
-	ObjectId : TSUInt32; 
-	FVertexIndex, FFaceIndex : TSUInt32;
+	ObjectId : TSFractalIndexInt; 
+	FVertexIndex, FFaceIndex : TSFractalIndexInt;
 	SpinCount0, SpinCount1, SpinCount2 : TSInt8;
 
 procedure RecList(const _List : TSVector2fList6; const _SpinCount : TSInt8; const _Depth : TSUInt32);forward;
@@ -277,7 +280,7 @@ Rec(SVertex2fImport(0, 0), 4, Depth);
 EndOfPolygonsConstruction(ObjectId);
 end;
 
-procedure TSFractalSierpinskiCarpetSixAngle.PushPoligonData(var ObjectId : TSUInt32; const v1, v2, v3, v4, v5, v6 : TSVector2f; var FVertexIndex, FFaceIndex : TSUInt32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSFractalSierpinskiCarpetSixAngle.PushPoligonData(var ObjectId : TSFractalIndexInt; const v1, v2, v3, v4, v5, v6 : TSVector2f; var FVertexIndex, FFaceIndex : TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 F3dObject.Objects[ObjectId].SetVertex(FVertexIndex + 0, v1);
 F3dObject.Objects[ObjectId].SetVertex(FVertexIndex + 1, v2);

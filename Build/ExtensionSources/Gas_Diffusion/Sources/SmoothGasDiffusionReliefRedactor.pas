@@ -1111,7 +1111,7 @@ if FPoints <> nil then if Length(FPoints) <> 0 then
 	V3dObject.LastObject().EnableCullFace := False;
 	V3dObject.LastObject().VertexType := S3dObjectVertexType3f;
 	V3dObject.LastObject().SetColorType(S3dObjectColorType4b);
-	V3dObject.LastObject().Vertexes := Length(FPoints);
+	V3dObject.LastObject().Vertices := Length(FPoints);
 	V3dObject.LastObject().ObjectMatrix := Matrixes[index];
 	
 	for i := 0 to High(FPoints) do
@@ -1154,7 +1154,7 @@ else
 					V3dObject.LastObject().EnableCullFace := False;
 					V3dObject.LastObject().VertexType := S3dObjectVertexType3f;
 					V3dObject.LastObject().SetColorType(S3dObjectColorType4b);
-					V3dObject.LastObject().Vertexes := 3*(Length(FPolygones[i]) - 2);
+					V3dObject.LastObject().Vertices := 3*(Length(FPolygones[i]) - 2);
 					V3dObject.LastObject().ObjectMatrix := Matrixes[index];
 					
 					for ii := 0 to Length(FPolygones[i])-3 do

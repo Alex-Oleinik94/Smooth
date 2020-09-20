@@ -7,6 +7,7 @@ interface
 uses
 	 SmoothBase
 	,SmoothFractal
+	,Smooth3DFractal
 	,SmoothCommon
 	,SmoothCommonStructs
 	,SmoothContextInterface
@@ -39,12 +40,12 @@ type
 			end;
 		procedure ConstructArray();
 		procedure Construct();override;
-		procedure PolygonsConstruction(var ObjectId,ThreadArB,ThreadArE:TSUInt32);
+		procedure PolygonsConstruction(var ObjectId,ThreadArB,ThreadArE:TSFractalIndexInt);
 		class function CountingTheNumberOfPolygons(const _FractalType : TSMengerType; const _BoolArray:TSMengerSpongeBoolAr6;const _Depth:TSInt32):TSInt64;
 		class function ConstructBoolArray(const _FractalType : TSMengerType; const _PreviousBoolArray:TSMengerSpongeBoolAr6;const i,j,k: TSUInt8;const _Depth:TSUInt32 = 0):TSMengerSpongeBoolAr6;
 		class function DoOrNotDo(const i,ii,iii:TSUInt8):TSBoolean;inline;
 		class function DoOrNotDoPlus(const i,ii,iii:TSUInt8):TSBoolean;inline;
-		procedure PushPoligonData(const i1,i2,i3,i4:TSVertex3f;const ai:TSUInt32;const AllQ:Real;var ObjectId:TSUInt32;var FVertexIndex,FFaceIndex:TSUInt32);inline;
+		procedure PushPoligonData(const i1,i2,i3,i4:TSVertex3f;const ai:TSUInt32;const AllQ:Real;var ObjectId, FVertexIndex,FFaceIndex:TSFractalIndexInt);inline;
 		function DoAtThreads():TSBoolean;inline;
 		end;
 		
@@ -52,9 +53,9 @@ type
 	
 	TSMengerSpongeFractalData=class(TSFractalData)
 			public
-		constructor Create(const a,b,c:TSUInt32;const d : TSFractalMengerSponge;const TID:TSUInt32);
+		constructor Create(const a,b,c:TSFractalIndexInt;const d : TSFractalMengerSponge;const TID:TSUInt32);
 			public
-		a1,b1,c1:TSUInt32;
+		a1,b1,c1:TSFractalIndexInt;
 		end;
 		
 	TSFractalMengerSpongeRelease=class(TSFractalMengerSponge)
@@ -160,11 +161,8 @@ begin
 inherited Create(VContext);
 FFont1 := SCreateFontFromFile(Context, SDefaultFontFileName);
 
-InitProjectionComboBox(Render.Width-250-90-125-155,5,150,30,[SAnchRight]);
-Screen.LastChild.BoundsMakeReal();
-
-InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]);
-Screen.LastChild.BoundsMakeReal();
+InitProjectionComboBox(Render.Width-250-90-125-155,5,150,30,[SAnchRight]).BoundsMakeReal();
+InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]).BoundsMakeReal();
 
 FComboBox2:=TSScreenComboBox.Create;
 Screen.CreateChild(FComboBox2);
@@ -217,11 +215,9 @@ Screen.LastChild.BoundsMakeReal();
 
 FLabelDepthCaption := SCreateLabel(Screen, 'Итерация:', Render.Width-250-90-125,5,115,30, [SAnchRight], True, True, Self);
 
-Depth := 2;
+Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
 FFractalType := SDefaultMengerType;
-{$IFNDEF ANDROID}
-	Threads:=1;
-	{$ENDIF}
+Depth := 2;
 Construct();
 end;
 
@@ -244,7 +240,7 @@ begin
 inherited;
 end;
 
-constructor TSMengerSpongeFractalData.Create(const a,b,c:LongWord; const d:TSFractalMengerSponge;const TID:LongWord);
+constructor TSMengerSpongeFractalData.Create(const a,b,c:TSFractalIndexInt; const d:TSFractalMengerSponge;const TID:LongWord);
 begin
 inherited Create(d,TID);
 a1:=a;
@@ -254,7 +250,7 @@ FFractal:=d;
 FThreadID:=TID;
 end;
 
-procedure NewMengerThread(MengerSpongeFractalData:TSMengerSpongeFractalData) ;
+procedure NewMengerThread(MengerSpongeFractalData:TSMengerSpongeFractalData);
 begin
 (MengerSpongeFractalData.FFractal as TSFractalMengerSponge).PolygonsConstruction(MengerSpongeFractalData.a1,MengerSpongeFractalData.b1,MengerSpongeFractalData.c1);
 MengerSpongeFractalData.FFractal.FThreadsData[MengerSpongeFractalData.FThreadID].FFinished:=True;
@@ -282,8 +278,9 @@ end;
 
 procedure TSFractalMengerSponge.Construct;
 var
-	NumberOfPolygons:TSInt64 = 0;
-	Index,ii,iii:TSUInt32;
+	NumberOfPolygons : TSFractalIndexInt;
+	Index, Index2 : TSMaxEnum;
+	i, j, k : TSFractalIndexInt;
 begin
 Clear3dObject();
 if DoAtThreads then
@@ -294,17 +291,17 @@ if DoAtThreads then
 		for Index:=0 to High(FThreadsData) do
 			begin
 			NumberOfPolygons:=0;
-			for ii:=Index*(20 div Length(FThreadsData)) to (Index+1)*(20 div (Length(FThreadsData)))-1 do
+			for Index2:=Index*(20 div Length(FThreadsData)) to (Index+1)*(20 div (Length(FThreadsData)))-1 do
 				begin
-				NumberOfPolygons+=CountingTheNumberOfPolygons(FFractalType,FThreadsArray[ii].Arr6,FDepth-1);
+				NumberOfPolygons+=CountingTheNumberOfPolygons(FFractalType,FThreadsArray[Index2].Arr6,FDepth-1);
 				end;
-			iii:=F3dObject.QuantityObjects;
+			k := F3dObject.QuantityObjects;
 			Construct3dObjects(NumberOfPolygons,SR_QUADS);
-			FThreadsData[Index].FData:=TSMengerSpongeFractalData.Create(iii,Index*(20 div Length(FThreadsData)),(Index+1)*(20 div Length(FThreadsData))-1,Self,Index);
+			FThreadsData[Index].FData:=TSMengerSpongeFractalData.Create(k ,Index*(20 div Length(FThreadsData)),(Index+1)*(20 div Length(FThreadsData))-1,Self,Index);
 			FThreadsData[Index].FFinished:=False;
 			end;
 		for Index:=0 to High(FThreadsData) do
-			FThreadsData[Index].FThread:=TSThread.Create(TSPointerProcedure(@NewMengerThread),FThreadsData[Index].FData);;
+			FThreadsData[Index].FThread:=TSThread.Create(TSPointerProcedure(@NewMengerThread),FThreadsData[Index].FData);
 		end;
 	if FFractalType <> SMengerCube then
 		begin
@@ -325,8 +322,8 @@ else
 	begin
 	NumberOfPolygons:=CountingTheNumberOfPolygons(FFractalType,TSMengerSpongeBoolAr6True,FDepth);
 	Construct3dObjects(NumberOfPolygons,SR_QUADS);
-	Index:=0;ii:=0;iii:=0;
-	PolygonsConstruction(Index,ii,iii);
+	i:=0;j:=0;k:=0;
+	PolygonsConstruction(i, j, k);
 	end;
 end;
 
@@ -354,11 +351,11 @@ if FEnableNormals then
 ConstructArray();
 end;
 
-procedure TSFractalMengerSponge.PolygonsConstruction(var ObjectId,ThreadArB,ThreadArE:TSUInt32);
+procedure TSFractalMengerSponge.PolygonsConstruction(var ObjectId,ThreadArB,ThreadArE:TSFractalIndexInt);
 var
 	i:LongInt;
 	ArVerts:packed array [1..8]of TSVertex3f;
-	NOfV,NOfF:LongWord;// Индекс количества вершин и полигонов в 3D обьекте
+	NOfV,NOfF:TSFractalIndexInt;// Индекс количества вершин и полигонов в 3D обьекте
 
 procedure Rec(const ArTP:TSMengerSpongeBoolAr6;const T1:TSVertex3f;const NowQ:real; const AllQ:real;const NowDepth:LongInt);
 var
@@ -628,7 +625,7 @@ if _FractalType = SMengerSnowflake then
 	end;
 end;
 
-procedure TSFractalMengerSponge.PushPoligonData(const i1,i2,i3,i4:TSVertex3f;const ai:longword;const AllQ:real;var ObjectId:LongWord;var FVertexIndex,FFaceIndex:LongWord);inline;
+procedure TSFractalMengerSponge.PushPoligonData(const i1,i2,i3,i4:TSVertex3f;const ai:longword;const AllQ:real;var ObjectId, FVertexIndex,FFaceIndex:TSFractalIndexInt);inline;
 //var
 //abnu:	B:boolean = False;
 begin

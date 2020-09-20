@@ -114,7 +114,7 @@ end;
 procedure TSExample14.LoadModel(const FileName : TSString);
 var
 	Stream : TMemoryStream = nil;
-	CountOfVertexes, CountOfIndexes : Integer;
+	CountOfVertices, CountOfIndexes : Integer;
 	Indexes : packed array of packed array [0..2] of TSLongWord;
 	i : LongWord;
 begin
@@ -144,13 +144,13 @@ Stream.ReadBuffer(CountOfIndexes,SizeOf(CountOfIndexes));
 SetLength(Indexes,CountOfIndexes);
 Stream.ReadBuffer(Indexes[0],(CountOfIndexes * SizeOf(Indexes[0])) div 3);
 
-Stream.ReadBuffer(CountOfVertexes,SizeOf(CountOfVertexes));
-FModel.Vertexes   := CountOfVertexes;
-Stream.ReadBuffer(FModel.GetArVertexes()^, CountOfVertexes * (6 * SizeOf(SIngle)));
+Stream.ReadBuffer(CountOfVertices,SizeOf(CountOfVertices));
+FModel.Vertices   := CountOfVertices;
+Stream.ReadBuffer(FModel.GetArVertices()^, CountOfVertices * (6 * SizeOf(SIngle)));
 
 Stream.Destroy();
 
-FModel.AutoSetIndexFormat(0,CountOfVertexes);
+FModel.AutoSetIndexFormat(0,CountOfVertices);
 FModel.SetFaceLength(0,CountOfIndexes div 3);
 for i := 0 to (CountOfIndexes div 3) - 1 do
 	FModel.SetFaceTriangle(0,i,Indexes[i][0],Indexes[i][1],Indexes[i][2]);

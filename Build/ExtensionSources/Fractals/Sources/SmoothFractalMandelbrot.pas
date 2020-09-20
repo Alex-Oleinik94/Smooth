@@ -7,6 +7,7 @@ interface
 uses
 	 SmoothBase
 	,SmoothFractal
+	,SmoothImageFractal
 	,SmoothContextClasses
 	,SmoothCommon
 	,SmoothCommonStructs
@@ -18,7 +19,6 @@ uses
 	,SmoothContextInterface
 	,SmoothScreenClasses
 	;
-
 type
 	TSMandelbrotPixel = record
 		r, g, b : TSByte;
@@ -447,14 +447,14 @@ with TSFractalMandelbrotRelease(Button.FUserPointer1) do
 	OnComponents();
 	if FEnablePictureStripPanel then
 		begin
-		Button.Caption:='Off видео панель';
+		Button.Caption:='OFF видео панель';
 		FBezierCurve:=TSBezierCurve.Create();
 		FBezierCurve.SetContext(Context);
 		FBezierCurveGoButton.Active:=False;
 		end
 	else
 		begin
-		Button.Caption:='On видео панель';
+		Button.Caption:='ON видео панель';
 		if FBezierCurve<>nil then
 			FBezierCurve.Destroy();
 		FBezierCurve:=nil;
@@ -464,7 +464,7 @@ with TSFractalMandelbrotRelease(Button.FUserPointer1) do
 		FCurvePointPanel.Visible:=False;
 		FCurveArPoints:=nil;
 		FEnablePictureStripAddingPoints:=False;
-		FBezierCurvePanel.Children[1].Caption:='On режим добавления точек';
+		FBezierCurvePanel.Children[1].Caption:='ON режим добавления точек';
 		FBezierCurveLabelPoints.Caption:='Количество точек: 0';
 		end;
 	end;
@@ -476,7 +476,7 @@ with TSFractalMandelbrotRelease(Button.FUserPointer1) do
 	begin
 	OffComponents();
 	FCurveInfoLbl.Visible:=True;
-	FCurveInfoLbl.Caption:='Тут будет отображаться информация!!!';
+	FCurveInfoLbl.Caption:='Здесь будет отображаться информация';
 	FBezierCurveKadrProgressBar.Visible:=True;
 	FBezierCurveKadrProgressBar.Progress:=0;
 	FNowKadr:=0;
@@ -500,9 +500,9 @@ with TSFractalMandelbrotRelease(Button.FUserPointer1) do
 	begin
 	FEnablePictureStripAddingPoints:= not FEnablePictureStripAddingPoints;
 	if FEnablePictureStripAddingPoints then
-		Button.Caption:='Off режим добавления точек'
+		Button.Caption:='OFF режим добавления точек'
 	else
-		Button.Caption:='On режим добавления точек';
+		Button.Caption:='ON режим добавления точек';
 	end;
 end;
 
@@ -696,7 +696,7 @@ FCurvePointPanel.LastChild.FUserPointer1:=Self;
 FBezierCurvePanel := SCreatePanel(Screen, Render.Width-10-(130+140+10),Render.Height-130,130+140+10,125, [SAnchBottom, SAnchRight], False, True, Self);
 
 FBezierCurvePanel.CreateChild(TSScreenButton.Create());
-FBezierCurvePanel.LastChild.Caption:='On режим добавления точек';
+FBezierCurvePanel.LastChild.Caption:='ON режим добавления точек';
 FBezierCurvePanel.LastChild.SetBounds(3,3,275,20);
 (FBezierCurvePanel.LastChild as TSScreenButton).OnChange:=TSScreenComponentProcedure(@bcpAddPoint);
 FBezierCurvePanel.LastChild.FUserPointer1:=Self;
@@ -705,11 +705,11 @@ FBezierCurvePanel.LastChild.BoundsMakeReal();
 FBezierCurveLabelPoints := SCreateLabel(FBezierCurvePanel, 'Количество точек: 0', 3,47,137,20, False, True, Self);
 SCreateLabel(FBezierCurvePanel, 'Количество кадров:', False, 3,25,275,20, False, True, Self);
 FBezierCurveEditKadr := SCreateEdit(Screen.LastChild, '200', TSScreenEditTextTypeFunction(@MyMandNumberFucntionVideo), 123,27,137,20, [], False, True, Self);
-SCreateLabel(FBezierCurvePanel, 'Примерно займет времени: дохрена!', 3,70,275,20, False, True, Self);
+SCreateLabel(FBezierCurvePanel, 'Примерно займет времени: много!', 3,70,275,20, False, True, Self);
 
 FBezierCurveGoButton:=TSScreenButton.Create();
 FBezierCurvePanel.CreateChild(FBezierCurveGoButton);
-(FBezierCurvePanel.LastChild as TSScreenButton).Caption:='Начать и пусть весь мир подождет';
+(FBezierCurvePanel.LastChild as TSScreenButton).Caption:='Начать (требуется много времени)';
 (FBezierCurvePanel.LastChild as TSScreenButton).SetBounds(3,92,275,20);
 (FBezierCurvePanel.LastChild as TSScreenButton).OnChange:=TSScreenComponentProcedure(@bcpGoVideo);
 FBezierCurvePanel.LastChild.FUserPointer1:=Self;
@@ -871,7 +871,7 @@ end;
 
 class function TSFractalMandelbrotRelease.ClassName:string;
 begin
-Result := 'Фрактал Мандельброда и подобное';
+Result := 'Множество Мандельброта и подобное';
 end;
 
 function TSFractalMandelbrotRelease.GetPointOnPosOnMand(const Point: TSPoint2int32):TSComplexNumber;inline;

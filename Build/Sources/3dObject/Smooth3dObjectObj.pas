@@ -223,13 +223,13 @@ var
 			FName      : TSString;
 			FFaceIndex : TSLongWord;
 			end = nil;
-	ObjQuantityNormals,ObjQuantityVertexes,ObjQuantityTexCoord,ObjQuantityFaces,ObjQuantityMaterials: TSLongWord;
+	ObjQuantityNormals,ObjQuantityVertices,ObjQuantityTexCoord,ObjQuantityFaces,ObjQuantityMaterials: TSLongWord;
 	Comand : TSString;
 
 procedure Calculate3DObject();
 var
-	ObjArAllVertexes : packed array of array[0..2] of TSLongWord = nil;
-	ObjQuantityAllVertexes : TSLongWord;
+	ObjArAllVertices : packed array of array[0..2] of TSLongWord = nil;
+	ObjQuantityAllVertices : TSLongWord;
 	ObjArNormalFaces : packed array of array[0..2] of TSLongWord = nil;
 	//ObjQuantityNormalFaces : TSLongWord;
 
@@ -238,11 +238,11 @@ var
 	ei : TSLongWord;
 begin
 Result:=-1;
-if ObjQuantityAllVertexes <> 0 then
-	for ei:= 0 to ObjQuantityAllVertexes - 1 do
-		if  (f1 = ObjArAllVertexes[ei][0]) and
-			(f2 = ObjArAllVertexes[ei][1]) and 
-			(f3 = ObjArAllVertexes[ei][2]) then
+if ObjQuantityAllVertices <> 0 then
+	for ei:= 0 to ObjQuantityAllVertices - 1 do
+		if  (f1 = ObjArAllVertices[ei][0]) and
+			(f2 = ObjArAllVertices[ei][1]) and 
+			(f3 = ObjArAllVertices[ei][2]) then
 				begin
 				Result:=ei;
 				Break;
@@ -254,7 +254,7 @@ var
 	ib : TSByte;
 	i, ii, iii : TSLongWord;
 begin
-ObjQuantityAllVertexes:=0;
+ObjQuantityAllVertices:=0;
 //ObjQuantityNormalFaces:=0;
 SetLength(ObjArNormalFaces,ObjQuantityFaces);
 for i := 0 to ObjQuantityFaces-1 do
@@ -263,12 +263,12 @@ for i := 0 to ObjQuantityFaces-1 do
 		i64r := ExistsVertex(ObjArFaces[i][ib][0],ObjArFaces[i][ib][1],ObjArFaces[i][ib][2]);
 		if i64r = -1 then
 			begin
-			ObjQuantityAllVertexes+=1;
-			SetLength(ObjArAllVertexes,ObjQuantityAllVertexes);
-			ObjArAllVertexes[ObjQuantityAllVertexes-1][0]:=ObjArFaces[i][ib][0];
-			ObjArAllVertexes[ObjQuantityAllVertexes-1][1]:=ObjArFaces[i][ib][1];
-			ObjArAllVertexes[ObjQuantityAllVertexes-1][2]:=ObjArFaces[i][ib][2];
-			ObjArNormalFaces[i][ib] := ObjQuantityAllVertexes-1;
+			ObjQuantityAllVertices+=1;
+			SetLength(ObjArAllVertices,ObjQuantityAllVertices);
+			ObjArAllVertices[ObjQuantityAllVertices-1][0]:=ObjArFaces[i][ib][0];
+			ObjArAllVertices[ObjQuantityAllVertices-1][1]:=ObjArFaces[i][ib][1];
+			ObjArAllVertices[ObjQuantityAllVertices-1][2]:=ObjArFaces[i][ib][2];
+			ObjArNormalFaces[i][ib] := ObjQuantityAllVertices-1;
 			end
 		else
 			begin
@@ -280,20 +280,20 @@ with VObject do
 	HasNormals := True;
 	HasTexture := True;
 	VertexType := S3dObjectVertexType3f;
-	Vertexes := ObjQuantityAllVertexes;
+	Vertices := ObjQuantityAllVertices;
 	//if Render.CanBumpMapping then
 		BumpFormat := SBumpFormatCopyTexture2f;
-	for i:= 0 to ObjQuantityAllVertexes-1 do
+	for i:= 0 to ObjQuantityAllVertices-1 do
 		begin
-		ArVertex3f [i]^ := ObjArVertex  [ObjArAllVertexes[i][0] - 1];
-		ArTexVertex[i]^ := ObjArTexCoord[ObjArAllVertexes[i][1] - 1];
-		ArNormal   [i]^ := ObjArNormals [ObjArAllVertexes[i][2] - 1];
+		ArVertex3f [i]^ := ObjArVertex  [ObjArAllVertices[i][0] - 1];
+		ArTexVertex[i]^ := ObjArTexCoord[ObjArAllVertices[i][1] - 1];
+		ArNormal   [i]^ := ObjArNormals [ObjArAllVertices[i][2] - 1];
 		end;
 	i64r := ObjQuantityFaces - 1;
 	for i := ObjQuantityMaterials -1 downto 0 do
 		begin
 		AddFaceArray();
-		AutoSetIndexFormat(QuantityFaceArrays-1,ObjQuantityAllVertexes);
+		AutoSetIndexFormat(QuantityFaceArrays-1,ObjQuantityAllVertices);
 		PoligonesType[QuantityFaceArrays-1] := SR_TRIANGLES;
 		Faces[QuantityFaceArrays-1] := i64r - ObjArMaterials[i].FFaceIndex + 1;
 		Model.IdentifyLastObjectMaterial(ObjArMaterials[i].FName);
@@ -308,18 +308,18 @@ with VObject do
 	end;
 if ObjArNormalFaces<>nil then
 	SetLength(ObjArNormalFaces,0);
-if ObjArAllVertexes<>nil then
-	SetLength(ObjArAllVertexes,0);
+if ObjArAllVertices<>nil then
+	SetLength(ObjArAllVertices,0);
 end;
 
 procedure ObjAddVertex();
 begin
-ObjQuantityVertexes+=1;
-SetLength(ObjArVertex,ObjQuantityVertexes);
+ObjQuantityVertices+=1;
+SetLength(ObjArVertex,ObjQuantityVertices);
 ReadLn(VFile^,
-	ObjArVertex[ObjQuantityVertexes-1].x,
-	ObjArVertex[ObjQuantityVertexes-1].y,
-	ObjArVertex[ObjQuantityVertexes-1].z);
+	ObjArVertex[ObjQuantityVertices-1].x,
+	ObjArVertex[ObjQuantityVertices-1].y,
+	ObjArVertex[ObjQuantityVertices-1].z);
 end;
 
 procedure ObjAddNormal();
@@ -375,7 +375,7 @@ end;
 
 begin
 ObjQuantityNormals:=0;
-ObjQuantityVertexes:=0;
+ObjQuantityVertices:=0;
 ObjQuantityTexCoord:=0;
 ObjQuantityFaces:=0;
 ObjQuantityMaterials:=0;

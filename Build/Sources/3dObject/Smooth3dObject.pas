@@ -80,7 +80,7 @@ type
 		procedure Dublicate(const Index:TSLongWord);
 		procedure Translate(const Index:TSLongWord;const Vertex : TSVertex3f);
     public
-		function VertexesSize():TSQWord;
+		function VerticesSize():TSQWord;
 		function FacesSize():TSQWord;
 		function Size():TSQWord;
     end;
@@ -191,13 +191,13 @@ for i:=0 to FQuantityObjects-1 do
 	;//ArObjects[i].Stripificate;
 end;
 
-function TSCustomModel.VertexesSize():QWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function TSCustomModel.VerticesSize():QWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
 	i : TSLongWord;
 begin
 Result:=0;
 for i:=0 to FQuantityObjects-1 do
-	Result+=FArObjects[i].F3dObject.VertexesSize();
+	Result+=FArObjects[i].F3dObject.VerticesSize();
 end;
 
 function TSCustomModel.FacesSize():TSQuadWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}

@@ -59,7 +59,7 @@ type
 		FVertexIndex : TSLongWord;
 		FRelief      : TSLongWord;
 		end;
-	TSSubsidenceVertexes = type packed array of TSSubsidenceVertex;
+	TSSubsidenceVertices = type packed array of TSSubsidenceVertex;
 	
 	TSGGDC = ^ TSByte;
 	TSGasDiffusionCube = class(TSPaintableObject)
@@ -90,7 +90,7 @@ type
 		FDinamicQuantityMoleculs : LongWord;		// количество точек газа на данный момент
 		FFlag       : Boolean;						// флажок этапа итерации. этот алгоритм работает в 2 этапа
 		FRelief     : PSGasDiffusionRelief;
-		FSubsidenceVertexes : TSSubsidenceVertexes;
+		FSubsidenceVertices : TSSubsidenceVertices;
 			public
 		property Edge : TSLongWord read FEdge;
 		end;
@@ -247,7 +247,7 @@ FSourses:= nil;
 FGazes  := nil;
 FCubeCoords := nil;
 FRelief := nil;
-FSubsidenceVertexes := nil;
+FSubsidenceVertices := nil;
 end;
 
 procedure TSGasDiffusionCube.Paint();
@@ -287,8 +287,8 @@ if FCube<>nil then
 	FreeMem(FCube);
 	FCube:=nil;
 	end;
-if FSubsidenceVertexes <> nil then
-	SetLength(FSubsidenceVertexes, 0);
+if FSubsidenceVertices <> nil then
+	SetLength(FSubsidenceVertices, 0);
 inherited;
 end;
 
@@ -743,9 +743,9 @@ FreeMem(FRCI);
 // Алгоритм для оседающих граней
 if FRelief <> nil then
 	begin
-	if (FSubsidenceVertexes <> nil) then
-		SetLength(FSubsidenceVertexes, 0);
-	FSubsidenceVertexes := nil;
+	if (FSubsidenceVertices <> nil) then
+		SetLength(FSubsidenceVertices, 0);
+	FSubsidenceVertices := nil;
 	for j := 0 to 5 do
 		begin
 		if FRelief^.FData[j].FEnabled and FRelief^.FData[j].FType then
@@ -759,7 +759,7 @@ if FRelief <> nil then
 			FRelief^.FData[j].F3dObject.EnableCullFace := False;
 			FRelief^.FData[j].F3dObject.VertexType := S3dObjectVertexType3f;
 			FRelief^.FData[j].F3dObject.SetColorType (S3dObjectColorType4b);
-			FRelief^.FData[j].F3dObject.Vertexes   := Edge * Edge;
+			FRelief^.FData[j].F3dObject.Vertices   := Edge * Edge;
 			FRelief^.FData[j].F3dObject.AddFaceArray();
 			FRelief^.FData[j].F3dObject.PoligonesType[0] := SR_TRIANGLES;
 			
@@ -800,21 +800,21 @@ if FRelief <> nil then
 					
 					if (l>=0) and (l<=Edge - 1) then
 						begin
-						if (FSubsidenceVertexes = nil) then
-							SetLength(FSubsidenceVertexes, 1)
+						if (FSubsidenceVertices = nil) then
+							SetLength(FSubsidenceVertices, 1)
 						else
-							SetLength(FSubsidenceVertexes, Length(FSubsidenceVertexes) + 1);
-						FSubsidenceVertexes[High(FSubsidenceVertexes)].FCount := 0;
+							SetLength(FSubsidenceVertices, Length(FSubsidenceVertices) + 1);
+						FSubsidenceVertices[High(FSubsidenceVertices)].FCount := 0;
 						case j of
-						0 : FSubsidenceVertexes[High(FSubsidenceVertexes)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l); //Up
-						1 : FSubsidenceVertexes[High(FSubsidenceVertexes)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l); //Down
-						2 : FSubsidenceVertexes[High(FSubsidenceVertexes)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l); 
-						3 : FSubsidenceVertexes[High(FSubsidenceVertexes)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l);
-						4 : FSubsidenceVertexes[High(FSubsidenceVertexes)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l);
-						5 : FSubsidenceVertexes[High(FSubsidenceVertexes)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l);
+						0 : FSubsidenceVertices[High(FSubsidenceVertices)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l); //Up
+						1 : FSubsidenceVertices[High(FSubsidenceVertices)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l); //Down
+						2 : FSubsidenceVertices[High(FSubsidenceVertices)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l); 
+						3 : FSubsidenceVertices[High(FSubsidenceVertices)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l);
+						4 : FSubsidenceVertices[High(FSubsidenceVertices)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l);
+						5 : FSubsidenceVertices[High(FSubsidenceVertices)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l);
 						end;
-						FSubsidenceVertexes[High(FSubsidenceVertexes)].FVertexIndex := i * Edge + ii;
-						FSubsidenceVertexes[High(FSubsidenceVertexes)].FRelief := j;
+						FSubsidenceVertices[High(FSubsidenceVertices)].FVertexIndex := i * Edge + ii;
+						FSubsidenceVertices[High(FSubsidenceVertices)].FRelief := j;
 						end;
 					end;
 			
@@ -1044,16 +1044,16 @@ var
         c : TSGGDC;
         col : TSColor4f;
 begin
-if (FSubsidenceVertexes <> nil) and (Length(FSubsidenceVertexes)>0) then
-   for i := 0 to High(FSubsidenceVertexes) do
+if (FSubsidenceVertices <> nil) and (Length(FSubsidenceVertices)>0) then
+   for i := 0 to High(FSubsidenceVertices) do
        begin
-       c := Cube(FSubsidenceVertexes[i].FCoords.x, FSubsidenceVertexes[i].FCoords.y, FSubsidenceVertexes[i].FCoords.z);
+       c := Cube(FSubsidenceVertices[i].FCoords.x, FSubsidenceVertices[i].FCoords.y, FSubsidenceVertices[i].FCoords.z);
        if c^ <> 0 then
           begin
-          col := FRelief^.FData[FSubsidenceVertexes[i].FRelief].F3dObject.GetColor(FSubsidenceVertexes[i].FVertexIndex);
-          col := (col * FSubsidenceVertexes[i].FCount + FGazes[c^ - 1].FColor) / (FSubsidenceVertexes[i].FCount + 1);
-          FSubsidenceVertexes[i].FCount += 1;
-          FRelief^.FData[FSubsidenceVertexes[i].FRelief].F3dObject.SetColor(FSubsidenceVertexes[i].FVertexIndex, col.r, col.g, col.b, col.a);
+          col := FRelief^.FData[FSubsidenceVertices[i].FRelief].F3dObject.GetColor(FSubsidenceVertices[i].FVertexIndex);
+          col := (col * FSubsidenceVertices[i].FCount + FGazes[c^ - 1].FColor) / (FSubsidenceVertices[i].FCount + 1);
+          FSubsidenceVertices[i].FCount += 1;
+          FRelief^.FData[FSubsidenceVertices[i].FRelief].F3dObject.SetColor(FSubsidenceVertices[i].FVertexIndex, col.r, col.g, col.b, col.a);
           c^ := 0;
           end;
        end;
@@ -1122,7 +1122,7 @@ if FInReliafDebug<>0 then
 		Result.LastObject().EnableCullFace := False;
 		Result.LastObject().VertexType := S3dObjectVertexType3f;
 		Result.LastObject().SetColorType (S3dObjectColorType4b);
-		Result.LastObject().Vertexes   := FDinamicQuantityMoleculs;
+		Result.LastObject().Vertices   := FDinamicQuantityMoleculs;
 
 		FDinamicQuantityMoleculs:=0;
 		for i:=0 to FEdge*FEdge*FEdge -1 do
@@ -1169,7 +1169,7 @@ else
 
 
 
-		Result.LastObject().Vertexes   := FDinamicQuantityMoleculs;
+		Result.LastObject().Vertices   := FDinamicQuantityMoleculs;
 
 		FDinamicQuantityMoleculs:=0;
 		for i:=0 to FEdge*FEdge*FEdge -1 do
@@ -1200,7 +1200,7 @@ if VRelief = nil then
 	Result.LastObject().EnableCullFace := False;
 	Result.LastObject().VertexType := S3dObjectVertexType3f;
 	Result.LastObject().SetColorType(S3dObjectColorType4b);
-	Result.LastObject().Vertexes := 28;
+	Result.LastObject().Vertices := 28;
 
 	Result.LastObject().ArVertex3f[0]^.Import(-1,-1,-1);
 	Result.LastObject().ArVertex3f[1]^.Import(1,-1,-1);
@@ -1245,7 +1245,7 @@ if VRelief = nil then
 	Result.LastObject().ArVertex3f[26]^.Import(1,-1,-1);
 	Result.LastObject().ArVertex3f[27]^.Import(-1,-1,1);
 	
-	for i:=0 to Result.LastObject().Vertexes - 1 do
+	for i:=0 to Result.LastObject().Vertices - 1 do
 		Result.LastObject().SetColor(i,$0A/256,$C7/256,$F5/256,1);
 	end
 else

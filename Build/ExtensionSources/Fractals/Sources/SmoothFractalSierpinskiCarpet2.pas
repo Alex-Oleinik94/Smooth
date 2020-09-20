@@ -8,7 +8,8 @@ uses
 	 SmoothBase
 	,SmoothCommonStructs
 	,SmoothContextInterface
-	,SmoothFractalForm
+	,Smooth3DFractal
+	,Smooth3DFractalForm
 	,SmoothScreenClasses
 	;
 
@@ -38,12 +39,12 @@ type
 		protected
 	class function CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum; override; // counting the number of polygons
 		protected
-	procedure Generate4(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32);
-	procedure Generate2(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32);
-	procedure Generate1(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32);
+	procedure Generate4(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt);
+	procedure Generate2(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt);
+	procedure Generate1(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt);
 		public
 	procedure PolygonsConstruction(); override; // fractal construction
-	procedure PushPoligonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32; const v1, v2, v3, v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF} // adding data to array
+	procedure PushPoligonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt; const v1, v2, v3, v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF} // adding data to array
 	end;
 
 implementation
@@ -62,7 +63,8 @@ FEnableColors := True;
 FIs2D := True;
 FPrimetiveType := SR_QUADS;
 FPrimetiveParam := 0;
-FDepth := 3;
+Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
+Depth := 4;
 
 Construct();
 end;
@@ -147,7 +149,7 @@ end;
 
 procedure TSFractalSierpinskiCarpet2.PolygonsConstruction();
 var
-	ObjectNumber, VertexIndex, FaceIndex, ObjectSize : TSUInt32;
+	ObjectNumber, VertexIndex, FaceIndex, ObjectSize : TSFractalIndexInt;
 begin
 ObjectNumber := 0;
 VertexIndex := 0;
@@ -160,7 +162,7 @@ Generate4(FDepth,
 EndOfPolygonsConstruction(ObjectNumber);
 end;
 
-procedure TSFractalSierpinskiCarpet2.PushPoligonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32; const v1, v2, v3, v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSFractalSierpinskiCarpet2.PushPoligonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt; const v1, v2, v3, v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 _VertexIndex+=4;
 F3dObject.Objects[_ObjectNumber].SetVertex(_VertexIndex - 4, v1);
@@ -182,7 +184,7 @@ _FaceIndex+=1;
 AfterPushingPoligonData(_ObjectNumber, FThreadsEnable, _VertexIndex, _FaceIndex);
 end;
 
-procedure TSFractalSierpinskiCarpet2.Generate4(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32);
+procedure TSFractalSierpinskiCarpet2.Generate4(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt);
 begin
 if _Depth = 0 then
 	Generate1(_Depth, _v1, _v2, _v3, _v4, _c1, _c2, _c3, _c4, _ObjectNumber, _VertexIndex, _FaceIndex)
@@ -193,19 +195,20 @@ else
 	end;
 end;
 
-procedure TSFractalSierpinskiCarpet2.Generate2(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32);
+procedure TSFractalSierpinskiCarpet2.Generate2(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt);
 begin
 Generate1(_Depth, _v1, (_v1 * 2 + _v2)/3, (_v4 * 2 + _v3)/3, _v4, _c1, (_c1 * 2 + _c2)/3, (_c4 * 2 + _c3)/3, _c4, _ObjectNumber, _VertexIndex, _FaceIndex);
 Generate1(_Depth, (_v2 * 2 + _v1)/3, _v2, _v3, (_v3 * 2 + _v4)/3, (_c2 * 2 + _c1)/3, _c2, _c3, (_c3 * 2 + _c4)/3, _ObjectNumber, _VertexIndex, _FaceIndex);
 end;
 
-procedure TSFractalSierpinskiCarpet2.Generate1(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32);
+procedure TSFractalSierpinskiCarpet2.Generate1(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt);
 // 0 1 2 3  4   5    ...
 // 1 1 4 24 176 1376 ...
 
 procedure Generate(const _Depth, _Depth2 : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f);
 var
-	PatchNumber, Index, DivNumber : TSInt64;
+	PatchNumber, DivNumber : TSInt64;
+	Index : TSMaxEnum;
 	Step : TSVector2f;
 	StepC41, StepC32 : TSVector3f;
 begin

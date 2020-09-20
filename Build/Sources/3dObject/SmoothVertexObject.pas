@@ -200,7 +200,7 @@ type
         property CountTextureFloatsInVertexArray   : TSLongWord       read FCountTextureFloatsInVertexArray write FCountTextureFloatsInVertexArray;
         property BumpFormat                        : TSBumpFormat     read FBumpFormat          write FBumpFormat;
         property PoligonesType[Index:TSLongWord]  : TSLongWord       read GetPoligonesType     write SetPoligonesType;
-		property QuantityVertexes                  : TSQuadWord       read FNOfVerts;
+		property QuantityVertices                  : TSQuadWord       read FNOfVerts;
 		property HasTexture                        : TSBoolean        read FHasTexture          write SetHasTexture;
 		property HasColors                         : TSBoolean        read FHasColors           write FHasColors;
 		property HasNormals                        : TSBoolean        read FHasNormals          write FHasNormals;
@@ -218,7 +218,7 @@ type
 		ArVertex : TSPointer;
 	public
 		// Возвращает указатель на первый элемент массива вершин
-		function GetArVertexes():TSPointer; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetArVertices():TSPointer; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		// Возвращает указатель на первый элемент массива индексов
 		function GetArFaces(const Index : LongWord = 0):TSPointer; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 	private
@@ -237,7 +237,7 @@ type
 		property ArVertex4f[Index : TSMaxEnum]:PSVertex4f read GetVertex4f;
 		
 		// Добавляет пустую(ые) вершины в массив вершин
-		procedure AddVertex(const QuantityNewVertexes : LongWord = 1);
+		procedure AddVertex(const QuantityNewVertices : LongWord = 1);
 		
 		procedure SetVertex(const VVertexIndex : TSUInt32; const x, y : TSFloat32; const z : TSFloat32 = 0; const w : TSFloat32 = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		procedure SetVertex(const VVertexIndex : TSUInt32; const v2 : TSVector2f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -293,7 +293,7 @@ type
 		procedure SetVertexLength(const NewVertexLength:TSQuadWord); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		
 		// Возвращает сколько в байтах занимают массив вершин
-		function GetVertexesSize():TSMaxEnum;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetVerticesSize():TSMaxEnum;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		
 		// Эта процедура для DirectX. Дело в том, что там нету SR_QUADS. Так что он разбивается на 2 треугольника.
 		procedure SetFaceQuad(const ArIndex:TSLongWord;const Index :TSMaxEnum; const p0,p1,p2,p3:TSLongWord);
@@ -339,7 +339,7 @@ type
 		// Ствойства для получения и редактирования длинн массивов
 		property QuantityFaceArrays       : TSLongWord read FQuantityFaceArrays  write SetFaceArLength;
 		property Faces[Index:TSLongWord] : TSQuadWord read GetQuantityFaces     write SetFaceLength;
-		property Vertexes                 : TSQuadWord read GetVertexLength      write SetVertexLength;
+		property Vertices                 : TSQuadWord read GetVertexLength      write SetVertexLength;
 		property RealQuantityFaces[Index : TSLongWord]: TSQuadWord   read GetFaceLength;
     protected
 		// Задействован ли VBO
@@ -350,7 +350,7 @@ type
 		FEnableVBO      : TSBoolean;
 		
 		// Идентификатор массива вершин в памяти видеокарты
-        FVertexesBuffer    : TS3DObjectBuffer;
+        FVerticesBuffer    : TS3DObjectBuffer;
         // Идентификатор массива индексов в памяти видеокарты
         FFacesBuffers      : TS3DObjectBufferList;
         
@@ -375,7 +375,7 @@ type
         procedure BasicDraw(); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
         procedure BasicDrawWithAttributes();{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
         // Загрузка массивов в память видеокарты
-        procedure LoadToVBO(const ClearAfterLoad : TSBoolean = True);
+        function LoadToVBO(const ClearAfterLoad : TSBoolean = True) : TSBoolean;
         // Очищение памяти видеокарты от массивов этого класса
         procedure ClearVBO();
         // Процедурка очищает оперативную память от массивов этого класса
@@ -386,13 +386,13 @@ type
         
         (* Я ж переписывал этот класс. Это то, что я не написал. *)
 		//procedure Stripificate;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-		//procedure Stripificate(var VertexesAndTriangles:TSArTSArTSFaceType;var OutputStrip:TSArTSFaceType);overload;
+		//procedure Stripificate(var VerticesAndTriangles:TSArTSArTSFaceType;var OutputStrip:TSArTSFaceType);overload;
 		
 		// Выводит полную информацию о характеристиках модельки
 		procedure WriteInfo(const PredStr : TSString = ''; const CasesOfPrint : TSCasesOfPrint = [SCasePrint, SCaseLog]);
 	public
 		// Возвращает, сколько занимают байтов вершины
-		function VertexesSize():QWord;Inline;
+		function VerticesSize():QWord;Inline;
 		// Возвращает, сколько занимают байтов индексы
 		function FacesSize():QWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		// Возвращает, сколько занимают байтов вершины и индексы
@@ -829,7 +829,7 @@ for i:=0 to Faces[0]-1 do
 	ArPoligonesNormals[i].Import(
 		Plane.a, Plane.b, Plane.c);
 	end;
-for i:=0 to QuantityVertexes-1 do
+for i:=0 to QuantityVertices-1 do
 	begin
 	Vertex.Import(0,0,0);
 	for ii:=0 to Faces[0]-1 do
@@ -855,10 +855,10 @@ begin
 SetFaceLength(ArIndex,Faces[ArIndex]+FQuantityNewFaces);
 end;
 
-procedure TS3DObject.AddVertex(const QuantityNewVertexes : LongWord = 1);
+procedure TS3DObject.AddVertex(const QuantityNewVertices : LongWord = 1);
 begin
-FNOfVerts += QuantityNewVertexes;
-ReAllocMem(ArVertex, GetVertexesSize());
+FNOfVerts += QuantityNewVertices;
+ReAllocMem(ArVertex, GetVerticesSize());
 end;
 
 procedure TS3DObject.Change3dObjectColorType4b(); // BGRA to RGBA
@@ -866,7 +866,7 @@ var
 	i : TSMaxEnum;
 	c : byte;
 begin
-for i:=0 to Vertexes - 1 do
+for i:=0 to Vertices - 1 do
 	begin
 	c:=ArColor4b[i]^.r;
 	ArColor4b[i]^.r:=ArColor4b[i]^.b;
@@ -1094,7 +1094,7 @@ else
 	Result := @ArFaces[Index];
 end;
 
-function TS3DObject.GetArVertexes():Pointer; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function TS3DObject.GetArVertices():Pointer; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result := ArVertex;
 end;
@@ -1114,9 +1114,9 @@ procedure TS3DObject.SetVertexLength(const NewVertexLength:QWord); {$IFDEF SUPPO
 begin
 FNOfVerts:=NewVertexLength;
 if ArVertex = nil then
-	GetMem(ArVertex,GetVertexesSize())
+	GetMem(ArVertex,GetVerticesSize())
 else
-	ReallocMem(ArVertex,GetVertexesSize());
+	ReallocMem(ArVertex,GetVerticesSize());
 end;
 
 function TS3DObject.GetCountOfOneTextureCoord():TSLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
@@ -1167,7 +1167,7 @@ Result:= GetSizeOfOneVertexCoord() +
 	GetSizeOfOneTextureCoord();
 end;
 
-function TS3DObject.GetVertexesSize():TSMaxEnum;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function TS3DObject.GetVerticesSize():TSMaxEnum;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=FNOfVerts*GetSizeOfOneVertex();
 end;
@@ -1243,7 +1243,7 @@ begin
 TextColor(7);
 SHint(PredStr + 'TS3DObject__WriteInfo(..)', CasesOfPrint);
 SHint([PredStr,'  Name                = "',FName,'"'], CasesOfPrint);
-SHint([PredStr,'  CountOfVertexes     = "',FNOfVerts,'"'], CasesOfPrint);
+SHint([PredStr,'  CountOfVertices     = "',FNOfVerts,'"'], CasesOfPrint);
 SHint([PredStr,'  HasColors           = "',FHasColors,'"'], CasesOfPrint);
 SHint([PredStr,'  HasNormals          = "',FHasNormals,'"'], CasesOfPrint);
 SHint([PredStr,'  HasTexture          = "',FHasTexture,'"'], CasesOfPrint);
@@ -1256,16 +1256,16 @@ SHint([PredStr,'  VertexFormat        = "', SStrVertexFormat(FVertexType), '"'],
 SHint([PredStr,'  CountTextureFloatsInVertexArray = "',FCountTextureFloatsInVertexArray,'"'], CasesOfPrint);
 SHint([PredStr,'  ColorType           = "' + SStr3dObjectColorFormat(FColorType) + '"'], CasesOfPrint);
 TextColor(15);
-SHint([PredStr,'  VertexesSize        = "',SMemorySizeToString(VertexesSize(),'EN'),'"'], CasesOfPrint);
+SHint([PredStr,'  VerticesSize        = "',SMemorySizeToString(VerticesSize(),'EN'),'"'], CasesOfPrint);
 if FQuantityFaceArrays>0 then
 	SHint([PredStr,'  AllSize             = "',SMemorySizeToString(Size(),'EN'),'"'], CasesOfPrint);
 TextColor(7);
 SHint([PredStr,'  EnableVBO           = "',FEnableVBO,'"'], CasesOfPrint);
-SHint([PredStr,'  LinksVBO            = Vertex:',FVertexesBuffer,', Faces:(', Iff(LinksVBO() = '', 'nil', LinksVBO()), ')'], CasesOfPrint);
+SHint([PredStr,'  LinksVBO            = Vertex:',FVerticesBuffer,', Faces:(', Iff(LinksVBO() = '', 'nil', LinksVBO()), ')'], CasesOfPrint);
 SHint([PredStr,'  ObjectMaterialID    = "',FObjectMaterial,'"'], CasesOfPrint);
 end;
 
-function TS3DObject.VertexesSize():TSQuadWord;Inline;
+function TS3DObject.VerticesSize():TSQuadWord;Inline;
 begin
 Result:=GetSizeOfOneVertex()*FNOfVerts;
 end;
@@ -1284,7 +1284,7 @@ function TS3DObject.Size():QWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=
 	FacesSize()+
-	VertexesSize();
+	VerticesSize();
 end;
 
 class function TS3DObject.GetPoligoneInt(const ThisPoligoneType : LongWord):Byte; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
@@ -1434,7 +1434,7 @@ FObjectPoligonesType := SR_TRIANGLES;
 FColorType:=S3dObjectColorType3b;
 FVertexType:=S3dObjectVertexType3f;
 FEnableVBO:=False;
-FVertexesBuffer := 0;
+FVerticesBuffer := 0;
 FFacesBuffers := nil;
 FEnableObjectMatrix := False;
 FObjectMatrix := SIdentityMatrix();
@@ -1539,8 +1539,8 @@ Destination.Name := Name;
 //Destination.Parent := Parent;
 Destination.ObjectMaterial := ObjectMaterial;
 
-Destination.Vertexes := Vertexes;
-Move(ArVertex^,Destination.ArVertex^,VertexesSize());
+Destination.Vertices := Vertices;
+Move(ArVertex^,Destination.ArVertex^,VerticesSize());
 
 if QuantityFaceArrays <> 0 then
 	for i := 0 to QuantityFaceArrays - 1 do
@@ -1588,7 +1588,7 @@ if FHasColors then
 
 if FEnableVBO then
 	begin
-	Render.BindBufferARB(SR_ARRAY_BUFFER_ARB, FVertexesBuffer);
+	Render.BindBufferARB(SR_ARRAY_BUFFER_ARB, FVerticesBuffer);
 	Render.VertexPointer(GetCountOfOneVertexCoord(), SR_FLOAT, GetSizeOfOneVertex(), nil);
 	
 	if FHasColors then
@@ -1780,33 +1780,38 @@ else
 		Render.DrawArrays(FObjectPoligonesType, 0, FNOfVerts);
 end;
 
-procedure TS3dObject.LoadToVBO(const ClearAfterLoad : TSBoolean = True);
+function TS3dObject.LoadToVBO(const ClearAfterLoad : TSBoolean = True) : TSBoolean;
 var
 	Index : TSMaxEnum;
 begin
+Result := False;
 if Self = nil then
 	begin
 	SLog.Source('TS3dObject(nil)__LoadToVBO().');
-	Exit;
+	exit;
 	end;
-
 if FEnableVBO then
 	begin
 	SLog.Source('TS3dObject__LoadToVBO : It is not possible to do this several counts!');
-	Exit;
+	exit;
+	end;
+Result := True;
+Render.GenBuffersARB(1, @FVerticesBuffer);
+Result := Result and (FVerticesBuffer <> 0);
+if Result then
+	begin
+	Render.BindBufferARB(SR_ARRAY_BUFFER_ARB, FVerticesBuffer);
+	Render.BufferDataARB(SR_ARRAY_BUFFER_ARB, FNOfVerts * GetSizeOfOneVertex(), ArVertex, SR_STATIC_DRAW_ARB);
+	Render.BindBufferARB(SR_ARRAY_BUFFER_ARB, 0);
 	end;
 
-Render.GenBuffersARB(1, @FVertexesBuffer);
-Render.BindBufferARB(SR_ARRAY_BUFFER_ARB, FVertexesBuffer);
-Render.BufferDataARB(SR_ARRAY_BUFFER_ARB, FNOfVerts * GetSizeOfOneVertex(), ArVertex, SR_STATIC_DRAW_ARB);
-Render.BindBufferARB(SR_ARRAY_BUFFER_ARB, 0);
-
-if FQuantityFaceArrays <> 0 then
+if Result and (FQuantityFaceArrays <> 0) then
 	begin
 	SetLength(FFacesBuffers, FQuantityFaceArrays);
 	for Index := 0 to FQuantityFaceArrays - 1 do
 		begin
 		Render.GenBuffersARB(1, @FFacesBuffers[Index]);
+		Result := Result and (FFacesBuffers[Index] <> 1);
 		Render.BindBufferARB(SR_ELEMENT_ARRAY_BUFFER_ARB, FFacesBuffers[Index]);
 		Render.BufferDataARB(SR_ELEMENT_ARRAY_BUFFER_ARB,
 			GetFaceLength(Index) * GetFaceInt(ArFaces[Index].FIndexFormat),
@@ -1817,9 +1822,9 @@ if FQuantityFaceArrays <> 0 then
 	Render.BindBufferARB(SR_ELEMENT_ARRAY_BUFFER_ARB, 0);
 	end;
 
-if ClearAfterLoad then
+FEnableVBO := Result;
+if Result and ClearAfterLoad then
 	ClearArrays(False);
-FEnableVBO := True;
 end;
 
 procedure TS3DObject.ClearVBO(); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
@@ -1835,9 +1840,9 @@ if FEnableVBO and (Render<>nil) then
 				Render.DeleteBuffersARB(1,@FFacesBuffers[Index]);
 				FFacesBuffers[Index]:=0;
 				end;
-	if FVertexesBuffer<>0 then
-		Render.DeleteBuffersARB(1,@FVertexesBuffer);
-	FVertexesBuffer:=0;
+	if FVerticesBuffer<>0 then
+		Render.DeleteBuffersARB(1,@FVerticesBuffer);
+	FVerticesBuffer:=0;
 	FEnableVBO:=False;
 	end;
 end;

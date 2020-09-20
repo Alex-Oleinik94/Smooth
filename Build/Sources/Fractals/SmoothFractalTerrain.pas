@@ -123,7 +123,7 @@ if Terrain <> nil then
 	Result.VertexType := S3dObjectVertexType3f;
 	if Result.HasColors then
 		Result.AutoSetColorType();
-	Result.Vertexes := FSize * FSize;
+	Result.Vertices := FSize * FSize;
 	for i := 0 to FSize - 1 do
 		for ii := 0 to FSize - 1 do
 			begin

@@ -7,6 +7,7 @@ interface
 uses
 	 SmoothBase
 	,SmoothFractal
+	,Smooth3DFractal
 	,SmoothScreen
 	,SmoothContextInterface
 	,SmoothCommonStructs
@@ -23,7 +24,7 @@ type
 		class function CountingTheNumberOfPolygons(const ThisDepth : TSUInt64) : TSUInt64;
 		procedure Construct();override;
 		procedure PolygonsConstruction();
-		procedure PushPoligonData(var ObjectId:LongWord;const v1,v2,v3,v4:TSVertex2f;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure PushPoligonData(var ObjectId:TSFractalIndexInt;const v1,v2,v3,v4:TSVertex2f;var FVertexIndex,FFaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSScreenLabel;
 		FBPD, FBMD : TSScreenButton;
@@ -43,7 +44,7 @@ begin
 Result := 'Ковёр (квадрат) Серпинского';
 end;
 
-procedure TSFractalSierpinskiCarpet.PushPoligonData(var ObjectId:LongWord;const v1, v2, v3, v4 : TSVertex2f;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSFractalSierpinskiCarpet.PushPoligonData(var ObjectId:TSFractalIndexInt;const v1, v2, v3, v4 : TSVertex2f;var FVertexIndex,FFaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 FVertexIndex+=4;
 F3dObject.Objects[ObjectId].SetVertex(FVertexIndex - 4, v1);
@@ -59,8 +60,9 @@ end;
 
 procedure TSFractalSierpinskiCarpet.PolygonsConstruction();
 var
-	ObjectId:LongWord;
-	FVertexIndex,FFaceIndex:LongWord;
+	ObjectId:TSFractalIndexInt;
+	FVertexIndex,FFaceIndex:TSFractalIndexInt;
+
 procedure Rec(const t1,t2:TSVertex3f;const NowDepth:LongWord);
 var
 	a : TSFloat64;
@@ -186,7 +188,7 @@ else
 	Result := 8 * CountingTheNumberOfPolygons(ThisDepth - 1);
 end;
 
-procedure FractalSierpinskiCarpetButtonDepthPlusOnChangeKT(Button:TSScreenButton);
+procedure FractalSierpinskiCarpetButtonDepthPlusOnChange(Button:TSScreenButton);
 begin
 with TSFractalSierpinskiCarpet(Button.FUserPointer1) do
 	begin
@@ -197,7 +199,7 @@ with TSFractalSierpinskiCarpet(Button.FUserPointer1) do
 	end;
 end;
 
-procedure FractalSierpinskiCarpetButtonDepthMinusOnChangeKT(Button:TSScreenButton);
+procedure FractalSierpinskiCarpetButtonDepthMinusOnChange(Button:TSScreenButton);
 begin
 with TSFractalSierpinskiCarpet(Button.FUserPointer1) do
 	begin
@@ -217,15 +219,13 @@ begin
 inherited;
 FEnableColors  := False;
 FEnableNormals := False;
-{$IFNDEF ANDROID}
-	Threads:=1;
-	{$ENDIF}
+Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
 Depth:=3;
 FLightingEnable := False;
 
-InitProjectionComboBox(Render.Width-160, 5, 150, 30, [SAnchRight]);
-InitSizeLabel(5, Render.Height-25, Render.Width-20, 20, [SAnchBottom]);
-InitSaveButton(Render.Width - 160, 37, 150, 30, [SAnchRight]);
+InitProjectionComboBox(Render.Width-160, 5, 150, 30, [SAnchRight]).BoundsMakeReal();
+InitSizeLabel(5, Render.Height-25, Render.Width-20, 20, [SAnchBottom]).BoundsMakeReal();
+InitSaveButton(Render.Width - 160, 37, 150, 30, [SAnchRight]).BoundsMakeReal();
 
 FLDC := SCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SAnchRight], True, True, Self);
 
@@ -235,7 +235,7 @@ Screen.LastChild.SetBounds(Render.Width-160-30,5,20,30);
 Screen.LastChild.Anchors:=[SAnchRight];
 Screen.LastChild.Caption:='+';
 Screen.LastChild.FUserPointer1:=Self;
-FBPD.OnChange:=TSScreenComponentProcedure(@FractalSierpinskiCarpetButtonDepthPlusOnChangeKT);
+FBPD.OnChange:=TSScreenComponentProcedure(@FractalSierpinskiCarpetButtonDepthPlusOnChange);
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsMakeReal();
 
@@ -246,12 +246,12 @@ Screen.CreateChild(FBMD);
 Screen.LastChild.SetBounds(Render.Width-160-90,5,20,30);
 Screen.LastChild.Anchors:=[SAnchRight];
 Screen.LastChild.Caption:='-';
-FBMD.OnChange:=TSScreenComponentProcedure(@FractalSierpinskiCarpetButtonDepthMinusOnChangeKT);
+FBMD.OnChange:=TSScreenComponentProcedure(@FractalSierpinskiCarpetButtonDepthMinusOnChange);
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsMakeReal();
 
-FLD.Caption:=SStringToPChar(SStr(Depth));
+FLD.Caption:= SStr(Depth);
 
 Construct;
 end;

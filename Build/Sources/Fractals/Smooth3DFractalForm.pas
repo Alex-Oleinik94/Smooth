@@ -1,12 +1,12 @@
 {$INCLUDE Smooth.inc}
 
-unit SmoothFractalForm;
+unit Smooth3DFractalForm;
 
 interface
 
 uses 
 	 SmoothBase
-	,SmoothFractal
+	,Smooth3DFractal
 	,SmoothScreen
 	,SmoothContextInterface
 	,SmoothScreenClasses
@@ -22,6 +22,7 @@ type
 		procedure Construct();override;
 		procedure PolygonsConstruction(); virtual; // polygons construction
 			protected
+		procedure SetDepth(const _Depth : LongInt); override;
 		procedure EndOfPolygonsConstruction(const ObjectId : TSUInt32); virtual;
 		class function CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum; virtual; abstract;
 			protected
@@ -33,6 +34,8 @@ type
 		FPrimetiveParam : TSUInt32;
 		end;
 
+procedure S3DFractalThreadCallback(Fractal:TS3DFractalForm);
+
 implementation
 
 uses
@@ -40,7 +43,20 @@ uses
 	,SmoothRenderBase
 	,SmoothVertexObject
 	,SmoothScreenBase
+	,SmoothThreads
 	;
+
+procedure TS3DFractalForm.SetDepth(const _Depth : LongInt);
+begin
+inherited;
+if FLD <> nil then
+	FLD.Caption := SStr(FDepth)
+end;
+
+procedure S3DFractalThreadCallback(Fractal:TS3DFractalForm);
+begin
+Fractal.PolygonsConstruction();
+end;
 
 procedure TS3DFractalForm.Construct();
 var
@@ -60,7 +76,9 @@ if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished := False;
 	FThreadsData[0].FData     := nil;
-	PolygonsConstruction();
+	SKill(FThreadsData[0].FThread);
+	FThreadsData[0].FThread   := TSThread.Create(TSPointerProcedure(@S3DFractalThreadCallback), Self);
+	//PolygonsConstruction();
 	end
 else
 	begin
@@ -111,28 +129,13 @@ end;
 constructor TS3DFractalForm.Create(const VContext : ISContext);
 begin
 inherited;
-FEnableColors  := False;
-FEnableNormals := False;
-{$IFNDEF ANDROID}
-	Threads:=1;
-	{$ENDIF}
-Depth:=3;
-FLightingEnable := False;
-
-FIs2D := False;
-FPrimetiveType := SR_LINES;
-FPrimetiveParam := 0;
-
 FLD  := nil;
 FLDC := nil;
 FBMD := nil;
 FBPD := nil;
 
-InitProjectionComboBox(Render.Width-160,5,150,30,[SAnchRight]);
-Screen.LastChild.BoundsMakeReal();
-
-InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]);
-Screen.LastChild.BoundsMakeReal();
+InitProjectionComboBox(Render.Width-160,5,150,30,[SAnchRight]).BoundsMakeReal();
+InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]).BoundsMakeReal();
 
 FLDC := SCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SAnchRight], True, True, Self);
 
@@ -158,7 +161,15 @@ Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsMakeReal();
 
-FLD.Caption:=SStringToPChar(SStr(Depth));
+FIs2D := False;
+FLightingEnable := False;
+FPrimetiveType := SR_LINES;
+FPrimetiveParam := 0;
+
+FEnableColors  := False;
+FEnableNormals := False;
+Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
+Depth:=3;
 end;
 
 destructor TS3DFractalForm.Destroy();

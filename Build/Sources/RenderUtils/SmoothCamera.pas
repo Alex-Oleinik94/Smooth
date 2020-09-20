@@ -10,6 +10,7 @@ uses
 	,SmoothContextClasses
 	,SmoothMatrix
 	,SmoothCasesOfPrint
+	,SmoothContextInterface
 	;
 const
 	S_VIEW_WATCH_OBJECT        = $001001;
@@ -19,6 +20,7 @@ type
 	TSCamera = class(TSContextObject)
 			public
 		constructor Create();override;
+		constructor Create(const _Context : ISContext; const _MatrixMode : TSMode);
 			private
 		FMatrixMode: TSMode; // S_3D, S_2D, S_ORTHO_3D
 		FViewMode  : TSMode; // S_VIEW_...
@@ -134,6 +136,13 @@ end;
 function TSCamera.GetModelViewMatrix() : TSMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Render.GetFloatv(SR_MODELVIEW_MATRIX, @Result);
+end;
+
+constructor TSCamera.Create(const _Context : ISContext; const _MatrixMode : TSMode);
+begin
+Create();
+Context := _Context;
+MatrixMode := _MatrixMode;
 end;
 
 constructor TSCamera.Create();

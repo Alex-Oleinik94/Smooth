@@ -7,6 +7,7 @@ interface
 uses
 	 SmoothBase
 	,SmoothFractal
+	,Smooth3DFractal
 	,SmoothCommonStructs
 	,SmoothContextInterface
 	,SmoothScreen
@@ -23,7 +24,7 @@ type
 		class function CountingTheNumberOfPolygons(const ThisDepth:Int64):Int64;
 		procedure Construct();override;
 		procedure PolygonsConstruction();
-		procedure PushPoligonData(var ObjectId:LongWord;const v1,v2,v3:TSVertex2f;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure PushPoligonData(var ObjectId:TSFractalIndexInt;const v1,v2,v3:TSVertex2f;var FVertexIndex,FFaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSScreenLabel;
 		FBPD, FBMD : TSScreenButton;
@@ -43,7 +44,7 @@ begin
 Result := 'Треугольник Серпинского';
 end;
 
-procedure TSFractalSierpinskiTriangle.PushPoligonData(var ObjectId:LongWord;const v1,v2,v3:TSVertex2f;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSFractalSierpinskiTriangle.PushPoligonData(var ObjectId:TSFractalIndexInt;const v1,v2,v3:TSVertex2f;var FVertexIndex,FFaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 FVertexIndex+=3;
 F3dObject.Objects[ObjectId].SetVertex(FVertexIndex-3, v1);
@@ -60,8 +61,8 @@ end;
 
 procedure TSFractalSierpinskiTriangle.PolygonsConstruction();
 var
-	ObjectId:LongWord;
-	FVertexIndex,FFaceIndex:LongWord;
+	ObjectId:TSFractalIndexInt;
+	FVertexIndex,FFaceIndex:TSFractalIndexInt;
 procedure Rec(const t1,t2,t3:TSVertex3f;const NowDepth:LongWord);
 begin
 PushPoligonData(
@@ -181,19 +182,14 @@ begin
 inherited;
 FEnableColors:=False;
 FEnableNormals:=False;
-{$IFNDEF ANDROID}
-	Threads:=1;
-	{$ENDIF}
+Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
 Depth:=3;
 FLightingEnable:=False;
 ClearVBOAfterLoad := False;
 
-InitProjectionComboBox(Render.Width-160,5,150,30,[SAnchRight]);
-Screen.LastChild.BoundsMakeReal();
-
-InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]);
-Screen.LastChild.BoundsMakeReal();
-InitSaveButton(Render.Width - 160, 37, 150, 30, [SAnchRight]);
+InitProjectionComboBox(Render.Width-160,5,150,30,[SAnchRight]).BoundsMakeReal();
+InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]).BoundsMakeReal();
+InitSaveButton(Render.Width - 160, 37, 150, 30, [SAnchRight]).BoundsMakeReal();
 
 FLDC := SCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SAnchRight], True, True, Self);
 

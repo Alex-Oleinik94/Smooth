@@ -127,7 +127,7 @@ type
 			public
 		FFileName  : string;            // имя файла
 		FPoligons  : array of TPoligon; // полигоны
-		FVertexes  : array of TVertex;  // вершины
+		FVertices  : array of TVertex;  // вершины
 		FLocalized : array of TVertex;  // вывернутая модель (инверсно преобразованная)
 		FAnimation : TSkelAnimation;    // скелетная анимация модели
 		F3dObject      : TS3DObject;
@@ -208,11 +208,11 @@ var
 begin
 if F3dObject <> nil then
 	F3dObject.Destroy();
-if FVertexes <> nil then
+if FVertices <> nil then
 	begin
-	for i := 0 to High(FVertexes) do
-		FVertexes[i].Clear();
-	SetLength(FVertexes,0);
+	for i := 0 to High(FVertices) do
+		FVertices[i].Clear();
+	SetLength(FVertices,0);
 	end;
 if FLocalized <> nil then
 	begin
@@ -317,7 +317,7 @@ while SReadLnStringFromStream(Stream) <> 'triangles' do ;
 
 i := 0;
 SetLength(FPoligons,0);
-SetLength(FVertexes,0);
+SetLength(FVertices,0);
 repeat
 	s := SReadLnStringFromStream(Stream);
 	if s<>'end' then
@@ -327,17 +327,17 @@ repeat
 		FPoligons[i].FVertexCoordNum := 3;
 		for j:=0 to 2 do
 			begin
-			SetLength(FVertexes,Length(FVertexes)+1);
-			k := High(FVertexes);
+			SetLength(FVertices,Length(FVertices)+1);
+			k := High(FVertices);
 			s := SReadLnStringFromStream(Stream);
-			SetLength(FVertexes[k].FParents,1);
-			FVertexes[k].FParents[0].FBoneNum := StrToInt(StringWordGet(Trim(s),' ',1));
-			FVertexes[k].FParents[0].FWeight  := 1;
-			FVertexes[k].FCoord.Import(
+			SetLength(FVertices[k].FParents,1);
+			FVertices[k].FParents[0].FBoneNum := StrToInt(StringWordGet(Trim(s),' ',1));
+			FVertices[k].FParents[0].FWeight  := 1;
+			FVertices[k].FCoord.Import(
 				GetValue(S,2),
 				GetValue(S,3),
 				GetValue(S,4));
-			FVertexes[k].FNorm.Import(
+			FVertices[k].FNorm.Import(
 				GetValue(S,5),
 				GetValue(S,6),
 				GetValue(S,7));
@@ -567,21 +567,21 @@ begin
 FAnimation.MakeReferenceMatrixes();
 FAnimation.MakeBoneMatrixes();
 
-SetLength(FLocalized,Length(FVertexes));
+SetLength(FLocalized,Length(FVertices));
 for i := 0 to High(FLocalized) do
 	begin
-	FLocalized[i] := FVertexes[i];
+	FLocalized[i] := FVertices[i];
 	FinalVertex.Import();
 	FinalNormal.Import();
 	for k := 0 to High(FLocalized[i].FParents) do
 		begin
-		Matrix := FAnimation.FReferencePos[FVertexes[i].FParents[k].FBoneNum].FAbsoluteMatrix;
+		Matrix := FAnimation.FReferencePos[FVertices[i].FParents[k].FBoneNum].FAbsoluteMatrix;
 		
-		TempVertex  := STranslateVectorInverse(Matrix, FVertexes[i].FCoord);
+		TempVertex  := STranslateVectorInverse(Matrix, FVertices[i].FCoord);
 		TempVertex  := SRotateVectorInverse   (Matrix, TempVertex);
 		FinalVertex += TempVertex * FLocalized[i].FParents[k].FWeight;
 		
-		FinalNormal += SRotateVectorInverse   (Matrix, FVertexes[i].FNorm);
+		FinalNormal += SRotateVectorInverse   (Matrix, FVertices[i].FNorm);
 		end;
 	FLocalized[i].FCoord := FinalVertex;
 	FLocalized[i].FNorm  := FinalNormal;
@@ -620,11 +620,11 @@ F3dObject.EnableCullFace := False;
 F3dObject.VertexType := S3dObjectVertexType4f;
 F3dObject.SetColorType(S3dObjectColorType4f);
 F3dObject.CountTextureFloatsInVertexArray := 4;
-F3dObject.Vertexes   := 3*Length(FPoligons);
+F3dObject.Vertices   := 3*Length(FPoligons);
 for i := 0 to Length(FPoligons) - 1 do
 	for j := 0 to 2 do
 		begin
-		TotalBones := Length(FVertexes[FPoligons[i].FVertexIndexes[j]].FParents);
+		TotalBones := Length(FVertices[FPoligons[i].FVertexIndexes[j]].FParents);
 		F3dObject.ArVertex4f[3*i+j]^.Import(
 			FLocalized[FPoligons[i].FVertexIndexes[j]].FCoord.x,
 			FLocalized[FPoligons[i].FVertexIndexes[j]].FCoord.y,
@@ -633,14 +633,14 @@ for i := 0 to Length(FPoligons) - 1 do
 		F3dObject.ArTexVertex4f[3*i+j]^.Import(
 			FPoligons[i].FTexCoord[j].x,
 			FPoligons[i].FTexCoord[j].y,
-			FVertexes[FPoligons[i].FVertexIndexes[j]].FParents[0].FBoneNum/255,
-			FVertexes[FPoligons[i].FVertexIndexes[j]].FParents[0].FWeight);
-		F3dObject.ArNormal[3*i+j]^ := FVertexes[FPoligons[i].FVertexIndexes[j]].FNorm;
+			FVertices[FPoligons[i].FVertexIndexes[j]].FParents[0].FBoneNum/255,
+			FVertices[FPoligons[i].FVertexIndexes[j]].FParents[0].FWeight);
+		F3dObject.ArNormal[3*i+j]^ := FVertices[FPoligons[i].FVertexIndexes[j]].FNorm;
 		F3dObject.ArColor4f[3*i+j]^.Import(
-			Byte(TotalBones>1)*FVertexes[FPoligons[i].FVertexIndexes[j]].FParents[1].FBoneNum/255,
-			Byte(TotalBones>1)*FVertexes[FPoligons[i].FVertexIndexes[j]].FParents[1].FWeight,
-			Byte(TotalBones>2)*FVertexes[FPoligons[i].FVertexIndexes[j]].FParents[2].FBoneNum/255,
-			Byte(TotalBones>2)*FVertexes[FPoligons[i].FVertexIndexes[j]].FParents[2].FWeight);
+			Byte(TotalBones>1)*FVertices[FPoligons[i].FVertexIndexes[j]].FParents[1].FBoneNum/255,
+			Byte(TotalBones>1)*FVertices[FPoligons[i].FVertexIndexes[j]].FParents[1].FWeight,
+			Byte(TotalBones>2)*FVertices[FPoligons[i].FVertexIndexes[j]].FParents[2].FBoneNum/255,
+			Byte(TotalBones>2)*FVertices[FPoligons[i].FVertexIndexes[j]].FParents[2].FWeight);
 		end;
 F3dObject.LoadToVBO();
 end;

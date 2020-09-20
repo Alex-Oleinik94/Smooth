@@ -7,6 +7,7 @@ interface
 uses
 	 SmoothBase
 	,SmoothFractal
+	,Smooth3DFractal
 	,SmoothCommonStructs
 	,SmoothScreen
 	,SmoothScreenClasses
@@ -21,7 +22,7 @@ type
 			public
 		procedure Construct();override;
 		procedure PolygonsConstruction();
-		procedure PushPoligonData(var ObjectId:LongWord;const v:TSVertex2f;var FVertexIndex:LongWord);Inline;
+		procedure PushPoligonData(var ObjectId:TSFractalIndexInt;const v:TSVertex2f;var FVertexIndex:TSFractalIndexInt);Inline;
 			protected
 		FLD, FLDC : TSScreenLabel;
 		FBPD, FBMD : TSScreenButton;
@@ -43,7 +44,7 @@ begin
 Result := 'Кривая Леви (дракон Хартера)';
 end;
 
-procedure TSFractalLevyCurve.PushPoligonData(var ObjectId:LongWord;const v:TSVertex2f;var FVertexIndex:LongWord);Inline;
+procedure TSFractalLevyCurve.PushPoligonData(var ObjectId:TSFractalIndexInt;const v:TSVertex2f;var FVertexIndex:TSFractalIndexInt);Inline;
 begin
 F3dObject.Objects[ObjectId].SetVertex(FVertexIndex, v);
 FVertexIndex+=1;
@@ -53,8 +54,8 @@ end;
 
 procedure TSFractalLevyCurve.PolygonsConstruction();
 var
-	ObjectId:LongWord;
-	FVI:LongWord;
+	ObjectId:TSFractalIndexInt;
+	FVI:TSFractalIndexInt;
 
 procedure Rec(const t1,t2:TSVertex2f;const NowDepth:LongWord;const b:integer = 1);
 var
@@ -94,17 +95,17 @@ if FThreadsEnable then
 			F3dObjectsInfo[ObjectId]:=S_TRUE;
 end;
 
-procedure NewLevyCurveThread(Klass:TSFractalData) ;
+procedure NewLevyCurveThread(FractalData:TSFractalData) ;
 begin
-(Klass.FFractal as TSFractalLevyCurve).PolygonsConstruction();
-Klass.FFractal.FThreadsData[Klass.FThreadID].FFinished:=True;
-Klass.FFractal.FThreadsData[Klass.FThreadID].FData:=nil;
-Klass.Destroy;
+(FractalData.FFractal as TSFractalLevyCurve).PolygonsConstruction();
+FractalData.FFractal.FThreadsData[FractalData.FThreadID].FFinished:=True;
+FractalData.FFractal.FThreadsData[FractalData.FThreadID].FData:=nil;
+FractalData.Destroy;
 end;
 
 procedure TSFractalLevyCurve.Construct;
 var
-	NumberOfPolygons:Int64;
+	NumberOfPolygons : TSUInt64;
 begin
 inherited;
 Clear3dObject;
@@ -121,25 +122,25 @@ if FThreadsEnable then
 	end
 else
 	begin
-	PolygonsConstruction;
+	PolygonsConstruction();
 	if FEnableVBO and (not F3dObject.LastObject().EnableVBO) then
 		F3dObject.LastObject().LoadToVBO();
 	end;
 end;
 
-procedure LevyCurveFButtonDepthPlusOnChangeKT(Button:TSScreenButton);
+procedure SFractalLevyCurveButtonDepthPlusOnChange(Button:TSScreenButton);
 begin
 with TSFractalLevyCurve(Button.FUserPointer1) do
 	begin
 	FDepth+=1;
 	Construct;
-	FLD.Caption:=SStringToPChar(SStr(Depth));
+	FLD.Caption := SStr(Depth);
 	FBMD.Active:=True;
 	end;
 end;
 
 
-procedure LevyCurveFButtonDepthMinusOnChangeKT(Button:TSScreenButton);
+procedure SFractalLevyCurveButtonDepthMinusOnChange(Button:TSScreenButton);
 begin
 with TSFractalLevyCurve(Button.FUserPointer1) do
 	begin
@@ -147,14 +148,14 @@ with TSFractalLevyCurve(Button.FUserPointer1) do
 		begin
 		FDepth-=1;
 		Construct;
-		FLD.Caption:=SStringToPChar(SStr(Depth));
+		FLD.Caption := SStr(Depth);
 		if Depth=0 then
 			FBMD.Active:=False;
 		end;
 	end;
 end;
 
-procedure TSFractalLevyCurve_CamboBox_CallBackProcedure(a,b:LongInt;Button:TSScreenComponent);
+procedure SFractalLevyCurveComboBoxOnChange(a,b:LongInt;Button:TSScreenComponent);
 begin
 with TSFractalLevyCurve(Button.FUserPointer1) do
 	begin
@@ -169,20 +170,15 @@ end;
 constructor TSFractalLevyCurve.Create();
 begin
 inherited;
+HasIndexes := False;
+FLightingEnable:=False;
 FEnableColors:=False;
 FEnableNormals:=False;
-{$IFNDEF ANDROID}
-	Threads:=1;
-	{$ENDIF}
+Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
 Depth:=3;
-FLightingEnable:=False;
-HasIndexes := False;
 
-InitProjectionComboBox(Render.Width-160,5,150,30,[SAnchRight]);
-Screen.LastChild.BoundsMakeReal();
-
-InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]);
-Screen.LastChild.BoundsMakeReal();
+InitProjectionComboBox(Render.Width-160,5,150,30,[SAnchRight]).BoundsMakeReal();
+InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]).BoundsMakeReal();
 
 FLDC := SCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SAnchRight], True, True, Self);
 
@@ -192,7 +188,7 @@ Screen.LastChild.SetBounds(Render.Width-160-30,5,20,30);
 Screen.LastChild.Anchors:=[SAnchRight];
 Screen.LastChild.Caption:='+';
 Screen.LastChild.FUserPointer1:=Self;
-FBPD.OnChange:=TSScreenComponentProcedure(@LevyCurveFButtonDepthPlusOnChangeKT);
+FBPD.OnChange:=TSScreenComponentProcedure(@SFractalLevyCurveButtonDepthPlusOnChange);
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsMakeReal();
 
@@ -203,7 +199,7 @@ Screen.CreateChild(FBMD);
 Screen.LastChild.SetBounds(Render.Width-160-90,5,20,30);
 Screen.LastChild.Anchors:=[SAnchRight];
 Screen.LastChild.Caption:='-';
-FBMD.OnChange:=TSScreenComponentProcedure(@LevyCurveFButtonDepthMinusOnChangeKT);
+FBMD.OnChange:=TSScreenComponentProcedure(@SFractalLevyCurveButtonDepthMinusOnChange);
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsMakeReal();
@@ -214,13 +210,13 @@ FTCB.SetBounds(Render.Width-160-90-125-130-50,5,125+50,20);
 FTCB.Anchors:=[SAnchRight];
 FTCB.CreateItem('Кривая Леви');
 FTCB.CreateItem('Дракон Хартера — Хейтуэя');
-FTCB.CallBackProcedure:=TSScreenComboBoxProcedure(@TSFractalLevyCurve_CamboBox_CallBackProcedure);
+FTCB.CallBackProcedure:=TSScreenComboBoxProcedure(@SFractalLevyCurveComboBoxOnChange);
 FTCB.SelectItem:=0;
 FTCB.FUserPointer1:=Self;
 FTCB.Visible:=True;
 FTCB.BoundsMakeReal();
 
-FLD.Caption:=SStringToPChar(SStr(Depth));
+FLD.Caption := SStr(Depth);
 
 Construct();
 end;

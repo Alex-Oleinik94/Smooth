@@ -69,7 +69,7 @@ F3dObject.LastObject().HasNormals := True;
 F3dObject.LastObject().HasTexture := True;
 F3dObject.LastObject().HasColors  := False;
 F3dObject.LastObject().VertexType := S3dObjectVertexType3f;
-F3dObject.LastObject().Vertexes   := 4;
+F3dObject.LastObject().Vertices   := 4;
 F3dObject.LastObject().ArVertex3f[0]^.Import(-1,-1);
 F3dObject.LastObject().ArVertex3f[1]^.Import(-1,1);
 F3dObject.LastObject().ArVertex3f[2]^.Import(1,1);

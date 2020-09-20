@@ -163,7 +163,7 @@ if ii = 0 then
 	SLogWriteLn('TSLeaksDetector : Leaks not detected.')
 else
 	begin
-	SLogWriteLn(SStr(['TSLeaksDetector : Total ', ii, ' leak', Iff(ii > 1, 's'), '.']));
+	SLogWriteLn(SStr(['TSLeaksDetector : Detected ', ii, ' leak', Iff(ii > 1, 's'), '.']));
 	LogSignificant := True;
 	SL := nil;
 	if FReferences <> nil then

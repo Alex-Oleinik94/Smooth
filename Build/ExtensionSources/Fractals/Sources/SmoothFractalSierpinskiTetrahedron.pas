@@ -6,7 +6,7 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothFractal
+	,Smooth3DFractal
 	,SmoothCommon
 	,SmoothCommonStructs
 	,SmoothScreen
@@ -22,7 +22,7 @@ type
 			public
 		procedure Construct();override;
 		procedure PolygonsConstruction();
-		procedure PushPoligonData(var ObjectId:LongWord;const n,v0,v1,v2:TSVertex3f;var FVertexIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure PushPoligonData(var ObjectId:TSFractalIndexInt;const n,v0,v1,v2:TSVertex3f;var FVertexIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSScreenLabel;
 		FBPD, FBMD : TSScreenButton;
@@ -48,7 +48,7 @@ begin
 Result:='Тетраэдр Серпинского';
 end;
 
-procedure TSFractalSierpinskiTetrahedron.PushPoligonData(var ObjectId:LongWord;const n,v0,v1,v2:TSVertex3f;var FVertexIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSFractalSierpinskiTetrahedron.PushPoligonData(var ObjectId:TSFractalIndexInt;const n,v0,v1,v2:TSVertex3f;var FVertexIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	c:TSColor3f;
 
@@ -83,8 +83,8 @@ end;
 
 procedure TSFractalSierpinskiTetrahedron.PolygonsConstruction();
 var
-	ObjectId:LongWord;
-	FVI:LongWord;
+	ObjectId:TSFractalIndexInt;
+	FVI:TSFractalIndexInt;
 
 procedure Rec(const t0,t1,t2,t3:TSVertex3f;const NowDepth:LongWord);
 
@@ -144,7 +144,7 @@ end;
 
 procedure TSFractalSierpinskiTetrahedron.Construct();
 var
-	NumberOfPolygons:Int64;
+	NumberOfPolygons:TSFractalIndexInt;
 begin
 inherited;
 Clear3dObject();
@@ -194,10 +194,10 @@ end;
 constructor TSFractalSierpinskiTetrahedron.Create();
 begin
 inherited;
+HasIndexes     := False;
+LightingEnable := True;
 EnableColors   := True;
 EnableNormals  := True;
-LightingEnable := True;
-HasIndexes     := False;
 Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
 Depth:=3;
 Radius:=5;
@@ -207,11 +207,8 @@ c1:=SColor4fFromUInt32($00FFFF);
 c2:=SColor4fFromUInt32($FFFF00);
 c3:=SColor4fFromUInt32($0080FF);
 
-InitProjectionComboBox(Render.Width-160,5,150,30,[SAnchRight]);
-Screen.LastChild.BoundsMakeReal();
-
-InitEffectsComboBox(Render.Width-160,40,150,30,[SAnchRight]);
-Screen.LastChild.BoundsMakeReal();
+InitProjectionComboBox(Render.Width-160,5,150,30,[SAnchRight]).BoundsMakeReal();
+InitEffectsComboBox(Render.Width-160,40,150,30,[SAnchRight]).BoundsMakeReal();
 
 InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]);
 Screen.LastChild.BoundsMakeReal();

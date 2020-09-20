@@ -190,11 +190,11 @@ Result.LastObject().EnableCullFace := False;
 Result.LastObject().VertexType := S3dObjectVertexType3f;
 Result.LastObject().SetColorType(S3dObjectColorType4b);
 
-Result.LastObject().Vertexes   := Length(Setka)*Length(Setka[0]);
+Result.LastObject().Vertices   := Length(Setka)*Length(Setka[0]);
 Result.LastObject().QuantityFaceArrays := 1;
 Result.LastObject().PoligonesType[0]:=SR_TRIANGLES;
 
-Result.LastObject().AutoSetIndexFormat(0,Result.LastObject().Vertexes);
+Result.LastObject().AutoSetIndexFormat(0,Result.LastObject().Vertices);
 Result.LastObject().SetFaceLength(0,High(Setka)*High(Setka[0])*2);
 
 max := -1000000;

@@ -279,7 +279,7 @@ with FModel.LastObject() do
 	SkipHeader();
 	FFile.Read(iii, 2);
 	SetVertexLength(iii);
-	for i:=0 to QuantityVertexes-1 do
+	for i:=0 to QuantityVertices-1 do
 		with ArVertex3f[i]^ do
 			begin
 			FFile.Read(x, SizeOf(TSFloat32));
@@ -292,13 +292,13 @@ with FModel.LastObject() do
 	ChPos:=FindChunk(TRI_MAPPINGCOORS,true);
 	SkipHeader;
 	FFile.Read(iii,2);
-	if iii<>QuantityVertexes then
+	if iii<>QuantityVertices then
 		begin
-		SLog.Source('TS3dObject3DSLoader__ReadObject : Fatal : Quantity Vrtexes <> Quantity Texture Vertexes!');
+		SLog.Source('TS3dObject3DSLoader__ReadObject : Fatal : Quantity Vrtexes <> Quantity Texture Vertices!');
 		FModel.Clear();
 		Exit;
 		end;
-	for i:=0 to QuantityVertexes-1 do
+	for i:=0 to QuantityVertices-1 do
 		with ArTexVertex[i]^ do
 			begin
 			FFile.Read(x,SizeOf(TSFloat32));
@@ -311,7 +311,7 @@ with FModel.LastObject() do
 	SkipHeader();
 	FFile.Read(iii, 2);
 	AddFaceArray();
-	AutoSetIndexFormat(0, Vertexes);
+	AutoSetIndexFormat(0, Vertices);
 	SetFaceLength(0, iii);
 	for i:=0 to Faces[0] - 1 do
 		begin
@@ -328,7 +328,7 @@ with FModel.LastObject() do
 	SkipHeader();
 	FFile.Read(Local, Sizeof(Local));
 	//Совершаем преобразования
-	for i:=0 to QuantityVertexes - 1 do
+	for i:=0 to QuantityVertices - 1 do
 		begin
 		ArVertex3f[i]^.x-=Local[9];
 		ArVertex3f[i]^.z-=Local[10];
@@ -496,7 +496,7 @@ if FModel.QuantityObjects > 0 then
 			SetProgress(0.15 + (iObject - FObjectsCountBeforeImport + 0.2) * ObjectProgressProportion);
 			vSum.Import();
 			shared:=0;
-			for i:=0 to QuantityVertexes-1 do
+			for i:=0 to QuantityVertices-1 do
 				begin
 				for ii:=0 to Faces[0]-1 do
 					begin
@@ -510,7 +510,7 @@ if FModel.QuantityObjects > 0 then
 				ArNormal[i]^ := ArNormal[i]^.Normalized();
 				vSum.Import();
 				shared:=0;
-				SetProgress(0.15 + (iObject - FObjectsCountBeforeImport + 0.2 + 0.8 * (i / (QuantityVertexes - 1))) * ObjectProgressProportion);
+				SetProgress(0.15 + (iObject - FObjectsCountBeforeImport + 0.2 + 0.8 * (i / (QuantityVertices - 1))) * ObjectProgressProportion);
 				end;
 			SetProgress(0.15 + (iObject - FObjectsCountBeforeImport + 1) * ObjectProgressProportion);
 			end;
