@@ -1,6 +1,6 @@
 {$INCLUDE Smooth.inc}
 
-unit SmoothFractalSpecialProject;
+unit SmoothFractalSierpinskiTrianglesHorizon;
 
 interface
 
@@ -20,7 +20,10 @@ const
 	SFSPMultiplier = 0.7;
 
 type
-	TSFractalSpSialProjSt = class(TSPaintableObject)
+	TSFractalSierpinskiTrianglesHorizon = class(TSPaintableObject)
+	// TSFractalSpSialProjSt ???
+	//   FractalSpecialProject
+	// Замена "ec" на "S"...
 			public
 		constructor Create(const ContextInterface : ISContext); override;
 		destructor Destroy(); override;
@@ -42,7 +45,7 @@ uses
 	,SmoothRenderBase
 	;
 
-constructor TSFractalSpSialProjSt.Create(const ContextInterface : ISContext);
+constructor TSFractalSierpinskiTrianglesHorizon.Create(const ContextInterface : ISContext);
 begin
 inherited Create(ContextInterface);
 FLinesCount := 25;
@@ -63,19 +66,19 @@ FObject.LoadToVBO();
 //FObject.WriteInfo();
 end;
 
-destructor TSFractalSpSialProjSt.Destroy();
+destructor TSFractalSierpinskiTrianglesHorizon.Destroy();
 begin
 SKill(FCamera);
 SKill(FObject);
 inherited;
 end;
 
-class function TSFractalSpSialProjSt.ClassName() : TSString;
+class function TSFractalSierpinskiTrianglesHorizon.ClassName() : TSString;
 begin
-Result := 'TSFractalSpSialProjSt';
+Result := 'TSFractalSierpinskiTrianglesHorizon';
 end;
 
-procedure TSFractalSpSialProjSt.PaintObject(const Position : TSVector3f; const Rotate : TSBoolean = False);
+procedure TSFractalSierpinskiTrianglesHorizon.PaintObject(const Position : TSVector3f; const Rotate : TSBoolean = False);
 begin
 Render.PushMatrix();
 Render.Translate(Position);
@@ -86,7 +89,7 @@ FObject.Paint();
 Render.PopMatrix();
 end;
 
-procedure TSFractalSpSialProjSt.PaintFractalPlaneAt(const FloatValue : TSFloat32);
+procedure TSFractalSierpinskiTrianglesHorizon.PaintFractalPlaneAt(const FloatValue : TSFloat32);
 var
 	Position : TSVector3f;
 	Position2 : TSVector3f;
@@ -108,7 +111,7 @@ while (Index < FLinesCount) do
 	end;
 end;
 
-procedure TSFractalSpSialProjSt.Paint();
+procedure TSFractalSierpinskiTrianglesHorizon.Paint();
 begin
 Render.ClearColor(1,1,1,1);
 Render.Color3f(0,0,0);

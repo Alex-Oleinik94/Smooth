@@ -6,7 +6,7 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothFractals
+	,SmoothFractal
 	,SmoothContextClasses
 	,SmoothCommon
 	,SmoothCommonStructs
@@ -785,7 +785,7 @@ SCreateLabel(FStartPanel, 'Количество потоков:', 5,55,Screen.LastChild.Width-10,
 Screen.LastChild.CreateChild(TSScreenButton.Create);
 Screen.LastChild.LastChild.SetBounds(75,115,140,20);
 Screen.LastChild.LastChild.Visible:=True;
-Screen.LastChild.LastChild.Caption:='Запуск';
+Screen.LastChild.LastChild.Caption := 'Готово';
 Screen.LastChild.LastChild.OnChange:=TSScreenComponentProcedure(@BeginInitMand);
 Screen.LastChild.LastChild.BoundsMakeReal;
 Screen.LastChild.LastChild.FUserPointer1:=Self;

@@ -6,7 +6,7 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothFractals
+	,SmoothFractal
 	,SmoothCommonStructs
 	,SmoothContextInterface
 	,SmoothScreen
@@ -87,8 +87,8 @@ end;
 begin
 ObjectId:=0;
 FVI:=0;
-PushPoligonData(ObjectId,SVertex2fImport(-6,-3.5),FVI);
-Rec(SVertex2fImport(-6,-3.5),SVertex2fImport(6,3.5),Depth);
+PushPoligonData(ObjectId,SVertex2fImport(-6,0),FVI);
+Rec(SVertex2fImport(-6,0),SVertex2fImport(6,0),Depth);
 if FThreadsEnable then
 	if (ObjectId>=0) and (ObjectId<=F3dObject.QuantityObjects-1) then
 		if F3dObjectsInfo[ObjectId]=S_FALSE then

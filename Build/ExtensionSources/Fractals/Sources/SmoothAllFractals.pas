@@ -26,9 +26,7 @@ implementation
 
 uses
 	 SmoothExtensionManager
-	
-	//,SmoothFractalSpecialProject //"deprecated"
-	
+
 	// Fractals
 	,SmoothFractalSierpinskiTetrahedron
 	,SmoothFractalLevyCurve

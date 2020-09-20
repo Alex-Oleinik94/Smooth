@@ -1,6 +1,6 @@
 {$INCLUDE Smooth.inc}
 
-unit SmoothFractals;
+unit SmoothFractal;
 
 interface
 

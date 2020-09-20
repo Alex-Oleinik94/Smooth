@@ -6,7 +6,7 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothFractals
+	,SmoothFractal
 	,SmoothCommonStructs
 	,SmoothContextInterface
 	,SmoothScreen
