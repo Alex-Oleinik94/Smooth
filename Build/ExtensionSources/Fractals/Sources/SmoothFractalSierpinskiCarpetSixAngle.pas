@@ -13,11 +13,9 @@ uses
 	,SmoothScreenClasses
 	;
 
-const
-	SFractalSierpinskiCarpetSixAngleTypesCount = 7;
 type
 	TSVector2fList6 = array[0..5] of TSVector2f;
-	TSFractalSierpinskiCarpetSixAngleType = TSByte;
+	PSVector2fList6 = ^ TSVector2fList6;
 	TSFractalSierpinskiCarpetSixAngle = class(TS3DFractalForm)
 			public
 		constructor Create(const VContext : ISContext);override;
@@ -25,18 +23,24 @@ type
 		class function ClassName():TSString;override;
 			protected
 		class function CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum; override;
+		procedure GenerateInteriorPolygons(const _List, _List1, _List2, _List3 : PSVector2fList6);
+		procedure Generate(const _PointCenter : TSVector2d; const _Radius : TSFloat64);
+		function TypeToSpins(const _Type : TSUInt8) : TSVector4int8;
+		function CalculatePolygonsShift() : TSUInt64; override;
 			public
 		procedure PolygonsConstruction(); override;
-		procedure PushPoligonData(var ObjectId : TSFractalIndexInt; const v1, v2, v3, v4, v5, v6 : TSVector2f; var FVertexIndex, FFaceIndex : TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure SetType(const NewType : TSFractalSierpinskiCarpetSixAngleType);
+		procedure PushPoligonData(var _ObjectNumber : TSFractalIndexInt; const _VectorList : PSVector2fList6; var _VertexIndex, _FaceIndex : TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetType(const _Type : TSUInt8);
 			protected
 		FTypeComboBox : TSScreenComboBox;
-		FType : TSFractalSierpinskiCarpetSixAngleType;
+		FSpins : TSVector4int8;
 		end;
 
 function SVector2fList6Import(const v1, v2, v3, v4, v5, v6 : TSVector2f): TSVector2fList6;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SPVector2fList6Create(const v1, v2, v3, v4, v5, v6 : TSVector2f): PSVector2fList6;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SVector2fList6Spin(var List : TSVector2fList6; const AboveZero : TSBool = True); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SVector2fList6Spining(Count : TSInt8; const List : TSVector2fList6): TSVector2fList6; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SVector2fList6Write(const _List : PSVector2fList6);
 
 implementation
 
@@ -81,6 +85,12 @@ else
 	end;
 end;
 
+function SPVector2fList6Create(const v1, v2, v3, v4, v5, v6 : TSVector2f): PSVector2fList6;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := GetMem(SizeOf(TSVector2fList6));
+Result^ := SVector2fList6Import(v1, v2, v3, v4, v5, v6);
+end;
+
 function SVector2fList6Import(const v1, v2, v3, v4, v5, v6 : TSVector2f): TSVector2fList6;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result[0] := v1;
@@ -91,13 +101,60 @@ Result[4] := v5;
 Result[5] := v6;
 end;
 
-procedure TSFractalSierpinskiCarpetSixAngle.SetType(const NewType : TSFractalSierpinskiCarpetSixAngleType);
+procedure SVector2fList6Write(const _List : PSVector2fList6);
+var
+	Index : TSMaxEnum;
 begin
-if (NewType >= 0) and (NewType <= SFractalSierpinskiCarpetSixAngleTypesCount - 1) and (NewType <> FType) then
+for Index := 0 to 5 do
 	begin
-	FType := NewType;
-	Construct();
+	Write('(', _List^[Index].x:0:5, ', ', _List^[Index].y:0:5,')');
+	if Index < 5 then
+		Write('; ');
 	end;
+WriteLn();
+end;
+
+// TSFractalSierpinskiCarpetSixAngle
+
+function TSFractalSierpinskiCarpetSixAngle.CalculatePolygonsShift() : TSUInt64;
+begin
+Result := inherited;
+Result := Result div 4;
+Result *= 3;
+end;
+
+procedure TSFractalSierpinskiCarpetSixAngle.SetType(const _Type : TSUInt8);
+var
+	Spins : TSVector4int8;
+begin
+if (_Type >= 0) and (_Type <= 11) then
+	begin
+	Spins := TypeToSpins(_Type);
+	if (Spins <> FSpins) then
+		begin
+		FSpins := Spins;
+		FSpins.WriteLn();
+		Construct();
+		end;
+	end;
+end;
+
+function TSFractalSierpinskiCarpetSixAngle.TypeToSpins(const _Type : TSUInt8) : TSVector4int8;
+begin
+case _Type of
+0 : Result := TSVector4int8.Create(0, 0, 0, 0);   // Треугольник
+1 : Result := TSVector4int8.Create(3, 2, -2, 0);  // Ладья
+2 : Result := TSVector4int8.Create(3, 0, 0, 0);   // Тупой глиф
+3 : Result := TSVector4int8.Create(-2, 2, 3, -2); // Острый глиф
+4 : Result := TSVector4int8.Create(-1, 1, 0, -2); // Красивый узор
+5 : Result := TSVector4int8.Create(-1, 0, 1, 2);  // Лист
+6 : Result := TSVector4int8.Create(3, 3, 0, -2);  // Пушинки
+7 : Result := TSVector4int8.Create(3, 3, 1, 2);   // Звезда
+8 : Result := TSVector4int8.Create(2, -2, 1, -2); // Причудливый узор
+9 : Result := TSVector4int8.Create(-1, -2, 2, -2);// Зигзаг
+10: Result := TSVector4int8.Create(2, 1, 0, 2);   // Орнамент
+else Result := TSVector4int8.Create(Random(6) - 2, Random(6) - 2, Random(6) - 2, Random(6) - 2);
+end;
 end;
 
 procedure TSFractalSierpinskiCarpetSixAngle__SetType(a, b : TSUInt32; Component : TSScreenComboBox);
@@ -106,16 +163,18 @@ TSFractalSierpinskiCarpetSixAngle(Component.FUserPointer1).SetType(b);
 end;
 
 constructor TSFractalSierpinskiCarpetSixAngle.Create(const VContext : ISContext);
+var
+	StartType : TSUInt8 = 0;
 begin
 inherited Create(VContext);
 
+StartType := Random(11);
+FSpins := TypeToSpins(StartType);
 FIs2D := True;
 FPrimetiveType := SR_LINES;
 FPrimetiveParam := 0;
-FType := Random(SFractalSierpinskiCarpetSixAngleTypesCount);
-//Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
-Threads := 0; // why runtime error?
-Depth := 6;
+Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
+Depth := 7;
 
 FTypeComboBox := TSScreenComboBox.Create();
 Screen.CreateChild(FTypeComboBox);
@@ -125,13 +184,18 @@ with FTypeComboBox do
 	SetBounds(Render.Width - 550, 5, 180, 30);
 	BoundsMakeReal();
 	CreateItem('Треугольник');
-	CreateItem('Лист');
+	CreateItem('Ладья');
+	CreateItem('Тупой глиф');
+	CreateItem('Острый глиф');
 	CreateItem('Красивый узор');
+	CreateItem('Лист');
+	CreateItem('Пушинки');
 	CreateItem('Звезда');
 	CreateItem('Причудливый узор');
-	CreateItem('Ладья');
+	CreateItem('Зигзаг');
+	CreateItem('Орнамент');
 	CreateItem('Случайный узор');
-	SelectItem := FType;
+	SelectItem := StartType;
 	FUserPointer1 := Self;
 	CallBackProcedure := TSScreenComboBoxProcedure(@TSFractalSierpinskiCarpetSixAngle__SetType);
 	Visible := True;
@@ -157,149 +221,84 @@ begin
 Result := 6 * (3 ** _Depth);
 end;
 
+procedure TSFractalSierpinskiCarpetSixAngle.GenerateInteriorPolygons(const _List, _List1, _List2, _List3 : PSVector2fList6);
+begin
+_List1^ := SVector2fList6Import(_List^[0], (_List^[0] + _List^[1]) / 2, (_List^[0] + _List^[2]) / 2, (_List^[0] + _List^[2] + _List^[4]) / 3, (_List^[4] + _List^[0]) / 2, (_List^[5] + _List^[0]) / 2);
+_List2^ := SVector2fList6Import(_List^[2], (_List^[2] + _List^[3]) / 2, (_List^[2] + _List^[4]) / 2, (_List^[0] + _List^[2] + _List^[4]) / 3, (_List^[0] + _List^[2]) / 2, (_List^[1] + _List^[2]) / 2);
+_List3^ := SVector2fList6Import(_List^[4], (_List^[4] + _List^[5]) / 2, (_List^[4] + _List^[0]) / 2, (_List^[0] + _List^[2] + _List^[4]) / 3, (_List^[2] + _List^[4]) / 2, (_List^[3] + _List^[4]) / 2);
+end;
+
 procedure TSFractalSierpinskiCarpetSixAngle.PolygonsConstruction();
-var 
-	ObjectId : TSFractalIndexInt; 
-	FVertexIndex, FFaceIndex : TSFractalIndexInt;
-	SpinCount0, SpinCount1, SpinCount2 : TSInt8;
-
-procedure RecList(const _List : TSVector2fList6; const _SpinCount : TSInt8; const _Depth : TSUInt32);forward;
-
-procedure Rec(const v1, v2, v3, v4, v5, v6 : TSVector2f; const _Depth : TSUInt32); overload;
-var
-	Center,
-	v12, v23, v34, v45, v56, v61,
-	v13, v35, v51
-		: TSVector2f;
 begin
-if _Depth = 0 then
-	PushPoligonData(ObjectId, v1, v2, v3, v4, v5, v6, FVertexIndex, FFaceIndex)
-else
+Generate(TSVertex2d.Create(0, 0), 4);
+end;
+
+procedure TSFractalSierpinskiCarpetSixAngle.Generate(const _PointCenter : TSVector2d; const _Radius : TSFloat64);
+var
+	ObjectNumber, VertexIndex, FaceIndex : TSFractalIndexInt;
+
+procedure Rec(const _List : PSVector2fList6; const _Depth : TSUInt32);
+var
+	List1, List2, List3 : PSVector2fList6;
+begin
+if _Depth > 0 then
 	begin
-	Center := (v1 + v3 + v5) / 3;
-	v12 := (v1 + v2) / 2;
-	v23 := (v2 + v3) / 2;
-	v34 := (v3 + v4) / 2;
-	v45 := (v4 + v5) / 2;
-	v56 := (v5 + v6) / 2;
-	v61 := (v6 + v1) / 2;
-	v13 := (v1 + v3) / 2;
-	v35 := (v3 + v5) / 2;
-	v51 := (v5 + v1) / 2;
-	case FType of
-	0 : // 1 Треугольник
-		begin
-		Rec(v1, v12, v13, Center, v51, v61, _Depth - 1);
-		Rec(v3, v34, v35, Center, v13, v23, _Depth - 1);
-		Rec(v5, v56, v51, Center, v35, v45, _Depth - 1);
-		end;
-	1 : // 2 Лист
-		begin
-		Rec(v1, v12, v13, Center, v51, v61, _Depth - 1);
-		Rec(v23, v3, v34, v35, Center, v13, _Depth - 1);
-		Rec(v56, v51, Center, v35, v45, v5, _Depth - 1);
-		end;
-	2 : // 3 Красивый узор
-		begin
-		Rec(v1, v12, v13, Center, v51, v61, _Depth - 1);
-		Rec(v34, v35, Center, v13, v23, v3, _Depth - 1);
-		Rec(v45, v5, v56, v51, Center, v35, _Depth - 1);
-		end;
-	3 : // 4 Звезда
-		begin
-		Rec(Center, v51, v61, v1, v12, v13, _Depth - 1);
-		Rec(v34, v35, Center, v13, v23, v3, _Depth - 1);
-		Rec(v45, v5, v56, v51, Center, v35, _Depth - 1);
-		end;
-	4 : // 5 Причудливый узор
-		begin
-		Rec(v61, v1, v12, v13, Center, v51, _Depth - 1);
-		Rec(v3, v34, v35, Center, v13, v23, _Depth - 1);
-		Rec(v5, v56, v51, Center, v35, v45, _Depth - 1);
-		end;
-	5 : // 6 Ладья
-		begin
-		Rec(Center, v51, v61, v1, v12, v13, _Depth - 1);
-		Rec(v13, v23, v3, v34, v35, Center, _Depth - 1);
-		Rec(v51, Center, v35, v45, v5, v56, _Depth - 1);
-		end;
-	6 : // 7 Случайный узор
-		begin
-		RecList(SVector2fList6Import(Center, v51, v61, v1, v12, v13), SpinCount0, _Depth - 1);
-		RecList(SVector2fList6Import(v34, v35, Center, v13, v23, v3), SpinCount1, _Depth - 1);
-		RecList(SVector2fList6Import(v45, v5, v56, v51, Center, v35), SpinCount2, _Depth - 1);
-		end;
-	end;
-	end;
+	_List^ := SVector2fList6Spining(FSpins.w, _List^);
+	List1 := GetMem(SizeOf(TSVector2fList6));
+	List2 := GetMem(SizeOf(TSVector2fList6));
+	List3 := GetMem(SizeOf(TSVector2fList6));
+	GenerateInteriorPolygons(_List, List1, List2, List3);
+	List1^ := SVector2fList6Spining(FSpins.x, List1^);
+	Rec(List1, _Depth - 1);
+	List2^ := SVector2fList6Spining(FSpins.y, List2^);
+	Rec(List2, _Depth - 1);
+	List3^ := SVector2fList6Spining(FSpins.z, List3^);
+	Rec(List3, _Depth - 1);
+	FreeMem(List1);
+	FreeMem(List2);
+	FreeMem(List3);
+	end
+else
+	PushPoligonData(ObjectNumber, _List, VertexIndex, FaceIndex);
 end;
 
-procedure RecList(const _List : TSVector2fList6; const _SpinCount : TSInt8; const _Depth : TSUInt32);
 var
-	SpinedList : TSVector2fList6;
-begin
-SpinedList := SVector2fList6Spining(_SpinCount, _List);
-Rec(
-	SpinedList[0],
-	SpinedList[1],
-	SpinedList[2],
-	SpinedList[3],
-	SpinedList[4],
-	SpinedList[5],
-	_Depth);
-end;
-
-procedure Rec(const _PointCenter : TSVector2f; const _Radius : TSFloat64; const _Depth : TSUInt32); overload;
-var
-	PointList : TSVector2fList6;
+	PointList : PSVector2fList6;
 	Index : TSUInt32;
 begin
+VertexIndex := 0;
+FaceIndex := 0;
+ObjectNumber := 0;
+PointList := GetMem(SizeOf(TSVector2fList6));
 for Index := 0 to 5 do
-	PointList[Index].Import(
+	PointList^[Index] := TSVector2f.Create(
 		_PointCenter.x + Sin(Index/6*2*PI) * _Radius,
 		_PointCenter.y + Cos(Index/6*2*PI) * _Radius);
-Rec(PointList[0],
-	PointList[1],
-	PointList[2],
-	PointList[3],
-	PointList[4],
-	PointList[5],
-	_Depth);
+Rec(PointList, FDepth);
+Freemem(PointList);
+EndOfPolygonsConstruction(ObjectNumber);
 end;
 
+procedure TSFractalSierpinskiCarpetSixAngle.PushPoligonData(var _ObjectNumber : TSFractalIndexInt; const _VectorList : PSVector2fList6; var _VertexIndex, _FaceIndex : TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-FVertexIndex := 0;
-FFaceIndex := 0;
-ObjectId := 0;
-if FType = 6 then
-	begin
-	SpinCount0 := Random(6) - 2;
-	SpinCount1 := Random(6) - 2;
-	SpinCount2 := Random(6) - 2;
-	end;
-Rec(SVertex2fImport(0, 0), 4, Depth);
-EndOfPolygonsConstruction(ObjectId);
-end;
+F3dObject.Objects[_ObjectNumber].SetVertex(_VertexIndex + 0, _VectorList^[0]);
+F3dObject.Objects[_ObjectNumber].SetVertex(_VertexIndex + 1, _VectorList^[1]);
+F3dObject.Objects[_ObjectNumber].SetVertex(_VertexIndex + 2, _VectorList^[2]);
+F3dObject.Objects[_ObjectNumber].SetVertex(_VertexIndex + 3, _VectorList^[3]);
+F3dObject.Objects[_ObjectNumber].SetVertex(_VertexIndex + 4, _VectorList^[4]);
+F3dObject.Objects[_ObjectNumber].SetVertex(_VertexIndex + 5, _VectorList^[5]);
 
-procedure TSFractalSierpinskiCarpetSixAngle.PushPoligonData(var ObjectId : TSFractalIndexInt; const v1, v2, v3, v4, v5, v6 : TSVector2f; var FVertexIndex, FFaceIndex : TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-F3dObject.Objects[ObjectId].SetVertex(FVertexIndex + 0, v1);
-F3dObject.Objects[ObjectId].SetVertex(FVertexIndex + 1, v2);
-F3dObject.Objects[ObjectId].SetVertex(FVertexIndex + 2, v3);
-F3dObject.Objects[ObjectId].SetVertex(FVertexIndex + 3, v4);
-F3dObject.Objects[ObjectId].SetVertex(FVertexIndex + 4, v5);
-F3dObject.Objects[ObjectId].SetVertex(FVertexIndex + 5, v6);
+F3dObject.Objects[_ObjectNumber].SetFaceLine(0, _FaceIndex + 0, _VertexIndex + 0, _VertexIndex + 1);
+F3dObject.Objects[_ObjectNumber].SetFaceLine(0, _FaceIndex + 1, _VertexIndex + 1, _VertexIndex + 2);
+F3dObject.Objects[_ObjectNumber].SetFaceLine(0, _FaceIndex + 2, _VertexIndex + 2, _VertexIndex + 3);
+F3dObject.Objects[_ObjectNumber].SetFaceLine(0, _FaceIndex + 3, _VertexIndex + 3, _VertexIndex + 4);
+F3dObject.Objects[_ObjectNumber].SetFaceLine(0, _FaceIndex + 4, _VertexIndex + 4, _VertexIndex + 5);
+F3dObject.Objects[_ObjectNumber].SetFaceLine(0, _FaceIndex + 5, _VertexIndex + 5, _VertexIndex + 0);
 
-F3dObject.Objects[ObjectId].SetFaceLine(0, FFaceIndex + 0, FVertexIndex + 0, FVertexIndex + 1);
-F3dObject.Objects[ObjectId].SetFaceLine(0, FFaceIndex + 1, FVertexIndex + 1, FVertexIndex + 2);
-F3dObject.Objects[ObjectId].SetFaceLine(0, FFaceIndex + 2, FVertexIndex + 2, FVertexIndex + 3);
-F3dObject.Objects[ObjectId].SetFaceLine(0, FFaceIndex + 3, FVertexIndex + 3, FVertexIndex + 4);
-F3dObject.Objects[ObjectId].SetFaceLine(0, FFaceIndex + 4, FVertexIndex + 4, FVertexIndex + 5);
-F3dObject.Objects[ObjectId].SetFaceLine(0, FFaceIndex + 5, FVertexIndex + 5, FVertexIndex + 0);
+_VertexIndex += 6;
+_FaceIndex += 6;
 
-FVertexIndex += 6;
-FFaceIndex += 6;
-
-AfterPushingPoligonData(ObjectId, FThreadsEnable, FVertexIndex);
+AfterPushingPoligonData(_ObjectNumber, FThreadsEnable, _VertexIndex);
 end;
 
 end.

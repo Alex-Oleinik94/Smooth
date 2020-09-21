@@ -29,13 +29,13 @@ type
 		F3dObject       : TSCustomModel;
 		F3dObjectsInfo  : TSUInt8List;
 		F3dObjectsReady : TSBoolean;
-		FShift          : TSFractalIndexInt;
+		FPolygonsShift  : TSFractalIndexInt;
 		
-		FLightSource              : TSVertex3f;
-		FLightSourceAbs           : TSSingle;
+		FLightSource    : TSVertex3f;
+		FLightSourceAbs : TSSingle;
 		FLightSourceTrigonometry  : TSVector3d;
-		FLightingEnable   : TSBoolean;
-		FCamera           : TSCamera;
+		FLightingEnable : TSBoolean;
+		FCamera         : TSCamera;
 		
 		FEnableVBO      : TSBoolean;
 		FClearVBOAfterLoad : TSBoolean;
@@ -47,6 +47,7 @@ type
 		procedure CkeckConstructedObjects();
 		procedure PaintObject();
 		procedure SaveObject();
+		function CalculatePolygonsShift() : TSUInt64; virtual;
 			public
 		procedure DeleteRenderResources();override;
 		procedure LoadRenderResources();override;
@@ -199,8 +200,8 @@ end;
 
 procedure TS3DFractal.AfterPushingPoligonData(var _ObjectNumber:TSFractalIndexInt;const _DoAtThreads:Boolean;var _VertexIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
-if ((HasIndexes) and ((_VertexIndex div F3dObject.Objects[_ObjectNumber].GetPoligoneInt(F3dObject.Objects[_ObjectNumber].PoligonesType[0]))>=FShift))
-or ((not HasIndexes) and ((_VertexIndex div F3dObject.Objects[_ObjectNumber].GetPoligoneInt(F3dObject.Objects[_ObjectNumber].ObjectPoligonesType))>=FShift))
+if ((HasIndexes) and ((_VertexIndex div F3dObject.Objects[_ObjectNumber].GetPoligoneInt(F3dObject.Objects[_ObjectNumber].PoligonesType[0]))>=FPolygonsShift))
+or ((not HasIndexes) and ((_VertexIndex div F3dObject.Objects[_ObjectNumber].GetPoligoneInt(F3dObject.Objects[_ObjectNumber].ObjectPoligonesType))>=FPolygonsShift))
  then
 	begin
 	if (not _DoAtThreads) and FEnableVBO then
@@ -213,14 +214,14 @@ or ((not HasIndexes) and ((_VertexIndex div F3dObject.Objects[_ObjectNumber].Get
 	_VertexIndex:=0;
 	if FEnableVBO and ((_ObjectNumber>=0) and (_ObjectNumber<=F3dObject.QuantityObjects-1)) and (F3dObjectsInfo[_ObjectNumber]=S_FALSE) and (F3dObject.Objects[_ObjectNumber].QuantityVertices=0) then
 		begin
-		Set3dObjectArLength(_ObjectNumber,FShift,F3dObject.Objects[_ObjectNumber].GetFaceLength(FShift));
+		Set3dObjectArLength(_ObjectNumber,FPolygonsShift,F3dObject.Objects[_ObjectNumber].GetFaceLength(FPolygonsShift));
 		end;
 	end;
 end;
 
 procedure TS3DFractal.AfterPushingPoligonData(var _ObjectNumber:TSFractalIndexInt;const _DoAtThreads:Boolean;var _VertexIndex,_FaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
-if _FaceIndex>=FShift then
+if _FaceIndex>=FPolygonsShift then
 	begin
 	if (not _DoAtThreads) and FEnableVBO then
 		begin
@@ -233,7 +234,7 @@ if _FaceIndex>=FShift then
 	_FaceIndex:=0;
 	if FEnableVBO and ((_ObjectNumber>=0) and (_ObjectNumber<=F3dObject.QuantityObjects-1)) and (F3dObjectsInfo[_ObjectNumber]=S_FALSE) and (F3dObject.Objects[_ObjectNumber].QuantityVertices=0) then
 		begin
-		Set3dObjectArLength(_ObjectNumber,FShift,F3dObject.Objects[_ObjectNumber].GetFaceLength(FShift));
+		Set3dObjectArLength(_ObjectNumber,FPolygonsShift,F3dObject.Objects[_ObjectNumber].GetFaceLength(FPolygonsShift));
 		end;
 	end;
 end;
@@ -241,10 +242,7 @@ end;
 procedure TS3DFractal.Construct3dObjects(NumberOfPolygons:Int64;const PoligoneType:LongWord;const VVertexType:TS3dObjectVertexType = S3dObjectVertexType3f;const VertexMultiplier : TSByte = 0);
 // VertexMultiplier ?
 begin
-if (Render = nil) or (Render.RenderType in [SRenderDirectX9,SRenderDirectX8]) then
-	FShift := 4608*2
-else
-	FShift:=336384;
+FPolygonsShift := CalculatePolygonsShift();
 while NumberOfPolygons<>0 do
 	begin
 	SetLength(F3dObjectsInfo,Length(F3dObjectsInfo)+1);
@@ -266,7 +264,7 @@ while NumberOfPolygons<>0 do
 		begin
 		F3dObject.LastObject().PoligonesType[0]:=F3dObject.LastObject().ObjectPoligonesType;
 		end;
-	if NumberOfPolygons<=FShift then
+	if NumberOfPolygons<=FPolygonsShift then
 		begin
 		if (PoligoneType=SR_QUADS) and (Render.RenderType<>SRenderOpenGL) then
 			if VertexMultiplier = 0 then
@@ -288,19 +286,19 @@ while NumberOfPolygons<>0 do
 		begin
 		if (PoligoneType=SR_QUADS) and (Render.RenderType<>SRenderOpenGL) then
 			if VertexMultiplier = 0 then
-				Set3dObjectArLength(F3dObject.QuantityObjects-1,FShift*2,
-					TS3DObject.GetFaceLength(FShift,SR_QUADS))
+				Set3dObjectArLength(F3dObject.QuantityObjects-1,FPolygonsShift*2,
+					TS3DObject.GetFaceLength(FPolygonsShift,SR_QUADS))
 			else
-				Set3dObjectArLength(F3dObject.QuantityObjects-1,FShift*2,
-					FShift*VertexMultiplier)
+				Set3dObjectArLength(F3dObject.QuantityObjects-1,FPolygonsShift*2,
+					FPolygonsShift*VertexMultiplier)
 		else
 			if VertexMultiplier = 0 then
-				Set3dObjectArLength(F3dObject.QuantityObjects-1,FShift,
-					TS3DObject.GetFaceLength(FShift,F3dObject.Objects[F3dObject.QuantityObjects-1].ObjectPoligonesType))
+				Set3dObjectArLength(F3dObject.QuantityObjects-1,FPolygonsShift,
+					TS3DObject.GetFaceLength(FPolygonsShift,F3dObject.Objects[F3dObject.QuantityObjects-1].ObjectPoligonesType))
 			else
-				Set3dObjectArLength(F3dObject.QuantityObjects-1,FShift,
-					FShift*VertexMultiplier);
-		NumberOfPolygons-=FShift;
+				Set3dObjectArLength(F3dObject.QuantityObjects-1,FPolygonsShift,
+					FPolygonsShift*VertexMultiplier);
+		NumberOfPolygons-=FPolygonsShift;
 		end;
 	end;
 end;
@@ -315,6 +313,15 @@ if FHasIndexes then
 F3dObject.Objects[_ObjectNumber].SetVertexLength(LVertices);
 end;
 
+function TS3DFractal.CalculatePolygonsShift() : TSUInt64;
+begin
+Result := 4608; // 2^9 • 3^2
+if (Render = nil) or (Render.RenderType in [SRenderDirectX9, SRenderDirectX8]) then
+	Result *= 2 // 2^10 • 3^2
+else
+	Result *= 73; // 2^9 • 3^2 • 73
+end;
+
 constructor TS3DFractal.Create();
 begin
 inherited;
@@ -326,10 +333,7 @@ F3dObject := nil;
 FEnableVBO := Render.SupportedGraphicalBuffers();
 FClearVBOAfterLoad := True;
 FHasIndexes := True;
-if (Render = nil) or (Render.RenderType in [SRenderDirectX9, SRenderDirectX8]) then
-	FShift := 4608 * 2
-else
-	FShift := 336384;
+FPolygonsShift := CalculatePolygonsShift();
 F3dObjectsInfo := nil;
 F3dObjectsReady := True;
 FEnableColors := True;
