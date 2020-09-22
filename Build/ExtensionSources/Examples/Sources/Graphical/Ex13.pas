@@ -46,7 +46,6 @@ type
 		class function ClassName():TSString;override;
 		class function Supported(const _Context : ISContext) : TSBoolean; override;
 			public
-		procedure KeyControl();
 		function GetVertexShaderSource():TSString;
 		function GetFragmentShaderSource(const VTexturesCount : TSLongWord):TSString;
 		procedure AddModels(const VCount : TIndex);
@@ -239,8 +238,9 @@ if Render.SupportedShaders() then
 	
 	FCamera:=TSCamera.Create();
 	FCamera.SetContext(Context);
-	FCamera.ViewMode := S_VIEW_LOOK_AT_OBJECT;
-	FCamera.Up:=SVertex3fImport(0,0,1);
+	FCamera.ViewMode := SMotileObjective;
+	FCamera.Motile := False;
+	FCamera.Up := SVertex3fImport(0,0,1);
 	FCamera.Location:=SVertex3fImport(0,-350,100);
 	FCamera.View:=(SVertex3fImport(0,0,0)-SVertex3fImport(0,-350,100)).Normalized();
 	FCamera.Location := FCamera.Location / ScaleForDepth;
@@ -376,7 +376,7 @@ var
 begin
 if Render.SupportedShaders() then
 	begin
-	FCamera.CallAction();
+	FCamera.InitMatrixAndMove();
 	FRotateAngle += Context.ElapsedTime/10;
 	if (not Context.CursorCentered) then
 		Render.Rotatef(FRotateAngle,FCamera.Up.x,FCamera.Up.y,FCamera.Up.z);
@@ -418,8 +418,6 @@ if Render.SupportedShaders() then
 	Render.UseProgram(0);
 	Render.Enable(SR_BLEND);
 	
-	//KeyControl();
-	
 	FFPS.Paint();
 	end
 else
@@ -436,45 +434,6 @@ else
 		SVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height + 00) div 2),
 		SVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 20) div 2));
 	end;
-end;
-
-procedure TSExample13.KeyControl();
-const
-	RotateConst = 0.002;
-var
-	Q, E : TSBoolean;
-	RotateZ : TSFloat = 0;
-begin
-if (Context.KeyPressed and (Context.KeyPressedChar = #27) and (Context.KeyPressedType = SUpKey)) then
-	begin
-	Context.CursorCentered := not Context.CursorCentered;
-	Context.ShowCursor(not Context.CursorCentered);
-	end;
-
-Q := Context.KeysPressed('Q');
-E := Context.KeysPressed('E');
-if (Q xor E) then
-	begin
-	if Q then
-		RotateZ := Context.ElapsedTime*2
-	else
-		RotateZ := -Context.ElapsedTime*2;
-	end;
-
-if (Context.KeysPressed('W')) then
-	FCamera.Move(Context.ElapsedTime*0.7);
-if (Context.KeysPressed('S')) then
-	FCamera.Move(-Context.ElapsedTime*0.7);
-if (Context.KeysPressed('A')) then
-	FCamera.MoveSidewards(-Context.ElapsedTime*0.7);
-if (Context.KeysPressed('D')) then
-	FCamera.MoveSidewards(Context.ElapsedTime*0.7);
-if (Context.KeysPressed(' ')) then
-	FCamera.MoveUp(Context.ElapsedTime*0.7);
-if (Context.KeysPressed('X')) then
-	FCamera.MoveUp(-Context.ElapsedTime*0.7);
-if (Context.CursorCentered) then
-	FCamera.Rotate(Context.CursorPosition(SDeferenseCursorPosition).y*RotateConst,Context.CursorPosition(SDeferenseCursorPosition).x/Render.Width*Render.Height*RotateConst,RotateZ*RotateConst);
 end;
 
 {$IFNDEF ENGINE}

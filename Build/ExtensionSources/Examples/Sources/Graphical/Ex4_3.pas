@@ -169,7 +169,7 @@ end;
 
 procedure TSExample4_3.Paint();
 begin
-FCamera.CallAction();
+FCamera.InitMatrixAndMove();
 
 Render.BindBufferARB(SR_ARRAY_BUFFER_ARB,FBufferArray);
 

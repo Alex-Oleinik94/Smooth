@@ -3266,7 +3266,7 @@ FRelefRedactor.Relief := @FRelief;
 
 FCamera:=TSCamera.Create();
 FCamera.SetContext(Context);
-FCamera.Zum := Render.Height/Render.Width;
+//FCamera.Zum := Render.Height/Render.Width;
 
 FTahomaFont := SCreateFontFromFile(Context, SDefaultFontFileName);
 
@@ -3475,7 +3475,7 @@ if FStartingFlag = 2 then
 if F3dObject <> nil then
 	begin
 	if FSourseChangeFlag=0 then
-		FCamera.Change();
+		FCamera.Move();
 	FCamera.InitMatrix();
 	F3dObject.Paint();
 	if (FSecheniePanel<>nil) then

@@ -103,8 +103,7 @@ inherited Create(VContext);
 
 FCamera:=TSCamera.Create();
 FCamera.SetContext(Context);
-FCamera.Zum := 6;
-FCamera.RotateX := 90;
+FCamera.Location := TSVector3f.Create(6, 6, -6) * 3.6;
 
 FPhysicsTimeCount:=Context.Width;
 SetLength(FPhysicsTime,FPhysicsTimeCount);
@@ -153,7 +152,7 @@ var
 	dt1,dt2   : TSDateTime;
 
 begin
-FCamera.CallAction();
+FCamera.InitMatrixAndMove();
 Render.Color3f(1,1,1);
 dt1.Get();
 if FPhysics<>nil then

@@ -9,60 +9,54 @@ uses
 	,SmoothCommonStructs
 	,SmoothContextClasses
 	,SmoothMatrix
+	,SmoothMath
 	,SmoothCasesOfPrint
 	,SmoothContextInterface
 	;
-const
-	S_VIEW_WATCH_OBJECT        = $001001;
-	S_VIEW_LOOK_AT_OBJECT      = $001002;
 type
-	TSMode = TSUInt32;
+	TSCameraMatrixMode = TSUInt32;
+	TSCameraViewMode = (SMotileObject, SMotileObjective);
+	TSCameraFloat  = TSFloat32;
+	TSCameraVector = TSVector3f;
 	TSCamera = class(TSContextObject)
 			public
 		constructor Create();override;
-		constructor Create(const _Context : ISContext; const _MatrixMode : TSMode);
+		constructor Create(const _Context : ISContext; const _MatrixMode : TSCameraMatrixMode);
 			private
-		FMatrixMode: TSMode; // S_3D, S_2D, S_ORTHO_3D
-		FViewMode  : TSMode; // S_VIEW_...
-			// for S_VIEW_WATCH_OBJECT
-		FRotateX, FRotateY, FTranslateX, FTranslateY, FZum : TSSingle;
-			// for S_VIEW_LOOK_AT_OBJECT
-		FLocation : TSVertex3f;
-		FView   :TSVertex3f;
-		FUp : TSVertex3f;
-		FChangingLookAtObject : TSBoolean;
+		FMatrixMode: TSCameraMatrixMode; // S_3D, S_2D, S_ORTHO_3D
+		FViewMode  : TSCameraViewMode; // SMotileObject, SMotileObjective
+		FLocation, FView, FUp : TSCameraVector; // Location is point, View and Up is vectors
+		FMotile : TSBoolean;
+			protected
+		procedure MoveMotileObjective();
+		procedure MoveMotileObject();
+		procedure Move(const Param : TSCameraFloat); overload;
+		procedure MoveSidewards(const Param : TSCameraFloat);
+		procedure MoveUp(const Param : TSCameraFloat);
+		procedure Rotate(const x, y, z : TSCameraFloat);
+		procedure SetMotile(const _Motile : TSBoolean);
+		procedure SetViewMode(const _ViewMode : TSCameraViewMode);
+		procedure SetLocation(const _Location : TSCameraVector);
 			public
-		procedure Change();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Move();{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 		procedure ViewInfo(const PredString : TSString = ''; const CasesOfPrint : TSCasesOfPrint = [SCaseLog, SCasePrint]); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure InitMatrix();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Clear();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure CallAction();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function GetProjectionMatrix() : TSMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function GetModelViewMatrix() : TSMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-			public
+		procedure InitMatrixAndMove();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function ProjectionMatrix() : TSMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function ModelViewMatrix() : TSMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure InitViewModeComboBox();virtual;abstract;
-		procedure Move(const Param : TSSingle);
-		procedure MoveSidewards(const Param : TSSingle);
-		procedure MoveUp(const Param : TSSingle);
-		procedure Rotate(const x, y, z : TSSingle);
 			public
-		property RotateX : TSFloat read FRotateX write FRotateX;
-		property RotateY : TSFloat read FRotateY write FRotateY;
-		property TranslateX : TSFloat read FTranslateX write FTranslateX;
-		property TranslateY : TSFloat read FTranslateY write FTranslateY;
-		property Zum : TSFloat read FZum write FZum;
-			public
-		property Up        : TSVertex3f read FUp         write FUp;
-		property Location  : TSVertex3f read FLocation   write FLocation;
-		property Position  : TSVertex3f read FLocation   write FLocation;
-		property View      : TSVertex3f read FView       write FView;
-		property MatrixMode: TSMode     read FMatrixMode write FMatrixMode;
-		property ViewMode  : TSMode     read FViewMode   write FViewMode;
-		property ChangingLookAtObject : TSBoolean read FChangingLookAtObject write FChangingLookAtObject;
+		property Up        : TSCameraVector read FUp         write FUp;
+		property Location  : TSCameraVector read FLocation   write SetLocation;
+		property View      : TSCameraVector read FView       write FView;
+		property MatrixMode: TSCameraMatrixMode read FMatrixMode write FMatrixMode;
+		property ViewMode  : TSCameraViewMode read FViewMode   write SetViewMode;
+		property Motile    : TSBoolean  read FMotile     write SetMotile;
 		end;
 
-function SStrMatrixMode(const Mode : TSMode) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SStrViewMode(const Mode : TSMode) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SStrMatrixMode(const Mode : TSCameraMatrixMode) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SStrViewMode(const Mode : TSCameraViewMode) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SKill(var Camera : TSCamera); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
@@ -85,23 +79,53 @@ if Camera <> nil then
 	end;
 end;
 
-function SStrMatrixMode(const Mode : TSMode) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SStrMatrixMode(const Mode : TSCameraMatrixMode) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 case Mode of
-S_3D       : Result := 'S_3D';
-S_2D       : Result := 'S_2D';
+S_3D : Result := 'S_3D';
+S_2D : Result := 'S_2D';
 S_3D_ORTHO : Result := 'S_3D_ORTHO';
-else          Result := 'INVALID(' + SStr(Mode) + ')';
+else Result := 'UNKNOWN(' + SStr(Mode) + ')';
 end;
 end;
 
-function SStrViewMode(const Mode : TSMode) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SStrViewMode(const Mode : TSCameraViewMode) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 case Mode of
-S_VIEW_WATCH_OBJECT   : Result := 'S_VIEW_WATCH_OBJECT';
-S_VIEW_LOOK_AT_OBJECT : Result := 'S_VIEW_LOOK_AT_OBJECT';
-else                     Result := 'INVALID(' + SStr(Mode) + ')';
+SMotileObject   : Result := 'SMotileObject';
+SMotileObjective : Result := 'SMotileObjective';
+else Result := 'UNKNOWN(' + SStr(TSMaxEnum(Mode)) + ')';
 end;
+end;
+
+// TSCamera
+
+procedure TSCamera.SetLocation(const _Location : TSCameraVector);
+begin
+FLocation := _Location;
+if (FViewMode = SMotileObject) then
+	FView := -FLocation.Normalized();
+end;
+
+procedure TSCamera.SetViewMode(const _ViewMode : TSCameraViewMode);
+begin
+FViewMode := _ViewMode;
+if (FViewMode = SMotileObject) and (Abs(FLocation) + Abs(FView) + Abs(FUp) < 0.00001) then
+	begin
+	FLocation.Import(0, 0, 10);
+	FUp.Import(0, 1, 0);
+	FView.Import(0, 0, -1);
+	end;
+end;
+
+procedure TSCamera.SetMotile(const _Motile : TSBoolean);
+var
+	TempBool : TSBoolean;
+begin
+FMotile := _Motile;
+TempBool := (SMotileObjective = FViewMode) and FMotile;
+Context.CursorCentered := TempBool;
+Context.ShowCursor(not TempBool);
 end;
 
 procedure TSCamera.ViewInfo(const PredString : TSString = ''; const CasesOfPrint : TSCasesOfPrint = [SCaseLog, SCasePrint]); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -109,36 +133,24 @@ begin
 SHint([PredString, 'TSCamera__ViewInfo(..).'], CasesOfPrint);
 SHint([PredString,     '  MatrixMode     = "', SStrMatrixMode(FMatrixMode), '"'], CasesOfPrint);
 SHint([PredString,     '  ViewMode       = "', SStrViewMode(FViewMode), '"'], CasesOfPrint);
-case FViewMode of
-S_VIEW_LOOK_AT_OBJECT :
-	begin
-	SHint([PredString, '  ChangingLookAt = "', FChangingLookAtObject, '"'], CasesOfPrint);
-	SHint([PredString, '  Location       = "', SStrVector3f(FLocation, 7), '"'], CasesOfPrint);
-	SHint([PredString, '  Up             = "', SStrVector3f(FUp, 7), '"'], CasesOfPrint);
-	SHint([PredString, '  View           = "', SStrVector3f(FView, 7), '"'], CasesOfPrint);
-	end;
-S_VIEW_WATCH_OBJECT :
-	begin
-	SHint([PredString, '  Rotate.X       = "', SStrReal(FRotateX, 7), '"'], CasesOfPrint);
-	SHint([PredString, '  Rotate.Y       = "', SStrReal(FRotateY, 7), '"'], CasesOfPrint);
-	SHint([PredString, '  Translate.X    = "', SStrReal(FTranslateX, 7), '"'], CasesOfPrint);
-	SHint([PredString, '  Translate.Y    = "', SStrReal(FTranslateY, 7), '"'], CasesOfPrint);
-	SHint([PredString, '  Zum            = "', SStrReal(FZum, 7), '"'], CasesOfPrint);
-	end;
-end;
+
+SHint([PredString, '  Motile = "', FMotile, '"'], CasesOfPrint);
+SHint([PredString, '  Location       = "', SStrVector3f(FLocation, 7), '"'], CasesOfPrint);
+SHint([PredString, '  Up             = "', SStrVector3f(FUp, 7), '"'], CasesOfPrint);
+SHint([PredString, '  View           = "', SStrVector3f(FView, 7), '"'], CasesOfPrint);
 end;
 
-function TSCamera.GetProjectionMatrix() : TSMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSCamera.ProjectionMatrix() : TSMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Render.GetFloatv(SR_PROJECTION_MATRIX, @Result);
 end;
 
-function TSCamera.GetModelViewMatrix() : TSMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSCamera.ModelViewMatrix() : TSMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Render.GetFloatv(SR_MODELVIEW_MATRIX, @Result);
 end;
 
-constructor TSCamera.Create(const _Context : ISContext; const _MatrixMode : TSMode);
+constructor TSCamera.Create(const _Context : ISContext; const _MatrixMode : TSCameraMatrixMode);
 begin
 Create();
 Context := _Context;
@@ -149,87 +161,82 @@ constructor TSCamera.Create();
 begin
 inherited;
 FMatrixMode := S_3D;
-FViewMode := S_VIEW_WATCH_OBJECT;
-FLocation.Import();
-FView.Import();
-FUp.Import(0,0,0);
+FMotile := True;
 Clear();
-FChangingLookAtObject := False;
+ViewMode := SMotileObject;
 end;
 
-procedure TSCamera.Change();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSCamera.MoveMotileObjective();
 const
 	RotateConst = 0.002;
 var
 	Q, E : TSBoolean;
-	RotateZ : TSFloat = 0;
-	o : TSFloat;
+	ElapsedTimeMiltiplier, MoveValue, RotateZ : TSFloat32;
 begin
-if (Context.KeysPressed(S_SHIFT_KEY) and (Context.KeyPressed) and (Context.KeyPressedChar = 'W') and (Context.KeyPressedType = SDownKey) and (Context.KeysPressed('C'))) then
-	ViewInfo();
-case FViewMode of
-S_VIEW_LOOK_AT_OBJECT: if FChangingLookAtObject then
+if FMotile then
 	begin
 	Q := Context.KeysPressed('Q');
 	E := Context.KeysPressed('E');
-	o := Byte(not Context.KeysPressed(S_SHIFT_KEY))*0.6+0.02+0.07*Byte(not Context.KeysPressed(S_CTRL_KEY));
-	if (Q xor E) then
-		begin
-		if Q then
-			RotateZ := Context.ElapsedTime*o*4
-		else
-			RotateZ := -Context.ElapsedTime*o*4;
-		end;
-
-	if (Context.KeysPressed('W')) then
-		Move(Context.ElapsedTime*o);
-	if (Context.KeysPressed('S')) then
-		Move(-Context.ElapsedTime*o);
-	if (Context.KeysPressed('A')) then
-		MoveSidewards(-Context.ElapsedTime*o);
-	if (Context.KeysPressed('D')) then
-		MoveSidewards(Context.ElapsedTime*o);
-	if (Context.KeysPressed(' ')) then
-		MoveUp(Context.ElapsedTime*o);
-	if (Context.KeysPressed('X')) then
-		MoveUp(-Context.ElapsedTime*o);
-	Rotate(Context.CursorPosition(SDeferenseCursorPosition).y*RotateConst,Context.CursorPosition(SDeferenseCursorPosition).x/Context.Width*Context.Height*RotateConst,RotateZ*RotateConst);
+	ElapsedTimeMiltiplier := 0.02 + 0.6*TSUInt8(not Context.KeysPressed(S_SHIFT_KEY)) + 0.07*TSUInt8(not Context.KeysPressed(S_CTRL_KEY));
+	MoveValue := Context.ElapsedTime * ElapsedTimeMiltiplier;
+	RotateZ :=  TSUInt8(Q xor E) * (TSUInt8(Q) * 2 - 1) * MoveValue * 4;
+	Move(MoveValue * (TSUInt8(Context.KeysPressed('W')) - TSUInt8(Context.KeysPressed('S'))));
+	MoveSidewards(MoveValue * (TSUInt8(Context.KeysPressed('D')) - TSUInt8(Context.KeysPressed('A'))));
+	MoveUp(MoveValue * (TSUInt8(Context.KeysPressed(' ')) - TSUInt8(Context.KeysPressed('X'))));
+	Rotate(
+		Context.CursorPosition(SDeferenseCursorPosition).y*RotateConst,
+		Context.CursorPosition(SDeferenseCursorPosition).x/Context.Width*Context.Height*RotateConst,
+		RotateZ*RotateConst)
+	//Rotate(0, 0, RotateZ*RotateConst);
 	end;
-S_VIEW_WATCH_OBJECT:
+end;
+
+procedure TSCamera.MoveMotileObject();
+const
+	RotateConst = 0.005;
+var
+	Sidewards, LocationVector : TSCameraVector;
+	LocationAbs, X, Y : TSFloat32;
+begin
+if FMotile then
 	begin
 	if Context.CursorWheel=SUpCursorWheel then
-		begin
-		FZum*=0.9;
-		end;
+		FLocation*=0.9;
 	if Context.CursorWheel=SDownCursorWheel then
-		begin
-		FZum*=1/0.9;
-		end;
-	if Context.CursorKeysPressed(SLeftCursorButton) then
-		begin
-		FRotateY+=Context.CursorPosition(SDeferenseCursorPosition).x/3;
-		FRotateX+=Context.CursorPosition(SDeferenseCursorPosition).y/3;
-		end;
-	if Context.CursorKeysPressed(SRightCursorButton) then
-		begin
-		FTranslateY+=   (-Context.CursorPosition(SDeferenseCursorPosition).y/100)*FZum;
-		FTranslateX+=   ( Context.CursorPosition(SDeferenseCursorPosition).x/100)*FZum;
-		end;
+		FLocation*=1/0.9;
 	if (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedChar=char(189)) and (Context.KeyPressedType=SDownKey)) then
-		begin
-		FZum*=1/0.89;
-		end;
+		FLocation*=1/0.89;
 	if  (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedByte=187) and (Context.KeyPressedType=SDownKey))  then
+		FLocation*=0.89;
+	X := -TSUInt8(Context.CursorKeysPressed(SLeftCursorButton)) * Context.CursorPosition(SDeferenseCursorPosition).y * RotateConst;
+	Y := TSUInt8(Context.CursorKeysPressed(SLeftCursorButton)) * Context.CursorPosition(SDeferenseCursorPosition).x * RotateConst;
+	if Abs(X) + Abs(Y) > 0.0001 then
 		begin
-		FZum*=0.89;
+		LocationAbs := Abs(FLocation);
+		LocationVector := FLocation / LocationAbs;
+		if x<>0 then
+			begin
+			Sidewards := (LocationVector * Up).Normalized();
+			LocationVector := SRotatePoint(LocationVector, Sidewards, -X).Normalized();
+			Up := (Sidewards * LocationVector).Normalized();
+			end;
+		if y<>0 then
+			LocationVector := SRotatePoint(LocationVector, Up, -Y).Normalized();
+		FLocation := LocationVector * LocationAbs;
+		FView := -LocationVector;
 		end;
 	end;
+end;
+
+procedure TSCamera.Move();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+case FViewMode of
+SMotileObjective: MoveMotileObjective();
+SMotileObject: MoveMotileObject();
 end;
 end;
 
 procedure TSCamera.InitMatrix(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
-procedure InitLookAt();
 var
 	Matrix : TSMatrix4x4;
 begin
@@ -239,28 +246,14 @@ Matrix := SGetLookAtMatrix(FLocation, FView + FLocation, FUp);
 Render.MultMatrixf(@Matrix);
 end;
 
+procedure TSCamera.Move(const Param : TSCameraFloat);
 begin
-case FViewMode of
-S_VIEW_WATCH_OBJECT :
-	begin
-	Render.InitMatrixMode(FMatrixMode, FZum);
-	Render.Translatef(FTranslateX, FTranslateY, -10 * FZum);
-	Render.Rotatef(FRotateX, 1, 0, 0);
-	Render.Rotatef(FRotateY, 0, 1, 0);
-	end;
-S_VIEW_LOOK_AT_OBJECT :
-	InitLookAt();
-end;
+FLocation := FLocation + FView * Param;
 end;
 
-procedure TSCamera.Move(const Param : TSSingle);
-begin
-Position := Position + FView * Param;
-end;
-
-procedure TSCamera.Rotate(const x, y, z : TSSingle);
+procedure TSCamera.Rotate(const x, y, z : TSCameraFloat);
 var
-	Sidewards : TSVertex3f;
+	Sidewards : TSCameraVector;
 begin
 if x<>0 then
 	begin
@@ -274,29 +267,31 @@ if z<>0 then
 	Up := SRotatePoint(Up, View, -Z).Normalized();
 end;
 
-procedure TSCamera.MoveUp(const Param : TSSingle);
+procedure TSCamera.MoveUp(const Param : TSCameraFloat);
 begin
-Position := Position + Up * Param;
+FLocation := FLocation + FUp * Param;
 end;
 
-procedure TSCamera.MoveSidewards(const Param : TSSingle);
+procedure TSCamera.MoveSidewards(const Param : TSCameraFloat);
 begin
-Position := Position + (View * Up).Normalized() * Param;
+FLocation := FLocation + (FView * FUp).Normalized() * Param;
 end;
 
-procedure TSCamera.CallAction();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSCamera.InitMatrixAndMove();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Change();
+if (Context.KeysPressed(S_SHIFT_KEY) and Context.KeysPressed('C') and 
+   Context.KeyPressed and (Context.KeyPressedChar = 'W') and (Context.KeyPressedType = SDownKey)) then
+	ViewInfo();
+
+Move();
 InitMatrix();
 end;
 
 procedure TSCamera.Clear();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-FZum:=1;
-FRotateX:=0;
-FRotateY:=0;
-FTranslateX:=0;
-FTranslateY:=0;
+FLocation.Import(0,0,0);
+FView.Import(0,0,0);
+FUp.Import(0,0,0);
 end;
 
 end.

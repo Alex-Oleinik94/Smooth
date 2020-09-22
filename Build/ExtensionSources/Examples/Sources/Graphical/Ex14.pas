@@ -36,7 +36,7 @@ uses
 	;
 
 const
-	TextureSize = 1024;
+	TextureSize = 4096;
 type
 	TSExample14 = class(TSPaintableObject)
 			public
@@ -189,8 +189,7 @@ begin
 inherited Create(VContext);
 FCamera:=TSCamera.Create();
 FCamera.Context := Context;
-FCamera.Zum := 10;
-FCamera.RotateX := 50;
+FCamera.Location := TSVector3f.Create(2.5, 10, 10) * 7;
 
 FLightPos.Import(0,0,0);
 FLightUp.Import(0,1,0);
@@ -403,12 +402,12 @@ Render.ClearColor(0,0,0,1);
 Render.Clear(SR_COLOR_BUFFER_BIT or SR_DEPTH_BUFFER_BIT);
 
 // Устанавливаем матрицы камеры
-FCamera.CallAction();
+FCamera.InitMatrixAndMove();
 
 // Сохраняем матрицы, они нам нужны для вычисления освещения
 // Инвертированная матрица используется в расчёте матрицы источника света
-FCameraProjectionMatrix := FCamera.GetProjectionMatrix();
-FCameraModelViewMatrix := FCamera.GetModelViewMatrix();
+FCameraProjectionMatrix := FCamera.ProjectionMatrix();
+FCameraModelViewMatrix := FCamera.ModelViewMatrix();
 FCameraInverseModelViewMatrix := SInverseMatrix(FCameraModelViewMatrix);
 
 FLightMatrix := FCameraInverseModelViewMatrix *

@@ -133,7 +133,7 @@ if (_Type >= 0) and (_Type <= 11) then
 	if (Spins <> FSpins) then
 		begin
 		FSpins := Spins;
-		FSpins.WriteLn();
+		//FSpins.WriteLn();
 		Construct();
 		end;
 	end;

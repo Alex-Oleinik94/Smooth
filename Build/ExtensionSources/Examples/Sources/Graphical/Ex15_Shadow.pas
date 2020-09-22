@@ -24,37 +24,37 @@ uses
 type
 	TSExample15_Shadow = class(TSContextObject)
 			public
-		constructor Create(const VContext : ISContext;const Lights : TSLongWord = 1; const BonesCount : TSLongWord = 32;const TextureBlock : TSTextureBlock = nil);
+		constructor Create(const VContext : ISContext;const Lights : TSUInt32 = 1; const BonesCount : TSUInt32 = 32;const TextureBlock : TSTextureBlock = nil);
 		destructor Destroy();override;
 		class function ClassName():TSString;override;
 			public
-		procedure BeginDrawToShadow(const LightIndex : TSLongWord = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure BeginDrawToShadow(const LightIndex : TSMaxEnum = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure EndDrawToShadow();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure BeginDrawScene();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure EndDrawScene();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure KeyboardCallback();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function GetCurrentShader():TSShaderProgram;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure UniformScrene();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure CreateTextureAndFrame(var VTexture, VFrame : TSLongWord;const TextureBlock : TSTextureBlock; const VRenderBuffer : PSLongWord = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure CreateTextureAndFrame(var VTexture, VFrame : TSUInt32;const TextureBlock : TSTextureBlock; const VRenderBuffer : PSLongWord = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			private
 		FInDrawToShadow : TSBoolean;
 		FInDrawScene    : TSBoolean;
-		FLightsCount    : TSLongWord;
+		FLightsCount    : TSUInt32;
 		
 		FLights : packed array of
 			packed record
-				FLightPos : TSVertex3f;
-				FLightEye : TSVertex3f;
-				FLightUp  : TSVertex3f;
-				FLightDir : TSVertex3f;
+				FLightPos : TSVector3f;
+				FLightEye : TSVector3f;
+				FLightUp  : TSVector3f;
+				FLightDirection : TSVector3f;
 				FLightAngle : TSFloat;
 				
-				FTexDepth  : TSLongWord;
-				FTexDepth2 : TSLongWord;
+				FTexDepth  : TSUInt32;
+				FTexDepth2 : TSUInt32;
 				
 				FFrameBufferDepth, 
 					FFrameBufferDepth2,
-					FRenderBufferDepth : TSLongWord;
+					FRenderBufferDepth : TSUInt32;
 				
 				FLightProjectionMatrix,
 					FLightModelViewMatrix,
@@ -63,19 +63,19 @@ type
 				FUniformShadowTex2D_shadowMap,
 					FUniformShadowTex2D_lightMatrix,
 					FUniformShadowTex2D_lightPos,
-					FUniformShadowTex2D_lightDir,
+					FUniformShadowTex2D_LightDirection,
 					FUniformShadowShad2D_shadowMap,
 					FUniformShadowShad2D_lightMatrix,
 					FUniformShadowShad2D_lightPos,
-					FUniformShadowShad2D_lightDir : TSLongWord;
+					FUniformShadowShad2D_LightDirection : TSUInt32;
 				
-				FUniformShadow_lightDir    : TSLongWord;
-				FUniformShadow_lightMatrix : TSLongWord;
-				FUniformShadow_lightPos    : TSLongWord;
-				FUniformShadow_shadowMap   : TSLongWord;
+				FUniformShadow_LightDirection    : TSUInt32;
+				FUniformShadow_lightMatrix : TSUInt32;
+				FUniformShadow_lightPos    : TSUInt32;
+				FUniformShadow_shadowMap   : TSUInt32;
 				end;
 		
-		FTexDepthSizeX, FTexDepthSizeY : TSLongWord;
+		FTexDepthSizeX, FTexDepthSizeY : TSUInt32;
 		// Шейдерные программы и uniform'ы
 		FShaderDepthTex2D,
 			FShaderDepthShad2D,
@@ -91,23 +91,23 @@ type
 		
 		FShaderShadow : TSShaderProgram;
 			private
-		function GetLightAngle(const index : TSLongWord):TSFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure SetLightAngle(const index : TSLongWord; const VAngle : TSFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function GetLightModelViewMatrix(const index : TSLongWord):TSMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function GetLightPos(const index : TSLongWord):TSVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure SetLightPos(const index : TSLongWord; const VPos : TSVertex3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure SetLightEye(const index : TSLongWord; const VEye : TSVertex3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure SetLightUp(const index : TSLongWord; const VUp : TSVertex3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function GetLightDir(const index : TSLongWord):TSVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetLightAngle(const Index : TSMaxEnum):TSFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetLightAngle(const Index : TSMaxEnum; const VAngle : TSFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetLightModelViewMatrix(const Index : TSMaxEnum):TSMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetLightPos(const Index : TSMaxEnum):TSVector3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetLightPos(const Index : TSMaxEnum; const VPos : TSVector3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetLightEye(const Index : TSMaxEnum; const VEye : TSVector3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetLightUp(const Index : TSMaxEnum; const VUp : TSVector3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetLightDirection(const Index : TSMaxEnum):TSVector3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
-		property LightAngle [index : TSLongWord]: TSFloat read  GetLightAngle write SetLightAngle;
+		property LightAngle [Index : TSMaxEnum]: TSFloat read  GetLightAngle write SetLightAngle;
 		property CameraProjectionMatrix : TSMatrix4x4  write FCameraProjectionMatrix;
 		property CameraModelViewMatrix  : TSMatrix4x4  write FCameraModelViewMatrix;
-		property LightModelViewMatrix [index : TSLongWord] : TSMatrix4x4  read  GetLightModelViewMatrix;
-		property LightPos [index : TSLongWord] : TSVertex3f read  GetLightPos write SetLightPos;
-		property LightEye [index : TSLongWord] : TSVertex3f write SetLightEye;
-		property LightUp  [index : TSLongWord] : TSVertex3f write SetLightUp;
-		property LightDir [index : TSLongWord] : TSVertex3f read  GetLightDir;
+		property LightModelViewMatrix [Index : TSMaxEnum] : TSMatrix4x4  read  GetLightModelViewMatrix;
+		property LightPos [Index : TSMaxEnum] : TSVector3f read  GetLightPos write SetLightPos;
+		property LightEye [Index : TSMaxEnum] : TSVector3f write SetLightEye;
+		property LightUp  [Index : TSMaxEnum] : TSVector3f write SetLightUp;
+		property LightDirection [Index : TSMaxEnum] : TSVector3f read  GetLightDirection;
 		property DrawingShadow          : TSBoolean  read  FInDrawToShadow;
 		property DrawingScene           : TSBoolean  read  FInDrawScene;
 		end;
@@ -120,44 +120,44 @@ uses
 	,SmoothContextUtils
 	;
 
-function TSExample15_Shadow.GetLightAngle(const index : TSLongWord):TSFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSExample15_Shadow.GetLightAngle(const Index : TSMaxEnum):TSFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := FLights[index].FLightAngle;
+Result := FLights[Index].FLightAngle;
 end;
 
-procedure TSExample15_Shadow.SetLightAngle(const index : TSLongWord; const VAngle : TSFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSExample15_Shadow.SetLightAngle(const Index : TSMaxEnum; const VAngle : TSFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-FLights[index].FLightAngle := VAngle;
+FLights[Index].FLightAngle := VAngle;
 end;
 
-function TSExample15_Shadow.GetLightModelViewMatrix(const index : TSLongWord):TSMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSExample15_Shadow.GetLightModelViewMatrix(const Index : TSMaxEnum):TSMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := FLights[index].FLightModelViewMatrix;
+Result := FLights[Index].FLightModelViewMatrix;
 end;
 
-function TSExample15_Shadow.GetLightPos(const index : TSLongWord):TSVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSExample15_Shadow.GetLightPos(const Index : TSMaxEnum):TSVector3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := FLights[index].FLightPos;
+Result := FLights[Index].FLightPos;
 end;
 
-procedure TSExample15_Shadow.SetLightPos(const index : TSLongWord; const VPos : TSVertex3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSExample15_Shadow.SetLightPos(const Index : TSMaxEnum; const VPos : TSVector3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-FLights[index].FLightPos := VPos;
+FLights[Index].FLightPos := VPos;
 end;
 
-procedure TSExample15_Shadow.SetLightEye(const index : TSLongWord; const VEye : TSVertex3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSExample15_Shadow.SetLightEye(const Index : TSMaxEnum; const VEye : TSVector3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-FLights[index].FLightEye := VEye;
+FLights[Index].FLightEye := VEye;
 end;
 
-procedure TSExample15_Shadow.SetLightUp(const index : TSLongWord; const VUp : TSVertex3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSExample15_Shadow.SetLightUp(const Index : TSMaxEnum; const VUp : TSVector3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-FLights[index].FLightUp := VUp;
+FLights[Index].FLightUp := VUp;
 end;
 
-function TSExample15_Shadow.GetLightDir(const index : TSLongWord):TSVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSExample15_Shadow.GetLightDirection(const Index : TSMaxEnum):TSVector3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := FLights[index].FLightDir;
+Result := FLights[Index].FLightDirection;
 end;
 
 function TSExample15_Shadow.GetCurrentShader() : TSShaderProgram; 
@@ -178,7 +178,7 @@ end;
 
 procedure TSExample15_Shadow.KeyboardCallback();
 var
-	i : TSLongWord;
+	Index : TSMaxEnum;
 begin
 if (Context.KeyPressed and (Context.KeyPressedType = SUpKey)) then
 	case Context.KeyPressedChar of
@@ -187,12 +187,12 @@ if (Context.KeyPressed and (Context.KeyPressedType = SUpKey)) then
 	'3' : 
 		begin
 		Render.Enable(SR_TEXTURE_2D);
-		for i := 0 to FLightsCount - 1 do
+		for Index := 0 to FLightsCount - 1 do
 			begin
-			Render.BindTexture(SR_TEXTURE_2D,FLights[i].FTexDepth);
+			Render.BindTexture(SR_TEXTURE_2D,FLights[Index].FTexDepth);
 			Render.TexParameteri(SR_TEXTURE_2D,SR_TEXTURE_MAG_FILTER, SR_LINEAR);
 			Render.TexParameteri(SR_TEXTURE_2D,SR_TEXTURE_MIN_FILTER, SR_LINEAR);
-			Render.BindTexture(SR_TEXTURE_2D,FLights[i].FTexDepth2);
+			Render.BindTexture(SR_TEXTURE_2D,FLights[Index].FTexDepth2);
 			Render.TexParameteri(SR_TEXTURE_2D,SR_TEXTURE_MAG_FILTER, SR_LINEAR);
 			Render.TexParameteri(SR_TEXTURE_2D,SR_TEXTURE_MIN_FILTER, SR_LINEAR);
 			end;
@@ -202,12 +202,12 @@ if (Context.KeyPressed and (Context.KeyPressedType = SUpKey)) then
 	'4' : 
 		begin
 		Render.Enable(SR_TEXTURE_2D);
-		for i := 0 to FLightsCount - 1 do
+		for Index := 0 to FLightsCount - 1 do
 			begin
-			Render.BindTexture(SR_TEXTURE_2D,FLights[i].FTexDepth);
+			Render.BindTexture(SR_TEXTURE_2D,FLights[Index].FTexDepth);
 			Render.TexParameteri(SR_TEXTURE_2D,SR_TEXTURE_MAG_FILTER, SR_NEAREST);
 			Render.TexParameteri(SR_TEXTURE_2D,SR_TEXTURE_MIN_FILTER, SR_NEAREST);
-			Render.BindTexture(SR_TEXTURE_2D,FLights[i].FTexDepth2);
+			Render.BindTexture(SR_TEXTURE_2D,FLights[Index].FTexDepth2);
 			Render.TexParameteri(SR_TEXTURE_2D,SR_TEXTURE_MAG_FILTER, SR_NEAREST);
 			Render.TexParameteri(SR_TEXTURE_2D,SR_TEXTURE_MIN_FILTER, SR_NEAREST);
 			end;
@@ -217,7 +217,7 @@ if (Context.KeyPressed and (Context.KeyPressedType = SUpKey)) then
 	end;
 end;
 
-procedure TSExample15_Shadow.CreateTextureAndFrame(var VTexture, VFrame : TSLongWord;const TextureBlock : TSTextureBlock; const VRenderBuffer : PSLongWord = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSExample15_Shadow.CreateTextureAndFrame(var VTexture, VFrame : TSUInt32;const TextureBlock : TSTextureBlock; const VRenderBuffer : PSLongWord = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if TextureBlock = nil then
 	Render.GenTextures(1, @VTexture)
@@ -263,12 +263,12 @@ else
 Render.BindFrameBuffer(SR_FRAMEBUFFER_EXT, 0);
 end;
 
-constructor TSExample15_Shadow.Create(const VContext : ISContext;const Lights : TSLongWord = 1; const BonesCount : TSLongWord = 32; const TextureBlock : TSTextureBlock = nil);
+constructor TSExample15_Shadow.Create(const VContext : ISContext;const Lights : TSUInt32 = 1; const BonesCount : TSUInt32 = 32; const TextureBlock : TSTextureBlock = nil);
 const
 	TexSize = 4096;
 	Example15Dir = SExamplesDirectory + DirectorySeparator + '15' +DirectorySeparator;
 var
-	i : TSLongWord;
+	Index : TSMaxEnum;
 begin
 FLightsCount := 0;
 inherited Create(VContext);
@@ -287,29 +287,29 @@ FTexDepthSizeY := TexSize;
 
 SetLength(FLights,FLightsCount);
 
-for i := 0 to FLightsCount - 1 do
+for Index := 0 to FLightsCount - 1 do
 	begin
-	FLights[i].FTexDepth  := 0;
-	FLights[i].FTexDepth2 := 0;
-	FLights[i].FLightAngle := PI/2;
-	FLights[i].FLightPos.Import(0,0,0);
-	FLights[i].FLightUp.Import(0,1,0);
-	FLights[i].FLightEye.Import(0,0,0);
-	FLights[i].FFrameBufferDepth  := 0;
-	FLights[i].FFrameBufferDepth2 := 0;
-	FLights[i].FRenderBufferDepth := 0;
+	FLights[Index].FTexDepth  := 0;
+	FLights[Index].FTexDepth2 := 0;
+	FLights[Index].FLightAngle := PI/2;
+	FLights[Index].FLightPos.Import(0,0,0);
+	FLights[Index].FLightUp.Import(0,1,0);
+	FLights[Index].FLightEye.Import(0,0,0);
+	FLights[Index].FFrameBufferDepth  := 0;
+	FLights[Index].FFrameBufferDepth2 := 0;
+	FLights[Index].FRenderBufferDepth := 0;
 	
-	FLights[i].FUniformShadowShad2D_lightDir    := 0;
-	FLights[i].FUniformShadowShad2D_lightMatrix := 0;
-	FLights[i].FUniformShadowShad2D_lightPos    := 0;
-	FLights[i].FUniformShadowShad2D_shadowMap   := 0;
-	FLights[i].FUniformShadowTex2D_lightDir     := 0;
-	FLights[i].FUniformShadowTex2D_lightMatrix  := 0;
-	FLights[i].FUniformShadowTex2D_lightPos     := 0;
-	FLights[i].FUniformShadowTex2D_shadowMap    := 0;
+	FLights[Index].FUniformShadowShad2D_LightDirection    := 0;
+	FLights[Index].FUniformShadowShad2D_lightMatrix := 0;
+	FLights[Index].FUniformShadowShad2D_lightPos    := 0;
+	FLights[Index].FUniformShadowShad2D_shadowMap   := 0;
+	FLights[Index].FUniformShadowTex2D_LightDirection     := 0;
+	FLights[Index].FUniformShadowTex2D_lightMatrix  := 0;
+	FLights[Index].FUniformShadowTex2D_lightPos     := 0;
+	FLights[Index].FUniformShadowTex2D_shadowMap    := 0;
 	
-	CreateTextureAndFrame(FLights[i].FTexDepth2,FLights[i].FFrameBufferDepth2,TextureBlock);
-	CreateTextureAndFrame(FLights[i].FTexDepth,FLights[i].FFrameBufferDepth,TextureBlock,@FLights[i].FRenderBufferDepth);
+	CreateTextureAndFrame(FLights[Index].FTexDepth2,FLights[Index].FFrameBufferDepth2,TextureBlock);
+	CreateTextureAndFrame(FLights[Index].FTexDepth,FLights[Index].FFrameBufferDepth,TextureBlock,@FLights[Index].FRenderBufferDepth);
 	end;
 
 FShaderDepthTex2D := SCreateShaderProgramFromSources(Context,
@@ -328,30 +328,30 @@ FShaderShadowShad2D := SCreateShaderProgramFromSources(Context,
 //SReadAndSaveShaderSourceFile(Example15Dir + 'main.vert','main_shadow.vert',[FLightsCount, BonesCount]);
 //SReadAndSaveShaderSourceFile(Example15Dir + 'main.frag','main_shadow.frag',['shadow', FLightsCount]);
 
-for i := 0 to FLightsCount - 1 do
+for Index := 0 to FLightsCount - 1 do
 	begin
-	FLights[i].FUniformShadowTex2D_shadowMap    := FShaderShadowTex2D.GetUniformLocation('shadowMap'+SStr(i));
-	FLights[i].FUniformShadowTex2D_lightMatrix  := FShaderShadowTex2D.GetUniformLocation('lightMatrix'+SStr(i));
-	FLights[i].FUniformShadowTex2D_lightPos     := FShaderShadowTex2D.GetUniformLocation('lightPos'+SStr(i));
-	FLights[i].FUniformShadowTex2D_lightDir     := FShaderShadowTex2D.GetUniformLocation('lightDir'+SStr(i));
+	FLights[Index].FUniformShadowTex2D_shadowMap    := FShaderShadowTex2D.GetUniformLocation('shadowMap'+SStr(Index));
+	FLights[Index].FUniformShadowTex2D_lightMatrix  := FShaderShadowTex2D.GetUniformLocation('lightMatrix'+SStr(Index));
+	FLights[Index].FUniformShadowTex2D_lightPos     := FShaderShadowTex2D.GetUniformLocation('lightPos'+SStr(Index));
+	FLights[Index].FUniformShadowTex2D_LightDirection     := FShaderShadowTex2D.GetUniformLocation('LightDirection'+SStr(Index));
 
-	FLights[i].FUniformShadowShad2D_shadowMap   := FShaderShadowShad2D.GetUniformLocation('shadowMap'+SStr(i));
-	FLights[i].FUniformShadowShad2D_lightMatrix := FShaderShadowShad2D.GetUniformLocation('lightMatrix'+SStr(i));
-	FLights[i].FUniformShadowShad2D_lightPos    := FShaderShadowShad2D.GetUniformLocation('lightPos'+SStr(i));
-	FLights[i].FUniformShadowShad2D_lightDir    := FShaderShadowShad2D.GetUniformLocation('lightDir'+SStr(i));
+	FLights[Index].FUniformShadowShad2D_shadowMap   := FShaderShadowShad2D.GetUniformLocation('shadowMap'+SStr(Index));
+	FLights[Index].FUniformShadowShad2D_lightMatrix := FShaderShadowShad2D.GetUniformLocation('lightMatrix'+SStr(Index));
+	FLights[Index].FUniformShadowShad2D_lightPos    := FShaderShadowShad2D.GetUniformLocation('lightPos'+SStr(Index));
+	FLights[Index].FUniformShadowShad2D_LightDirection    := FShaderShadowShad2D.GetUniformLocation('LightDirection'+SStr(Index));
 	end;
 end;
 
 destructor TSExample15_Shadow.Destroy();
 var
-	i : TSLongWord;
+	Index : TSMaxEnum;
 begin
 if (FLightsCount > 0) and (FLights <> nil) then
-	for i :=0 to FLightsCount - 1 do
-		if (i<=High(FLights)) then
+	for Index :=0 to FLightsCount - 1 do
+		if (Index<=High(FLights)) then
 			begin
-			Render.DeleteTextures(1,@FLights[i].FTexDepth);
-			Render.DeleteTextures(1,@FLights[i].FTexDepth2);
+			Render.DeleteTextures(1,@FLights[Index].FTexDepth);
+			Render.DeleteTextures(1,@FLights[Index].FTexDepth2);
 			end;
 if FShaderDepthTex2D <> nil then
 	FShaderDepthTex2D.Destroy();
@@ -369,7 +369,7 @@ begin
 Result := 'TSExample15_Shadow';
 end;
 
-procedure TSExample15_Shadow.BeginDrawToShadow(const LightIndex : TSLongWord = 0);
+procedure TSExample15_Shadow.BeginDrawToShadow(const LightIndex : TSMaxEnum = 0);
 begin
 Render.Viewport(0,0,FTexDepthSizeX,FTexDepthSizeY);
 if (FShadowRenderType) then
@@ -426,8 +426,8 @@ end;
 
 procedure TSExample15_Shadow.UniformScrene();
 var
-	FMVLightPos : TSVertex3f;
-	i : TSLongWord;
+	FMVLightPos : TSVector3f;
+	Index : TSMaxEnum;
 begin
 // Сохраняем матрицы, они нам нужны для вычисления освещения
 // Инвертированная матрица используется в расчёте матрицы источника света
@@ -435,27 +435,27 @@ begin
 {FCameraModelViewMatrix  :=} (*import*) {;}
 FCameraInverseModelViewMatrix := SInverseMatrix(FCameraModelViewMatrix);
 
-for i := 0 to FLightsCount - 1 do
+for Index := 0 to FLightsCount - 1 do
 	begin
-	FLights[i].FLightMatrix := FCameraInverseModelViewMatrix *
-		FLights[i].FLightModelViewMatrix * 
-		FLights[i].FLightProjectionMatrix *
+	FLights[Index].FLightMatrix := FCameraInverseModelViewMatrix *
+		FLights[Index].FLightModelViewMatrix * 
+		FLights[Index].FLightProjectionMatrix *
 		SScaleMatrix(SVertex3fImport(0.5,0.5,0.5)) *
 		STranslateMatrix(SVertex3fImport(0.5,0.5,0.5));
 
-	Render.Uniform1i(FLights[i].FUniformShadow_shadowMap, i + 7);
-	Render.UniformMatrix4fv(FLights[i].FUniformShadow_lightMatrix, 1, False, @FLights[i].FLightMatrix );
-	FMVLightPos := FLights[i].FLightPos * FCameraModelViewMatrix;
-	Render.Uniform3f(FLights[i].FUniformShadow_lightPos, FLights[i].FLightPos.x, FLights[i].FLightPos.y, FLights[i].FLightPos.z);
-	FLights[i].FLightDir := (FLights[i].FLightEye - FLights[i].FLightPos).Normalized();
-	Render.Uniform3f(FLights[i].FUniformShadow_lightDir, FLights[i].FLightDir.x, FLights[i].FLightDir.y, FLights[i].FLightDir.z);
+	Render.Uniform1i(FLights[Index].FUniformShadow_shadowMap, Index + 7);
+	Render.UniformMatrix4fv(FLights[Index].FUniformShadow_lightMatrix, 1, False, @FLights[Index].FLightMatrix );
+	FMVLightPos := FLights[Index].FLightPos * FCameraModelViewMatrix;
+	Render.Uniform3f(FLights[Index].FUniformShadow_lightPos, FLights[Index].FLightPos.x, FLights[Index].FLightPos.y, FLights[Index].FLightPos.z);
+	FLights[Index].FLightDirection := (FLights[Index].FLightEye - FLights[Index].FLightPos).Normalized();
+	Render.Uniform3f(FLights[Index].FUniformShadow_LightDirection, FLights[Index].FLightDirection.x, FLights[Index].FLightDirection.y, FLights[Index].FLightDirection.z);
 	end;
 end;
 
 procedure TSExample15_Shadow.BeginDrawScene();
 var
 	ShaderShadow : TSShaderProgram;
-	i : TSLongWord;
+	Index : TSMaxEnum;
 begin
 Render.Viewport(0,0,Context.Width,Context.Height);
 
@@ -464,32 +464,32 @@ if FShadowRenderType then
 else
 	ShaderShadow := FShaderShadowShad2D;
 
-for i := 0 to FLightsCount - 1 do
+for Index := 0 to FLightsCount - 1 do
 	if FShadowRenderType then
 		begin // Вариант #1
-		Render.ActiveTexture(i + 7);
+		Render.ActiveTexture(Index + 7);
 		//Render.Enable(SR_TEXTURE_2D);
-		Render.BindTexture(SR_TEXTURE_2D, FLights[i].FTexDepth);
+		Render.BindTexture(SR_TEXTURE_2D, FLights[Index].FTexDepth);
 		
-		FLights[i].FUniformShadow_lightDir    := FLights[i].FUniformShadowTex2D_lightDir;
-		FLights[i].FUniformShadow_lightMatrix := FLights[i].FUniformShadowTex2D_lightMatrix;
-		FLights[i].FUniformShadow_lightPos    := FLights[i].FUniformShadowTex2D_lightPos;
-		FLights[i].FUniformShadow_shadowMap   := FLights[i].FUniformShadowTex2D_shadowMap;
+		FLights[Index].FUniformShadow_LightDirection    := FLights[Index].FUniformShadowTex2D_LightDirection;
+		FLights[Index].FUniformShadow_lightMatrix := FLights[Index].FUniformShadowTex2D_lightMatrix;
+		FLights[Index].FUniformShadow_lightPos    := FLights[Index].FUniformShadowTex2D_lightPos;
+		FLights[Index].FUniformShadow_shadowMap   := FLights[Index].FUniformShadowTex2D_shadowMap;
 		end
 	else
 		begin // Вариант #2
-		Render.ActiveTexture(i + 7);
+		Render.ActiveTexture(Index + 7);
 		//Render.Enable(SR_TEXTURE_2D);
-		Render.BindTexture(SR_TEXTURE_2D, FLights[i].FTexDepth2);
+		Render.BindTexture(SR_TEXTURE_2D, FLights[Index].FTexDepth2);
 		
 		// Для второго варианта включаем режим сравнения текстуры
 		Render.TexParameteri(SR_TEXTURE_2D, SR_TEXTURE_COMPARE_MODE, SR_COMPARE_R_TO_TEXTURE);
 		Render.TexParameteri(SR_TEXTURE_2D, SR_TEXTURE_COMPARE_FUNC, SR_LEQUAL);
 		
-		FLights[i].FUniformShadow_lightDir    := FLights[i].FUniformShadowShad2D_lightDir;
-		FLights[i].FUniformShadow_lightMatrix := FLights[i].FUniformShadowShad2D_lightMatrix;
-		FLights[i].FUniformShadow_lightPos    := FLights[i].FUniformShadowShad2D_lightPos;
-		FLights[i].FUniformShadow_shadowMap   := FLights[i].FUniformShadowShad2D_shadowMap;
+		FLights[Index].FUniformShadow_LightDirection    := FLights[Index].FUniformShadowShad2D_LightDirection;
+		FLights[Index].FUniformShadow_lightMatrix := FLights[Index].FUniformShadowShad2D_lightMatrix;
+		FLights[Index].FUniformShadow_lightPos    := FLights[Index].FUniformShadowShad2D_lightPos;
+		FLights[Index].FUniformShadow_shadowMap   := FLights[Index].FUniformShadowShad2D_shadowMap;
 		end;
 
 FInDrawScene    := True;
@@ -500,13 +500,13 @@ end;
 
 procedure TSExample15_Shadow.EndDrawScene();
 var
-	i : TSLongWord;
+	Index : TSMaxEnum;
 begin
 FInDrawScene    := False;
 Render.UseProgram(0);
-for i := 0 to FLightsCount - 1 do
+for Index := 0 to FLightsCount - 1 do
 	begin
-	Render.ActiveTexture(i + 7);
+	Render.ActiveTexture(Index + 7);
 
 	if (not FShadowRenderType) then
 		begin // Вариант #2

@@ -160,7 +160,7 @@ end;
 var
 	FSun : TSVertex3f;
 begin
-FCamera.CallAction();
+FCamera.InitMatrixAndMove();
 
 FSunAngle += Context.ElapsedTime*0.01;
 FSun.Import(cos(FSunAngle)*FSunRadius,sin(FSunAngle)*FSunRadius);

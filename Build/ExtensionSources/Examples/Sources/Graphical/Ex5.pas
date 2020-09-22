@@ -109,8 +109,8 @@ begin
 inherited Create(VContext);
 FCamera:=TSCamera.Create();
 FCamera.SetContext(Context);
-FCamera.Zum := 6;
-FCamera.RotateX := 90;
+FCamera.Location := TSVector3f.Create(6, 6, -6) * 3.6;
+
 FPhysicsTimeCount:=Context.Width;
 SetLength(FPhysicsTime,FPhysicsTimeCount);
 FillChar(FPhysicsTime[0],FPhysicsTimeCount*SizeOf(FPhysicsTime[0]),0);
@@ -254,7 +254,7 @@ while PhysicsTiks >= Physics.TimeStep do
 Ex5_PAPPE.PhysicsInterpolate(Physics,PhysicsTiks/Physics.TimeStep);
 dt2.Get();
 
-FCamera.CallAction();
+FCamera.InitMatrixAndMove();
 
 Licht0Pos.Import(2,45,160);
 

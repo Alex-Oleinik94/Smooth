@@ -59,7 +59,7 @@ procedure TSExample2_2.Paint();
 var
 	Light : TSVertex3f;
 begin
-FCamera.CallAction();
+FCamera.InitMatrixAndMove();
 Light.Import(cos(FLightAngle),sin(FLightAngle),sin(FLightAngle*2));
 Light *= 7;
 FLightAngle += Context.ElapsedTime * 0.01;

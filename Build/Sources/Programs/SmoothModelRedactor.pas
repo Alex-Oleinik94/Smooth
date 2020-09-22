@@ -210,7 +210,7 @@ var
 begin
 if FCustomModel <> nil then
 	begin
-	FCamera.CallAction();
+	FCamera.InitMatrixAndMove();
 	
 	FSunAngle += Context.ElapsedTime * 0.005;
 	FSun.Import(cos(FSunAngle), sin(FSunAngle), cos(FSunAngle * 1.5));

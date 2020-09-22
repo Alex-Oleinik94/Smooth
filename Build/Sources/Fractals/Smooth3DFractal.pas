@@ -432,7 +432,7 @@ end;
 
 procedure TS3DFractal.Paint();
 begin
-FCamera.CallAction();
+FCamera.InitMatrixAndMove();
 if (not F3dObjectsReady) and FThreadsEnable then
 	CkeckConstructedObjects();
 if (F3dObject <> nil) then

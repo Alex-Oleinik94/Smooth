@@ -90,9 +90,8 @@ FFont := SCreateFontFromFile(Context, SDefaultFontFileName);
 
 FCamera:=TSCamera.Create();
 FCamera.SetContext(Context);
-FCamera.Zum := 15.47;
-FCamera.RotateY := -42.66;
-FCamera.RotateX := 37.66;
+FCamera.Location := TSVector3f.Create(15, 15, -15) * 5.5;
+
 Generate();
 end;
 
@@ -171,7 +170,7 @@ procedure TSExample16.Paint();
 var
 	Light : TSVertex3f;
 begin
-FCamera.CallAction();
+FCamera.InitMatrixAndMove();
 
 Light.Import(cos(FLightAngle),0.5,sin(FLightAngle));
 Light *= 40;

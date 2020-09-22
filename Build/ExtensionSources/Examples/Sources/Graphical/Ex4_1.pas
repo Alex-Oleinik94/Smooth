@@ -145,7 +145,7 @@ end;
 
 procedure TSExample4_1.Paint();
 begin
-FCamera.CallAction();
+FCamera.InitMatrixAndMove();
 
 Render.BindBufferARB(SR_ARRAY_BUFFER_ARB,FBuffer);
 

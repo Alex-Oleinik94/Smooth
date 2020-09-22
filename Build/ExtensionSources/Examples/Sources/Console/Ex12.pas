@@ -232,7 +232,7 @@ end;
 
 procedure TSApprFunction.Paint();
 begin
-FCamera.CallAction();
+FCamera.InitMatrixAndMove();
 F3dObject.Paint();
 end;
 
@@ -249,7 +249,7 @@ F3dObject := Calculate3dObject();
 FCamera := TSCamera.Create();
 FCamera.Context := Context;
 FCamera.MatrixMode := S_3D;
-FCamera.ViewMode:=S_VIEW_WATCH_OBJECT;
+FCamera.ViewMode:=SMotileObject;
 end;
 
 class function TSApprFunction.ClassName():TSString;

@@ -99,7 +99,7 @@ with Render do
 end;
 
 begin
-FCamera.CallAction();
+FCamera.InitMatrixAndMove();
 
 DrawCube(0,0,0,1,0.7);
 DrawCube(2,0,0,0.5,0.2);

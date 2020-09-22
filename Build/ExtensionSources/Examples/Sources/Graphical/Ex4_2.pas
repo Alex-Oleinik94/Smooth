@@ -129,7 +129,7 @@ end;
 
 procedure TSExample4_2.Paint();
 begin
-FCamera.CallAction();
+FCamera.InitMatrixAndMove();
 
 Render.EnableClientState(SR_VERTEX_ARRAY);
 Render.EnableClientState(SR_COLOR_ARRAY);

@@ -204,7 +204,7 @@ FPhysics.LastObject().AddObjectEnd(50);
 
 FLigthSphere := FPhysics.LastObject().Object3d;
 FPhysics.LastObject().Object3d := nil;
-FLigthSphere.ObjectColor:=SVertex4fImport(1,1,1,1);
+FLigthSphere.ObjectColor:=TSVector4f.Create(1,1,1,1);
 FLigthSphere.EnableCullFace := True;
 
 FPhysics.Destroy();
@@ -273,8 +273,8 @@ if Render.SupportedShaders() then
 	
 	FCamera:=TSCamera.Create();
 	FCamera.SetContext(Context);
-	FCamera.ViewMode := S_VIEW_LOOK_AT_OBJECT;
-	FCamera.ChangingLookAtObject := False;
+	FCamera.ViewMode := SMotileObjective;
+	FCamera.Motile := False;
 	FCamera.Up       := SVertex3fImport(0,0,1);
 	FCamera.Location := SVertex3fImport(0,-350,100);
 	FCamera.View     := (SVertex3fImport(0,0,0)-FCamera.Location).Normalized();
@@ -345,8 +345,7 @@ destructor TSExample15.Destroy();
 var
 	i : TIndex;
 begin
-if FCamera <> nil then
-	FCamera.Destroy();
+SKill(FCamera);
 if FModel <> nil then
 	FModel.Destroy();
 if FShadow <> nil then
@@ -362,35 +361,21 @@ SetLength(FAnimationStates,0);
 
 Context.CursorCentered := False;
 
-if (FP1Button <> nil) then
-	FP1Button.Destroy();
-if (FM1Button <> nil) then
-	FM1Button.Destroy();
-if (FP5Button <> nil) then
-	FP5Button.Destroy();
-if (FM5Button <> nil) then
-	FM5Button.Destroy();
-if (FP15Button <> nil) then
-	FP15Button.Destroy();
-if (FM15Button <> nil) then
-	FM15Button.Destroy();
-if (FP100Button <> nil) then
-	FP100Button.Destroy();
-if (FM100Button <> nil) then
-	FM100Button.Destroy();
-if (FCountLabel <> nil) then
-	FCountLabel.Destroy();
-if (FHelpLabel <> nil) then
-	FHelpLabel.Destroy();
+SKill(FP1Button);
+SKill(FM1Button);
+SKill(FP5Button);
+SKill(FM5Button);
+SKill(FP15Button);
+SKill(FM15Button);
+SKill(FP100Button);
+SKill(FM100Button);
+SKill(FCountLabel);
+SKill(FHelpLabel);
 
-if FFont <> nil then
-	FFont.Destroy();
-if FFPS <> nil then
-	FFPS.Destroy();
-if FStoneImageD <> nil then
-	FStoneImageD.Destroy();
-if FStoneImageB <> nil then
-	FStoneImageB.Destroy();
+SKill(FFont);
+SKill(FFPS);
+SKill(FStoneImageD);
+SKill(FStoneImageB);
 inherited;
 end;
 
@@ -495,11 +480,11 @@ if Render.SupportedShaders() then
 	
 	Render.ClearColor(0,0,0,0);
 	if not FUseCameraAnimation then
-		FCamera.Change();
+		FCamera.Move();
 	FCamera.InitMatrix();
 	Render.Rotatef(-FRotateAngleCamera*5,0,0,1);
-	FShadow.CameraProjectionMatrix := FCamera.GetProjectionMatrix();
-	FShadow.CameraModelViewMatrix  := FCamera.GetModelViewMatrix();
+	FShadow.CameraProjectionMatrix := FCamera.ProjectionMatrix();
+	FShadow.CameraModelViewMatrix  := FCamera.ModelViewMatrix();
 	
 	FShadow.BeginDrawScene();
 	i := FShadow.GetCurrentShader().GetUniformLocation('renderType');
@@ -508,8 +493,8 @@ if Render.SupportedShaders() then
 	Render.Uniform1i(i,2);
 	
 	FCamera.InitMatrix();
-	FShadow.CameraProjectionMatrix := FCamera.GetProjectionMatrix();
-	FShadow.CameraModelViewMatrix  := FCamera.GetModelViewMatrix();
+	FShadow.CameraProjectionMatrix := FCamera.ProjectionMatrix();
+	FShadow.CameraModelViewMatrix  := FCamera.ModelViewMatrix();
 	FShadow.UniformScrene();
 	
 	Render.ActiveTexture(0);
@@ -538,7 +523,7 @@ if Render.SupportedShaders() then
 		
 		Render.BeginScene(SR_LINES);
 		Render.Vertex(FShadow.LightPos[i]);
-		Render.Vertex(FShadow.LightPos[i] + FShadow.LightDir[i] * 10);
+		Render.Vertex(FShadow.LightPos[i] + FShadow.LightDirection[i] * 10);
 		Render.EndScene();
 		end;
 	
@@ -567,9 +552,7 @@ begin
 if (Context.KeyPressed and (Context.KeyPressedChar = 'C') and (Context.KeyPressedType = SUpKey)) then
 	begin
 	FUseCameraAnimation := not FUseCameraAnimation;
-	FCamera.ChangingLookAtObject := not FUseCameraAnimation;
-	Context.CursorCentered := not FUseCameraAnimation;
-	Context.ShowCursor(not Context.CursorCentered);
+	FCamera.Motile := not FUseCameraAnimation;
 	if FUseCameraAnimation then
 		begin
 		FCamera.Up   := SVertex3fImport(0,0,1);

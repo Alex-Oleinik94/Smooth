@@ -1592,7 +1592,7 @@ procedure TSGasDiffusionReliefRedactor.Paint();
 begin
 if FSingleRelief = nil then
 	begin
-	FCamera.CallAction();
+	FCamera.InitMatrixAndMove();
 	FRelief^.Draw(Render);
 	end
 else if FRelief <> nil then
@@ -1601,14 +1601,14 @@ else if FRelief <> nil then
 		begin
 		UpDatePointsShifting();
 		if FCutPolygoneButton.Active then
-			FCamera.Change();
+			FCamera.Move();
 		FCamera.InitMatrix();
 		DrawRedactoringRelief();
 		UpDate();
 		end
 	else
 		begin
-		FCamera.CallAction();
+		FCamera.InitMatrixAndMove();
 		FSingleRelief^.Draw(Render);
 		end;
 	end;

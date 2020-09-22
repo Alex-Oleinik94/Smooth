@@ -6,13 +6,13 @@ interface
 
 uses
 	 SmoothBase
+	,SmoothLists
 	,SmoothContextClasses
 	,SmoothContextInterface
 	,SmoothFont
 	;
 
 type
-	TSFPSViewer = class;
 	TSFPSViewer = class(TSPaintableObject)
 			public
 		constructor Create(const VContext : ISContext);override;
@@ -23,20 +23,22 @@ type
 		procedure LoadRenderResources();override;
 			private
 		FFont : TSFont;
-		FX, FY : TSWord;
+		FX, FY : TSUInt16;
 		FAlpha : TSFloat32;
 
-		FFrameArray : packed array of TSWord;
-		FFrameCount : TSWord;
-		FFrameIndex : TSWord;
+		FFrameArray : TSUInt16List;
+		FFrameCount : TSUInt16;
+		FFrameIndex : TSUInt16;
 		FFrameReady : TSBoolean;
 
-		function FrameSum():TSWord;inline;
+		function FrameSum():TSUInt16;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
-		property X : TSWord read FX write FX;
-		property Y : TSWord read FY write FY;
+		property X : TSUInt16 read FX write FX;
+		property Y : TSUInt16 read FY write FY;
 		property Alpha : TSFloat32 read FAlpha write FAlpha;
 		end;
+
+procedure SKill(var FPSViewer : TSFPSViewer); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
 
@@ -47,19 +49,28 @@ uses
 	,SmoothCommonStructs
 	;
 
-function TSFPSViewer.FrameSum():TSWord;inline;
+procedure SKill(var FPSViewer : TSFPSViewer); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if (FPSViewer <> nil) then
+	begin
+	FPSViewer.Destroy();
+	FPSViewer := nil;
+	end;
+end;
+
+function TSFPSViewer.FrameSum():TSUInt16; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSWord;
+	Index : TSUInt16;
 begin
 Result := 0;
 if FFrameCount <> 0 then
 	begin
 	if FFrameReady then
-		for i := 0 to FFrameCount - 1 do
-			Result += FFrameArray[i]
+		for Index := 0 to FFrameCount - 1 do
+			Result += FFrameArray[Index]
 	else
-		for i := 0 to FFrameIndex do
-			Result += FFrameArray[i];
+		for Index := 0 to FFrameIndex do
+			Result += FFrameArray[Index];
 	end;
 if Result = 0 then
 	Result := 1;
@@ -78,7 +89,7 @@ end;
 
 destructor TSFPSViewer.Destroy();
 begin
-FFont.Destroy();
+SKill(FFont);
 inherited;
 end;
 

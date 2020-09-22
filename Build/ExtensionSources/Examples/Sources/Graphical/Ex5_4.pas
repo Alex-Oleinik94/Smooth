@@ -56,8 +56,6 @@ type
 		
 		FFont : TSFont;
 		FHelpLabel : TSScreenLabel;
-			private
-		procedure KeyControl();
 		end;
 
 {$IFDEF ENGINE}
@@ -115,7 +113,8 @@ FGravitationFlag := False;
 
 FCamera:=TSCamera.Create();
 FCamera.SetContext(Context);
-FCamera.ViewMode := S_VIEW_LOOK_AT_OBJECT;
+FCamera.ViewMode := SMotileObjective;
+FCamera.Motile := False;
 FCamera.Up:=SVertex3fImport(0,1,0);
 FCamera.Location:=SVertex3fImport(0,-50,-60);
 FCamera.View:=SVertex3fImport(0,0,1);
@@ -186,14 +185,12 @@ destructor TSExample5_4.Destroy();
 begin
 if FBike <> nil then
 	FBike.Destroy();
-if FCamera <> nil then
-	FCamera.Destroy();
+SKill(FCamera);
 if FPhysics<>nil then
 	FPhysics.Destroy();
 if FHelpLabel<>nil then
 	FHelpLabel.Destroy();
-if FFont<>nil then
-	FFont.Destroy();
+SKill(FFont);
 inherited;
 end;
 
@@ -202,7 +199,7 @@ var
 	i,ii      : TSLongWord;
 	dt1,dt2   : TSDateTime;
 begin
-FCamera.CallAction();
+FCamera.InitMatrixAndMove();
 Render.Color3f(1,1,1);
 
 if FPhysics<>nil then
@@ -267,32 +264,8 @@ if FPhysics<>nil then
 		SVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5+(Screen as TSScreenComponent).Skin.Font.FontHeight-10));
 	end;
 
-KeyControl();
-end;
-
-procedure TSExample5_4.KeyControl();
-const
-	RotateConst = 0.002;
-var
-	Q, E : TSBoolean;
-	RotateZ : TSFloat = 0;
-begin
 if (Context.KeyPressed and (Context.KeyPressedChar = 'C') and (Context.KeyPressedType = SUpKey)) then
-	begin
-	Context.CursorCentered := not Context.CursorCentered;
-	Context.ShowCursor(not Context.CursorCentered);
-	end;
-
-Q := Context.KeysPressed('Q');
-E := Context.KeysPressed('E');
-if (Q xor E) then
-	begin
-	if Q then
-		RotateZ := Context.ElapsedTime*2
-	else
-		RotateZ := -Context.ElapsedTime*2;
-	end;
-
+	FCamera.Motile := not FCamera.Motile;
 if (Context.KeysPressed('Z')) then
 	begin
 	FGravitationFlag := True;
@@ -300,22 +273,7 @@ if (Context.KeysPressed('Z')) then
 	end
 else
 	FGravitationFlag := False;
-if (Context.KeysPressed('W')) then
-	FCamera.Move(Context.ElapsedTime*0.7);
-if (Context.KeysPressed('S')) then
-	FCamera.Move(-Context.ElapsedTime*0.7);
-if (Context.KeysPressed('A')) then
-	FCamera.MoveSidewards(-Context.ElapsedTime*0.7);
-if (Context.KeysPressed('D')) then
-	FCamera.MoveSidewards(Context.ElapsedTime*0.7);
-if (Context.KeysPressed(' ')) then
-	FCamera.MoveUp(Context.ElapsedTime*0.7);
-if (Context.KeysPressed('X')) then
-	FCamera.MoveUp(-Context.ElapsedTime*0.7);
-if Context.CursorCentered then
-	FCamera.Rotate(Context.CursorPosition(SDeferenseCursorPosition).y*RotateConst,Context.CursorPosition(SDeferenseCursorPosition).x/Context.Width*Context.Height*RotateConst,RotateZ*RotateConst)
-else
-	FCamera.Rotate(0, 0, RotateZ*RotateConst);
+if not Context.CursorCentered then
 end;
 
 {$IFNDEF ENGINE}
