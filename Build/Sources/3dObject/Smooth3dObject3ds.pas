@@ -252,7 +252,7 @@ FModel.AddObject();
 FModel.LastObject().HasNormals := True;
 FModel.LastObject().HasColors  := False;
 FModel.LastObject().EnableCullFace:=True;
-FModel.LastObject().ObjectPoligonesType:=SR_TRIANGLES;
+FModel.LastObject().ObjectPolygonsType:=SR_TRIANGLES;
 FModel.LastObject().VertexType:=S3dObjectVertexType3f;
 SkipHeader();
 FModel.LastObject().Name := SReadStringFromStream(FFile);

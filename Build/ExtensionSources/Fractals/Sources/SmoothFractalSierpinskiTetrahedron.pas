@@ -22,7 +22,7 @@ type
 			public
 		procedure Construct();override;
 		procedure PolygonsConstruction();
-		procedure PushPoligonData(var ObjectId:TSFractalIndexInt;const n,v0,v1,v2:TSVertex3f;var FVertexIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure PushPolygonData(var ObjectId:TSFractalIndexInt;const n,v0,v1,v2:TSVertex3f;var FVertexIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSScreenLabel;
 		FBPD, FBMD : TSScreenButton;
@@ -48,7 +48,7 @@ begin
 Result:='Тетраэдр Серпинского';
 end;
 
-procedure TSFractalSierpinskiTetrahedron.PushPoligonData(var ObjectId:TSFractalIndexInt;const n,v0,v1,v2:TSVertex3f;var FVertexIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSFractalSierpinskiTetrahedron.PushPolygonData(var ObjectId:TSFractalIndexInt;const n,v0,v1,v2:TSVertex3f;var FVertexIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	c:TSColor3f;
 
@@ -78,7 +78,7 @@ if FEnableNormals then
 	end;
 FVertexIndex+=3;
 
-AfterPushingPoligonData(ObjectId,FThreadsEnable,FVertexIndex);
+AfterPushingPolygonData(ObjectId,FThreadsEnable,FVertexIndex);
 end;
 
 procedure TSFractalSierpinskiTetrahedron.PolygonsConstruction();
@@ -91,10 +91,10 @@ procedure Rec(const t0,t1,t2,t3:TSVertex3f;const NowDepth:LongWord);
 begin
 if NowDepth=0 then
 	begin
-	PushPoligonData(ObjectId,FArNor[3],t0,t1,t2,FVI);
-	PushPoligonData(ObjectId,FArNor[0],t0,t1,t3,FVI);
-	PushPoligonData(ObjectId,FArNor[2],t0,t2,t3,FVI);
-	PushPoligonData(ObjectId,FArNor[1],t1,t2,t3,FVI);
+	PushPolygonData(ObjectId,FArNor[3],t0,t1,t2,FVI);
+	PushPolygonData(ObjectId,FArNor[0],t0,t1,t3,FVI);
+	PushPolygonData(ObjectId,FArNor[2],t0,t2,t3,FVI);
+	PushPolygonData(ObjectId,FArNor[1],t1,t2,t3,FVI);
 	end
 else
 	begin
@@ -152,8 +152,7 @@ NumberOfPolygons:=(4**(1+FDepth));
 Construct3dObjects(NumberOfPolygons,SR_TRIANGLES,S3dObjectVertexType3f);
 if FThreadsEnable then
 	begin
-	FThreadsData[0].FFinished:=False;
-	FThreadsData[0].FData:=nil;
+	FThreadsData[0].Clear(Self);
 	PolygonsConstruction();
 	end
 else

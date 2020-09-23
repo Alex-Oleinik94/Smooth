@@ -1104,7 +1104,7 @@ begin
 if FPoints <> nil then if Length(FPoints) <> 0 then
 	begin
 	V3dObject.AddObject();
-	V3dObject.LastObject().ObjectPoligonesType := SR_LINES;
+	V3dObject.LastObject().ObjectPolygonsType := SR_LINES;
 	V3dObject.LastObject().HasNormals := False;
 	V3dObject.LastObject().HasTexture := False;
 	V3dObject.LastObject().HasColors  := True;
@@ -1123,7 +1123,7 @@ if FPoints <> nil then if Length(FPoints) <> 0 then
 	ConstructLinesIndexes();
 	
 	V3dObject.LastObject().AddFaceArray();
-	V3dObject.LastObject().PoligonesType[0] := SR_LINES;
+	V3dObject.LastObject().PolygonsType[0] := SR_LINES;
 	V3dObject.LastObject().Faces[0] := Length(LinesIndexes);
 	for i := 0 to High(LinesIndexes) do
 		V3dObject.LastObject().SetFaceLine(0,i,LinesIndexes[i].i1,LinesIndexes[i].i2);
@@ -1147,7 +1147,7 @@ else
 				if FPolygones[i] <> nil then if Length(FPolygones[i]) <> 0 then
 					begin
 					V3dObject.AddObject();
-					V3dObject.LastObject().ObjectPoligonesType := SR_TRIANGLES;
+					V3dObject.LastObject().ObjectPolygonsType := SR_TRIANGLES;
 					V3dObject.LastObject().HasNormals := False;
 					V3dObject.LastObject().HasTexture := False;
 					V3dObject.LastObject().HasColors  := True;

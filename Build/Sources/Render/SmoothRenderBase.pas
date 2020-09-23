@@ -28,7 +28,7 @@ type
 
 {$INCLUDE SmoothRenderConstants.inc}
 
-function SStrPoligonesType(const PrimetiveType : TSPrimtiveType) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SStrPolygonsType(const PrimetiveType : TSPrimtiveType) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SStrVertexFormat(const VertexFormat : TSVertexFormat) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
@@ -47,7 +47,7 @@ else               Result := 'INVALID(' + SStr(TSByte(VertexFormat)) + ')';
 end;
 end;
 
-function SStrPoligonesType(const PrimetiveType : TSPrimtiveType) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SStrPolygonsType(const PrimetiveType : TSPrimtiveType) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 case PrimetiveType of
 SR_LINES      : Result := 'SR_LINES';

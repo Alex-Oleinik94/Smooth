@@ -30,7 +30,7 @@ uses
 	// Fractals
 	,SmoothFractalSierpinskiTetrahedron
 	,SmoothFractalLevyCurve
-	,SmoothFractalMandelbrot
+	,SmoothFractalMandelbrotGUI
 	,SmoothFractalMinkowskiCurve
 	,SmoothFractalSierpinskiCarpet
 	,SmoothFractalSierpinskiTriangle
@@ -44,7 +44,7 @@ begin
 inherited;
 FDrawClasses := TSPaintableObjectContainer.Create(Context);
 FDrawClasses.Add(TSFractalMengerSpongeRelease);
-FDrawClasses.Add(TSFractalMandelbrotRelease);
+FDrawClasses.Add(TSFractalMandelbrotGUI);
 FDrawClasses.Add(TSFractalSierpinskiTriangle);
 FDrawClasses.Add(TSFractalSierpinskiTetrahedron);
 FDrawClasses.Add(TSFractalMinkowskiCurve);

@@ -24,7 +24,7 @@ type
 		class function CountingTheNumberOfPolygons(const ThisDepth : TSUInt64) : TSUInt64;
 		procedure Construct();override;
 		procedure PolygonsConstruction();
-		procedure PushPoligonData(var ObjectId:TSFractalIndexInt;const v1,v2,v3,v4:TSVertex2f;var FVertexIndex,FFaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure PushPolygonData(var ObjectId:TSFractalIndexInt;const v1,v2,v3,v4:TSVertex2f;var FVertexIndex,FFaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSScreenLabel;
 		FBPD, FBMD : TSScreenButton;
@@ -44,7 +44,7 @@ begin
 Result := 'Ковёр (квадрат) Серпинского';
 end;
 
-procedure TSFractalSierpinskiCarpet.PushPoligonData(var ObjectId:TSFractalIndexInt;const v1, v2, v3, v4 : TSVertex2f;var FVertexIndex,FFaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSFractalSierpinskiCarpet.PushPolygonData(var ObjectId:TSFractalIndexInt;const v1, v2, v3, v4 : TSVertex2f;var FVertexIndex,FFaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 FVertexIndex+=4;
 F3dObject.Objects[ObjectId].SetVertex(FVertexIndex - 4, v1);
@@ -55,7 +55,7 @@ F3dObject.Objects[ObjectId].SetVertex(FVertexIndex - 1, v4);
 F3dObject.Objects[ObjectId].SetFaceQuad(0,FFaceIndex+0,FVertexIndex-1,FVertexIndex-2,FVertexIndex-3,FVertexIndex-4);
 FFaceIndex+=1;
 
-AfterPushingPoligonData(ObjectId,FThreadsEnable,FVertexIndex,FFaceIndex);
+AfterPushingPolygonData(ObjectId,FThreadsEnable,FVertexIndex,FFaceIndex);
 end;
 
 procedure TSFractalSierpinskiCarpet.PolygonsConstruction();
@@ -69,7 +69,7 @@ var
 begin
 a := Abs(t1.x - t2.x) / 3;
 if NowDepth = 0 then
-	PushPoligonData(
+	PushPolygonData(
 		ObjectId,
 		SVertex3fImport(t1.x, t1.y),
 		SVertex3fImport(t1.x, t2.y),
@@ -78,25 +78,25 @@ if NowDepth = 0 then
 		FVertexIndex, FFaceIndex)
 else if NowDepth = 1 then
 	begin
-	PushPoligonData(ObjectId,
+	PushPolygonData(ObjectId,
 		SVertex3fImport(t1.x, t1.y),
 		SVertex3fImport(t1.x + a, t1.y),
 		SVertex3fImport(t1.x + a, t1.y + 3 * a),
 		SVertex3fImport(t1.x, t1.y + 3 * a),
 		FVertexIndex, FFaceIndex);
-	PushPoligonData(ObjectId,
+	PushPolygonData(ObjectId,
 		SVertex3fImport(t1.x + a * 2, t1.y),
 		SVertex3fImport(t1.x + a * 3, t1.y),
 		SVertex3fImport(t1.x + a * 3, t1.y + 3 * a),
 		SVertex3fImport(t1.x + a * 2, t1.y + 3 * a),
 		FVertexIndex, FFaceIndex);
-	PushPoligonData(ObjectId,
+	PushPolygonData(ObjectId,
 		SVertex3fImport(t1.x, t1.y),
 		SVertex3fImport(t1.x + a * 3, t1.y),
 		SVertex3fImport(t1.x + a * 3, t1.y + a),
 		SVertex3fImport(t1.x, t1.y + a),
 		FVertexIndex, FFaceIndex);
-	PushPoligonData(ObjectId,
+	PushPolygonData(ObjectId,
 		SVertex3fImport(t1.x, t1.y + a * 2),
 		SVertex3fImport(t1.x + a * 3, t1.y + a * 2),
 		SVertex3fImport(t1.x + a * 3, t1.y + a * 3),
@@ -145,12 +145,11 @@ if FThreadsEnable then
 			F3dObjectsInfo[ObjectId]:=S_TRUE;
 end;
 
-procedure NewMengerThread(FractalData:TSFractalData);
+procedure TSFractalSierpinskiCarpet_Thread(FractalThreadData:PSFractalThreadData);
 begin
-(FractalData.FFractal as TSFractalSierpinskiCarpet).PolygonsConstruction();
-FractalData.FFractal.FThreadsData[FractalData.FThreadID].FFinished:=True;
-FractalData.FFractal.FThreadsData[FractalData.FThreadID].FData:=nil;
-FractalData.Destroy;
+(FractalThreadData^.Fractal as TSFractalSierpinskiCarpet).PolygonsConstruction();
+FractalThreadData^.Finished:=True;
+FractalThreadData^.FreeMemData();
 end;
 
 procedure TSFractalSierpinskiCarpet.Construct();
@@ -166,13 +165,12 @@ else
 	Construct3dObjects(NumberOfPolygons,SR_QUADS,S3dObjectVertexType2f);
 if FThreadsEnable then
 	begin
-	FThreadsData[0].FFinished:=False;
-	FThreadsData[0].FData:=nil;
-	PolygonsConstruction;
+	FThreadsData[0].Clear(Self);
+	PolygonsConstruction();
 	end
 else
 	begin
-	PolygonsConstruction;
+	PolygonsConstruction();
 	if FEnableVBO and (not F3dObject.LastObject().EnableVBO) then
 		F3dObject.LastObject().LoadToVBO();
 	end;

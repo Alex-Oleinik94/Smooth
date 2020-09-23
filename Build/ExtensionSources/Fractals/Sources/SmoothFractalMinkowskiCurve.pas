@@ -22,7 +22,7 @@ type
 			public
 		procedure Construct();override;
 		procedure PolygonsConstruction();
-		procedure PushPoligonData(var ObjectId : TSFractalIndexInt; const v : TSVertex2f; var FVertexIndex:TSFractalIndexInt); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure PushPolygonData(var ObjectId : TSFractalIndexInt; const v : TSVertex2f; var FVertexIndex:TSFractalIndexInt); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSScreenLabel;
 		FBPD, FBMD : TSScreenButton;
@@ -45,12 +45,12 @@ begin
 Result := 'Кривая Минковского';
 end;
 
-procedure TSFractalMinkowskiCurve.PushPoligonData(var ObjectId:TSFractalIndexInt;const v:TSVertex2f;var FVertexIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSFractalMinkowskiCurve.PushPolygonData(var ObjectId:TSFractalIndexInt;const v:TSVertex2f;var FVertexIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 F3dObject.Objects[ObjectId].SetVertex(FVertexIndex, v);
 FVertexIndex+=1;
 
-AfterPushingPoligonData(ObjectId,FThreadsEnable,FVertexIndex);
+AfterPushingPolygonData(ObjectId,FThreadsEnable,FVertexIndex);
 end;
 
 procedure TSFractalMinkowskiCurve.PolygonsConstruction();
@@ -81,13 +81,13 @@ if NowDepth>0 then
 	Rec(e3,t2,NowDepth-1);
 	end
 else
-	PushPoligonData(ObjectId,t2,FVI);
+	PushPolygonData(ObjectId,t2,FVI);
 end;
 
 begin
 ObjectId:=0;
 FVI:=0;
-PushPoligonData(ObjectId,SVertex2fImport(-6,0),FVI);
+PushPolygonData(ObjectId,SVertex2fImport(-6,0),FVI);
 Rec(SVertex2fImport(-6,0),SVertex2fImport(6,0),Depth);
 if FThreadsEnable then
 	if (ObjectId>=0) and (ObjectId<=F3dObject.QuantityObjects-1) then
@@ -108,8 +108,7 @@ else
 	Construct3dObjects(NumberOfPolygons,SR_LINE_STRIP,S3dObjectVertexType2f);
 if FThreadsEnable then
 	begin
-	FThreadsData[0].FFinished:=False;
-	FThreadsData[0].FData:=nil;
+	FThreadsData[0].Clear(Self);
 	PolygonsConstruction();
 	end
 else

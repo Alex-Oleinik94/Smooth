@@ -16,21 +16,29 @@ type
 		constructor Create();override;
 		class function ClassName():string;override;
 			protected
-		FImage:TSImage;
-		FView:TSScreenVertexes;
-		FDepthHeight:LongWord;
+		FImage : TSImage;
+		FView : TSScreenVertices;
+		FDepthHeight : LongWord;
 			public
 		procedure InitColor(const x,y:LongInt;const RecNumber:LongInt);virtual;
 		class function GetColor(const a,b,color:LongInt):byte;inline;
 		class function GetColorOne(const a,b,color:LongInt):byte;inline;
 		procedure ToTexture();virtual;
 		procedure BeginConstruct();override;
+		procedure KillImage();
 			public
 		property Width:LongInt read FDepth write FDepth;
 		property Height:LongWord read FDepthHeight write FDepthHeight;
+		property View : TSScreenVertices read FView write FView;
+		property Image : TSImage read FImage write FImage;
 		end;
 
 implementation
+
+procedure TSImageFractal.KillImage();
+begin
+SKill(FImage);
+end;
 
 class function TSImageFractal.ClassName:string;
 begin

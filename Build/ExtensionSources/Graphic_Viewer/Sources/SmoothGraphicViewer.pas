@@ -36,7 +36,7 @@ type
 			TSMathGraphic;
 		function Font() : TSFont;
 			public
-		View : TSScreenVertexes;
+		View : TSScreenVertices;
 		Changet : TSBoolean;
 		NotUsedInGraphic : TSBoolean;
 		Colors: packed array of

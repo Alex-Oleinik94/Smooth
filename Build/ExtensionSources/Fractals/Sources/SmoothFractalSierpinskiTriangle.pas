@@ -24,7 +24,7 @@ type
 		class function CountingTheNumberOfPolygons(const ThisDepth:Int64):Int64;
 		procedure Construct();override;
 		procedure PolygonsConstruction();
-		procedure PushPoligonData(var ObjectId:TSFractalIndexInt;const v1,v2,v3:TSVertex2f;var FVertexIndex,FFaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure PushPolygonData(var ObjectId:TSFractalIndexInt;const v1,v2,v3:TSVertex2f;var FVertexIndex,FFaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSScreenLabel;
 		FBPD, FBMD : TSScreenButton;
@@ -44,7 +44,7 @@ begin
 Result := 'Треугольник Серпинского';
 end;
 
-procedure TSFractalSierpinskiTriangle.PushPoligonData(var ObjectId:TSFractalIndexInt;const v1,v2,v3:TSVertex2f;var FVertexIndex,FFaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSFractalSierpinskiTriangle.PushPolygonData(var ObjectId:TSFractalIndexInt;const v1,v2,v3:TSVertex2f;var FVertexIndex,FFaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 FVertexIndex+=3;
 F3dObject.Objects[ObjectId].SetVertex(FVertexIndex-3, v1);
@@ -56,7 +56,7 @@ F3dObject.Objects[ObjectId].SetFaceLine(0,FFaceIndex+1,FVertexIndex-3,FVertexInd
 F3dObject.Objects[ObjectId].SetFaceLine(0,FFaceIndex+2,FVertexIndex-1,FVertexIndex-3);
 FFaceIndex+=3;
 
-AfterPushingPoligonData(ObjectId,FThreadsEnable,FVertexIndex,FFaceIndex);
+AfterPushingPolygonData(ObjectId,FThreadsEnable,FVertexIndex,FFaceIndex);
 end;
 
 procedure TSFractalSierpinskiTriangle.PolygonsConstruction();
@@ -65,7 +65,7 @@ var
 	FVertexIndex,FFaceIndex:TSFractalIndexInt;
 procedure Rec(const t1,t2,t3:TSVertex3f;const NowDepth:LongWord);
 begin
-PushPoligonData(
+PushPolygonData(
 	ObjectId,
 	(t1+t2)/2,
 	(t3+t2)/2,
@@ -83,7 +83,7 @@ begin
 ObjectId:=0;
 FFaceIndex:=0;
 FVertexIndex:=0;
-PushPoligonData(
+PushPolygonData(
 	ObjectId,
 	SVertex3fImport(cos(pi/2),sin(pi/2))*4,
 	SVertex3fImport(cos(pi/2+2*pi/3),sin(pi/2+2*pi/3))*4,
@@ -103,12 +103,11 @@ if FThreadsEnable then
 			F3dObjectsInfo[ObjectId]:=S_TRUE;
 end;
 
-procedure NewMengerThread(Klass:TSFractalData) ;
+procedure TSFractalSierpinskiTriangle_Thread(FractalThreadData:PSFractalThreadData);
 begin
-(Klass.FFractal as TSFractalSierpinskiTriangle).PolygonsConstruction();
-Klass.FFractal.FThreadsData[Klass.FThreadID].FFinished:=True;
-Klass.FFractal.FThreadsData[Klass.FThreadID].FData:=nil;
-Klass.Destroy;
+(FractalThreadData^.Fractal as TSFractalSierpinskiTriangle).PolygonsConstruction();
+FractalThreadData^.Finished:=True;
+FractalThreadData^.FreeMemData();
 end;
 
 procedure TSFractalSierpinskiTriangle.Construct();
@@ -124,8 +123,7 @@ else
 	Construct3dObjects(NumberOfPolygons,SR_LINES,S3dObjectVertexType2f,1);
 if FThreadsEnable then
 	begin
-	FThreadsData[0].FFinished:=False;
-	FThreadsData[0].FData:=nil;
+	FThreadsData[0].Clear(Self);
 	PolygonsConstruction;
 	end
 else

@@ -12,12 +12,32 @@ uses
 type
 	TSFractal = class;
 	
-	TSFractalData = class
+	TSFractalThreadData = object
 			public
-		constructor Create(const Fractal:TSFractal; const ThreadID:LongWord);
-			public
+		procedure Clear(const _Fractal : TSFractal);
+			private
 		FThreadID:LongWord;
 		FFractal:TSFractal;
+		FThread:TSThread;
+		FFinished:Boolean;
+		FData : TSPointer;
+			public
+		procedure FreeMemData();
+		procedure KillThread();
+			public
+		property Fractal : TSFractal read FFractal write FFractal;
+		property Finished : TSBoolean read FFinished write FFinished;
+		property Data : TSPointer read FData write FData;
+		property Thread : TSThread read FThread write FThread;
+		end;
+	PSFractalThreadData = ^ TSFractalThreadData;
+	TSFractalThreadDataList = packed array of TSFractalThreadData;
+	
+	TSCustomFractalThreadData = object
+			private
+		FFractalThreadData : PSFractalThreadData;
+			public
+		property FractalThreadData : PSFractalThreadData read FFractalThreadData write FFractalThreadData;
 		end;
 	
 	TSFractal = class(TSPaintableObject)
@@ -25,18 +45,15 @@ type
 		constructor Create(); override;
 		destructor Destroy(); override;
 		class function ClassName() : TSString; override;
-			public
+			protected
 		FDepth:LongInt;
-		
 		FThreadsEnable:Boolean;
-		
-		FThreadsData:packed array of 
-			packed record
-				FFinished:Boolean;
-				FData:TSFractalData;
-				FThread:TSThread;
-				end;
-		
+		FThreadsData : TSFractalThreadDataList;
+			protected
+		procedure SetDepth(const _Depth : LongInt); virtual;
+		procedure SetThreadsQuantity(NewQuantity:LongWord);
+		function GetThreadsQuantity():LongWord;inline;
+		function GetThreadData(Index : TSMaxEnum) : PSFractalThreadData;
 			public
 		function ThreadsReady():Boolean;virtual;
 		procedure Construct();virtual;
@@ -46,17 +63,38 @@ type
 		procedure DestroyThreads();virtual;
 		procedure AfterConstruct();virtual;
 		procedure BeginConstruct();virtual;
-		procedure SetThreadsQuantity(NewQuantity:LongWord);
-		function GetThreadsQuantity():LongWord;inline;
-			protected
-		procedure SetDepth(const _Depth : LongInt); virtual;
 			public
 		property Depth:LongInt read FDepth write SetDepth;
 		property ThreadsEnable:Boolean read FThreadsEnable write FThreadsEnable;
 		property Threads:LongWord read GetThreadsQuantity write SetThreadsQuantity;
+		property ThreadData[Index : TSMaxEnum] : PSFractalThreadData read GetThreadData;
 		end;
 
 implementation
+
+
+procedure TSFractalThreadData.FreeMemData();
+begin
+SKill(FData);
+end;
+
+procedure TSFractalThreadData.KillThread();
+begin
+SKill(FThread);
+end;
+
+procedure TSFractalThreadData.Clear(const _Fractal : TSFractal);
+begin
+FThreadID := 0;
+FFractal := _Fractal;
+FThread := nil;
+FFinished := False;
+end;
+
+function TSFractal.GetThreadData(Index : TSMaxEnum) : PSFractalThreadData;
+begin
+Result := @FThreadsData[Index];
+end;
 
 procedure TSFractal.SetDepth(const _Depth : LongInt);
 begin
@@ -66,13 +104,6 @@ end;
 class function TSFractal.ClassName:string;
 begin
 Result := 'Smooth fractal';
-end;
-
-constructor TSFractalData.Create(const Fractal:TSFractal; const ThreadID:LongWord);
-begin
-inherited Create();
-FFractal:=Fractal;
-FThreadID:=ThreadID;
 end;
 
 procedure TSFractal.AfterConstruct(); 
@@ -88,18 +119,7 @@ var
 	i:LongInt;
 begin
 for i:=0 to High(FThreadsData) do
-	begin
-	if FThreadsData[i].FData<>nil then
-		begin
-		FThreadsData[i].FData.Destroy();
-		FThreadsData[i].FData:=nil;
-		end;
-	if FThreadsData[i].FThread<>nil then
-		begin
-		FThreadsData[i].FThread.Destroy();
-		FThreadsData[i].FThread:=nil;
-		end;
-	end;
+	SKill(FThreadsData[i].FThread);
 SetLength(FThreadsData,0);
 FThreadsData:=nil;
 end;
@@ -109,15 +129,7 @@ var
 	i:LongInt;
 begin
 for i:=0 to High(FThreadsData) do
-	begin
 	FThreadsData[i].FFinished:=b;
-	if FThreadsData[i].FData<>nil then
-		begin
-		FThreadsData[i].FData.Destroy;
-		FThreadsData[i].FData:=Nil;
-		end;
-	FThreadsData[i].FFinished:=b;
-	end;
 end;
 
 function TSFractal.ThreadsReady:Boolean;
@@ -126,7 +138,7 @@ var
 begin
 Result:=True;
 for i:=0 to High(FThreadsData) do
-	if FThreadsData[i].FFinished=False then
+	if not FThreadsData[i].FFinished then
 		begin
 		Result:=False;
 		Break;
@@ -137,10 +149,13 @@ procedure TSFractal.CreateThreads(const a:Byte);
 var
 	i:LongInt;
 begin
-SetLEngth(FThreadsData,a);
-for i:=0 to High(FThreadsData) do
-	FThreadsData[i].FData:=nil;
-ThreadsBoolean(False);
+DestroyThreads();
+if a > 0 then
+	begin
+	SetLength(FThreadsData,a);
+	for i:=0 to High(FThreadsData) do
+		FThreadsData[i].Clear(Self);
+	end;
 end;
 
 procedure TSFractal.Paint();
@@ -154,7 +169,7 @@ end;
 
 procedure TSFractal.SetThreadsQuantity(NewQuantity:LongWord);inline;
 begin
-SetLength(FThreadsData,NewQuantity);
+CreateThreads(NewQuantity);
 FThreadsEnable:=NewQuantity>0;
 end;
 

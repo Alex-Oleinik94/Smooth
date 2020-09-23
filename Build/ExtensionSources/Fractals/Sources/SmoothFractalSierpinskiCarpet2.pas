@@ -44,7 +44,7 @@ type
 	procedure Generate1(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt);
 		public
 	procedure PolygonsConstruction(); override; // fractal construction
-	procedure PushPoligonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt; const v1, v2, v3, v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF} // adding data to array
+	procedure PushPolygonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt; const v1, v2, v3, v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF} // adding data to array
 	end;
 
 implementation
@@ -162,7 +162,7 @@ Generate4(FDepth,
 EndOfPolygonsConstruction(ObjectNumber);
 end;
 
-procedure TSFractalSierpinskiCarpet2.PushPoligonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt; const v1, v2, v3, v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSFractalSierpinskiCarpet2.PushPolygonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt; const v1, v2, v3, v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 _VertexIndex+=4;
 F3dObject.Objects[_ObjectNumber].SetVertex(_VertexIndex - 4, v1);
@@ -181,7 +181,7 @@ if FEnableColors then
 F3dObject.Objects[_ObjectNumber].SetFaceQuad(0, _FaceIndex, _VertexIndex - 1, _VertexIndex - 2, _VertexIndex - 3, _VertexIndex - 4);
 _FaceIndex+=1;
 
-AfterPushingPoligonData(_ObjectNumber, FThreadsEnable, _VertexIndex, _FaceIndex);
+AfterPushingPolygonData(_ObjectNumber, FThreadsEnable, _VertexIndex, _FaceIndex);
 end;
 
 procedure TSFractalSierpinskiCarpet2.Generate4(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt);
@@ -213,7 +213,7 @@ var
 	StepC41, StepC32 : TSVector3f;
 begin
 if (_Depth2 = 0) then
-	PushPoligonData(_ObjectNumber, _VertexIndex, _FaceIndex, _v1, _v2, _v3, _v4, _c1, _c2, _c3, _c4)
+	PushPolygonData(_ObjectNumber, _VertexIndex, _FaceIndex, _v1, _v2, _v3, _v4, _c1, _c2, _c3, _c4)
 else
 	begin
 	Generate(_Depth, _Depth2 - 1, _v1, (_v1 * 2 + _v2)/3, (_v4 * 2 + _v3)/3, _v4, _c1, (_c1 * 2 + _c2)/3, (_c4 * 2 + _c3)/3, _c4);
@@ -244,7 +244,7 @@ end;
 
 begin
 if (_Depth = 0) or (_Depth = 1) then
-	PushPoligonData(_ObjectNumber, _VertexIndex, _FaceIndex, _v1, _v2, _v3, _v4, _c1, _c2, _c3, _c4)
+	PushPolygonData(_ObjectNumber, _VertexIndex, _FaceIndex, _v1, _v2, _v3, _v4, _c1, _c2, _c3, _c4)
 else
 	// constructing...
 	Generate(_Depth, _Depth - 1, _v1, _v2, _v3, _v4, _c1, _c2, _c3, _c4);

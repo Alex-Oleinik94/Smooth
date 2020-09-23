@@ -35,7 +35,7 @@ type
 		function GetResultVertex(const Attitude:real):TSVertex3f;inline;overload;
 		procedure Construct();
 		procedure AddVertex(const VVertex:TSVertex3f);
-		property Vertexes[Index : TSMaxEnum]:TSVertex3f read GetVertex write SetVertex;
+		property Vertices[Index : TSMaxEnum]:TSVertex3f read GetVertex write SetVertex;
 		property Detalization:LongWord read FDetalization write FDetalization;
 		procedure Paint();override;
 		function VertexQuantity:TSMaxEnum;inline;
@@ -138,7 +138,7 @@ F3dObject:=TS3DObject.Create();
 F3dObject.SetContext(Context);
 F3dObject.ObjectColor:=SColor4fFromUInt32($FFFFFF);
 F3dObject.EnableCullFace:=False;
-F3dObject.ObjectPoligonesType:=SR_LINE_STRIP;
+F3dObject.ObjectPolygonsType:=SR_LINE_STRIP;
 F3dObject.VertexType := S3dObjectVertexType3f;
 F3dObject.SetVertexLength(FDetalization);
 for i:=0 to FDetalization-1 do

@@ -366,7 +366,7 @@ if (FPhysicsClass<>nil) and FPhysicsClass.Drawable then
 	F3dObject.Context := Context;
 	F3dObject.QuantityFaceArrays := 0;
 	F3dObject.HasColors := False;
-	F3dObject.ObjectPoligonesType:=SR_TRIANGLES;
+	F3dObject.ObjectPolygonsType:=SR_TRIANGLES;
 	F3dObject.ObjectColor:=SColor4fFromUInt32($FFFFFF);
 	F3dObject.EnableCullFace:=False;
 	F3dObject.HasNormals:=True;

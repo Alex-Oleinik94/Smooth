@@ -294,7 +294,7 @@ with VObject do
 		begin
 		AddFaceArray();
 		AutoSetIndexFormat(QuantityFaceArrays-1,ObjQuantityAllVertices);
-		PoligonesType[QuantityFaceArrays-1] := SR_TRIANGLES;
+		PolygonsType[QuantityFaceArrays-1] := SR_TRIANGLES;
 		Faces[QuantityFaceArrays-1] := i64r - ObjArMaterials[i].FFaceIndex + 1;
 		Model.IdentifyLastObjectMaterial(ObjArMaterials[i].FName);
 		iii := 0;

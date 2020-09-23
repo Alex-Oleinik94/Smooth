@@ -115,7 +115,7 @@ if Terrain <> nil then
 	begin
 	Result := TS3DObject.Create();
 	Result.Context := VContext;
-	Result.ObjectPoligonesType := SR_TRIANGLES;
+	Result.ObjectPolygonsType := SR_TRIANGLES;
 	Result.HasNormals := True;
 	Result.HasTexture := False;
 	Result.HasColors  := VColorFunction <> nil;
@@ -139,7 +139,7 @@ if Terrain <> nil then
 				Result.SetColor(i * FSize + ii, VertexColor.r, VertexColor.g, VertexColor.b, VertexColor.a);
 				end;
 	Result.AddFaceArray();
-	Result.PoligonesType[0] := SR_TRIANGLES;
+	Result.PolygonsType[0] := SR_TRIANGLES;
 	Result.AutoSetIndexFormat(0, FSize * FSize);
 	Result.Faces[0] := (FSize-1) * (FSize-1) * 2;
 	for i := 0 to FSize - 2 do 

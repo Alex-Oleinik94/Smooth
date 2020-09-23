@@ -45,15 +45,17 @@ type
 		class function ConstructBoolArray(const _FractalType : TSMengerType; const _PreviousBoolArray:TSMengerSpongeBoolAr6;const i,j,k: TSUInt8;const _Depth:TSUInt32 = 0):TSMengerSpongeBoolAr6;
 		class function DoOrNotDo(const i,ii,iii:TSUInt8):TSBoolean;inline;
 		class function DoOrNotDoPlus(const i,ii,iii:TSUInt8):TSBoolean;inline;
-		procedure PushPoligonData(const i1,i2,i3,i4:TSVertex3f;const ai:TSUInt32;const AllQ:Real;var ObjectId, FVertexIndex,FFaceIndex:TSFractalIndexInt);inline;
+		procedure PushPolygonData(const i1,i2,i3,i4:TSVertex3f;const ai:TSUInt32;const AllQ:Real;var ObjectId, FVertexIndex,FFaceIndex:TSFractalIndexInt);inline;
 		function DoAtThreads():TSBoolean;inline;
 		end;
 		
 	TSMengerSpongeFractal=TSFractalMengerSponge;
 	
-	TSMengerSpongeFractalData=class(TSFractalData)
+	PSMengerSpongeFractalData = ^ TSMengerSpongeFractalData;
+	TSMengerSpongeFractalData=object(TSCustomFractalThreadData)
 			public
-		constructor Create(const a,b,c:TSFractalIndexInt;const d : TSFractalMengerSponge;const TID:TSUInt32);
+		function Create(const a,b,c:TSFractalIndexInt) : PSMengerSpongeFractalData; static;
+		procedure Import(const a,b,c:TSFractalIndexInt);
 			public
 		a1,b1,c1:TSFractalIndexInt;
 		end;
@@ -240,22 +242,27 @@ begin
 inherited;
 end;
 
-constructor TSMengerSpongeFractalData.Create(const a,b,c:TSFractalIndexInt; const d:TSFractalMengerSponge;const TID:LongWord);
+function TSMengerSpongeFractalData.Create(const a,b,c:TSFractalIndexInt) : PSMengerSpongeFractalData;
 begin
-inherited Create(d,TID);
+Result := GetMem(SizeOf(TSMengerSpongeFractalData));
+Result^.Import(a,b,c);
+end;
+
+procedure TSMengerSpongeFractalData.Import(const a,b,c:TSFractalIndexInt);
+begin
 a1:=a;
 b1:=b;
 c1:=c;
-FFractal:=d;
-FThreadID:=TID;
 end;
 
-procedure NewMengerThread(MengerSpongeFractalData:TSMengerSpongeFractalData);
+procedure TSFractalMengerSponge_Thread(FractalData:PSFractalThreadData);
+var
+	MengerSpongeFractalData : PSMengerSpongeFractalData;
 begin
-(MengerSpongeFractalData.FFractal as TSFractalMengerSponge).PolygonsConstruction(MengerSpongeFractalData.a1,MengerSpongeFractalData.b1,MengerSpongeFractalData.c1);
-MengerSpongeFractalData.FFractal.FThreadsData[MengerSpongeFractalData.FThreadID].FFinished:=True;
-MengerSpongeFractalData.FFractal.FThreadsData[MengerSpongeFractalData.FThreadID].FData:=nil;
-MengerSpongeFractalData.Destroy();
+MengerSpongeFractalData := PSMengerSpongeFractalData(FractalData^.Data);
+(FractalData^.Fractal as TSFractalMengerSponge).PolygonsConstruction(MengerSpongeFractalData^.a1,MengerSpongeFractalData^.b1,MengerSpongeFractalData^.c1);
+FractalData^.Finished:=True;
+FractalData^.FreeMemData();
 end;
 
 function TSFractalMengerSponge.DoAtThreads:boolean;inline;
@@ -297,25 +304,25 @@ if DoAtThreads then
 				end;
 			k := F3dObject.QuantityObjects;
 			Construct3dObjects(NumberOfPolygons,SR_QUADS);
-			FThreadsData[Index].FData:=TSMengerSpongeFractalData.Create(k ,Index*(20 div Length(FThreadsData)),(Index+1)*(20 div Length(FThreadsData))-1,Self,Index);
-			FThreadsData[Index].FFinished:=False;
+			ThreadData[Index]^.Data:=TSMengerSpongeFractalData.Create(k ,Index*(20 div Length(FThreadsData)),(Index+1)*(20 div Length(FThreadsData))-1);
+			ThreadData[Index]^.Finished:=False;
 			end;
 		for Index:=0 to High(FThreadsData) do
-			FThreadsData[Index].FThread:=TSThread.Create(TSPointerProcedure(@NewMengerThread),FThreadsData[Index].FData);
+			ThreadData[Index]^.Thread:=TSThread.Create(TSPointerProcedure(@TSFractalMengerSponge_Thread),ThreadData[Index]);
 		end;
 	if FFractalType <> SMengerCube then
 		begin
 		F3dObjectsReady:=False;
 		for Index:=0 to High(FThreadsData) do
 			begin
-			FThreadsData[Index].FFinished:=True;
-			FThreadsData[Index].FData:=nil;
+			ThreadData[Index]^.Finished:=True;
+			ThreadData[Index]^.Data:=nil;
 			end;
 		Construct3dObjects(CountingTheNumberOfPolygons(FFractalType,TSMengerSpongeBoolAr6True,FDepth),SR_QUADS);
 		Index := 0;
-		FThreadsData[Index].FFinished:=False;
-		FThreadsData[Index].FData:=TSMengerSpongeFractalData.Create(0,0,0,Self,Index);
-		FThreadsData[Index].FThread:=TSThread.Create(TSPointerProcedure(@NewMengerThread),FThreadsData[Index].FData);
+		ThreadData[Index]^.Finished:=False;
+		ThreadData[Index]^.Data:=TSMengerSpongeFractalData.Create(0,0,0);
+		ThreadData[Index]^.Thread:=TSThread.Create(TSPointerProcedure(@TSFractalMengerSponge_Thread),ThreadData[Index]);
 		end;
 	end
 else
@@ -382,17 +389,17 @@ if NowDepth<=0 then
 			begin
 			case i of
 			0:
-				PushPoligonData(ArVerts[1],ArVerts[2],ArVerts[3],ArVerts[4],i,AllQ,ObjectId,NOfV,NOfF);
+				PushPolygonData(ArVerts[1],ArVerts[2],ArVerts[3],ArVerts[4],i,AllQ,ObjectId,NOfV,NOfF);
 			1:
-				PushPoligonData(ArVerts[1],ArVerts[2],ArVerts[6],ArVerts[5],i,AllQ,ObjectId,NOfV,NOfF);
+				PushPolygonData(ArVerts[1],ArVerts[2],ArVerts[6],ArVerts[5],i,AllQ,ObjectId,NOfV,NOfF);
 			2:
-				PushPoligonData(ArVerts[2],ArVerts[3],ArVerts[7],ArVerts[6],i,AllQ,ObjectId,NOfV,NOfF);
+				PushPolygonData(ArVerts[2],ArVerts[3],ArVerts[7],ArVerts[6],i,AllQ,ObjectId,NOfV,NOfF);
 			3:
-				PushPoligonData(ArVerts[3],ArVerts[4],ArVerts[8],ArVerts[7],i,AllQ,ObjectId,NOfV,NOfF);
+				PushPolygonData(ArVerts[3],ArVerts[4],ArVerts[8],ArVerts[7],i,AllQ,ObjectId,NOfV,NOfF);
 			4:
-				PushPoligonData(ArVerts[4],ArVerts[1],ArVerts[5],ArVerts[8],i,AllQ,ObjectId,NOfV,NOfF);
+				PushPolygonData(ArVerts[4],ArVerts[1],ArVerts[5],ArVerts[8],i,AllQ,ObjectId,NOfV,NOfF);
 			5:
-				PushPoligonData(ArVerts[7],ArVerts[8],ArVerts[5],ArVerts[6],i,AllQ,ObjectId,NOfV,NOfF);
+				PushPolygonData(ArVerts[7],ArVerts[8],ArVerts[5],ArVerts[6],i,AllQ,ObjectId,NOfV,NOfF);
 			end;
 			end;
 		end;
@@ -625,7 +632,7 @@ if _FractalType = SMengerSnowflake then
 	end;
 end;
 
-procedure TSFractalMengerSponge.PushPoligonData(const i1,i2,i3,i4:TSVertex3f;const ai:longword;const AllQ:real;var ObjectId, FVertexIndex,FFaceIndex:TSFractalIndexInt);inline;
+procedure TSFractalMengerSponge.PushPolygonData(const i1,i2,i3,i4:TSVertex3f;const ai:longword;const AllQ:real;var ObjectId, FVertexIndex,FFaceIndex:TSFractalIndexInt);inline;
 //var
 //abnu:	B:boolean = False;
 begin
@@ -654,7 +661,7 @@ if FEnableNormals then
 F3dObject.Objects[ObjectId].SetFaceQuad(0,FFaceIndex,FVertexIndex-1,FVertexIndex-2,FVertexIndex-3,FVertexIndex-4);
 FFaceIndex+=1;
 
-AfterPushingPoligonData(ObjectId,DoAtThreads,FVertexIndex,FFaceIndex);
+AfterPushingPolygonData(ObjectId,DoAtThreads,FVertexIndex,FFaceIndex);
 end;
 
 end.

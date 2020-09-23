@@ -133,7 +133,7 @@ type
 	PS3DObjectFace = ^ TS3DObjectFace;
 	TS3DObjectFace = packed record 
 		FIndexFormat      : TS3dObjectIndexFormat;
-		FPoligonesType    : TSLongWord;
+		FPolygonsType    : TSLongWord;
 		FNOfFaces         : TSQuadWord;
 		// Указательл на первый элемент области памяти, где находятся индексы
 		FArray            : TSPointer;
@@ -168,7 +168,7 @@ type
         FBumpFormat : TSBumpFormat;
     protected
         // Тип полигонов в модельки (SR_QUADS, SR_TRIANGLES, SR_LINES, SR_LINE_LOOP ....)
-        FObjectPoligonesType    : TSLongWord;
+        FObjectPolygonsType    : TSLongWord;
         // Тип вершин в модельке
         FVertexType       : TS3dObjectVertexType;
         // Тип хранение цветов
@@ -189,8 +189,8 @@ type
 		function GetVertexLength():QWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		procedure SetHasTexture(const VHasTexture:TSBoolean); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		function GetQuantityFaces(const Index : TSLongWord):TSQuadWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-		function GetPoligonesType(const ArIndex : TSLongWord):TSLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-		procedure SetPoligonesType(const ArIndex : TSLongWord;const NewPoligonesType : TSLongWord); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetPolygonsType(const ArIndex : TSLongWord):TSLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		procedure SetPolygonsType(const ArIndex : TSLongWord;const NewPolygonsType : TSLongWord); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 	public
 		procedure SetColorType(const VNewColorType:TS3dObjectColorType);
 		procedure SetVertexType(const VNewVertexType:TS3dObjectVertexType);
@@ -199,14 +199,14 @@ type
         // Эти свойства уже были прокоментированы выше (см на что эти свойства ссылаются)
         property CountTextureFloatsInVertexArray   : TSLongWord       read FCountTextureFloatsInVertexArray write FCountTextureFloatsInVertexArray;
         property BumpFormat                        : TSBumpFormat     read FBumpFormat          write FBumpFormat;
-        property PoligonesType[Index:TSLongWord]  : TSLongWord       read GetPoligonesType     write SetPoligonesType;
+        property PolygonsType[Index:TSLongWord]  : TSLongWord       read GetPolygonsType     write SetPolygonsType;
 		property QuantityVertices                  : TSQuadWord       read FNOfVerts;
 		property HasTexture                        : TSBoolean        read FHasTexture          write SetHasTexture;
 		property HasColors                         : TSBoolean        read FHasColors           write FHasColors;
 		property HasNormals                        : TSBoolean        read FHasNormals          write FHasNormals;
 		property ColorType                         : TS3dObjectColorType  read FColorType           write SetColorType;
 		property VertexType                        : TS3dObjectVertexType read FVertexType          write SetVertexType;
-		property ObjectPoligonesType               : LongWord          read FObjectPoligonesType write FObjectPoligonesType;
+		property ObjectPolygonsType               : LongWord          read FObjectPolygonsType write FObjectPolygonsType;
     protected
         // Это массив индексов
 		ArFaces : TS3DObjectFacees;
@@ -331,9 +331,9 @@ type
 		// Возвращает действительную длинну массива индексов
 		function GetFaceLength(const Index:TSLongWord):TSQuadWord;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		// Возвращает действительную длинну массива индексов в зависимости он их длинны и их типа, заданых параметрами
-		class function GetFaceLength(const FaceLength:TSQuadWord; const ThisPoligoneType:LongWord):TSQuadWord;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		class function GetFaceLength(const FaceLength:TSQuadWord; const ThisPolygonType:LongWord):TSQuadWord;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		// Возвращает, сколько в TSFaceType*Result байтов занимает одна структура индексов. Очень прикольная функция.
-		class function GetPoligoneInt(const ThisPoligoneType:LongWord):Byte; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		class function GetPolygonInt(const ThisPolygonType:LongWord):Byte; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		class function GetFaceInt(const ThisFaceFormat : TS3dObjectIndexFormat):Byte; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 	public
 		// Ствойства для получения и редактирования длинн массивов
@@ -591,14 +591,14 @@ S3dObjectIndexFormat4b:
 end;
 end;
 
-procedure TS3DObject.SetPoligonesType(const ArIndex : TSLongWord;const NewPoligonesType : TSLongWord); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+procedure TS3DObject.SetPolygonsType(const ArIndex : TSLongWord;const NewPolygonsType : TSLongWord); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
-ArFaces[ArIndex].FPoligonesType:=NewPoligonesType;
+ArFaces[ArIndex].FPolygonsType:=NewPolygonsType;
 end;
 
-function TS3DObject.GetPoligonesType(const ArIndex : TSLongWord):TSLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function TS3DObject.GetPolygonsType(const ArIndex : TSLongWord):TSLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
-Result:=ArFaces[ArIndex].FPoligonesType;
+Result:=ArFaces[ArIndex].FPolygonsType;
 end;
 
 procedure TS3DObject.AutoSetIndexFormat(const ArIndex : TSLongWord; const MaxVertexLength : TSQuadWord );
@@ -679,7 +679,7 @@ for Index := FQuantityFaceArrays to NewArLength - 1 do
 	begin
 	ArFaces[Index].FMaterial      := nil;
 	ArFaces[Index].FIndexFormat   := S3dObjectIndexFormat2b;
-	ArFaces[Index].FPoligonesType := SR_TRIANGLES;
+	ArFaces[Index].FPolygonsType := SR_TRIANGLES;
 	ArFaces[Index].FArray         := nil;
 	ArFaces[Index].FNOfFaces      := 0;
 	end;
@@ -780,15 +780,15 @@ procedure TS3DObject.AddNormals();
 var
 	SecondArVertex:Pointer = nil;
 	i,ii,iiii,iii:TSMaxEnum;
-	ArPoligonesNormals:packed array of TSVertex3f = nil;
+	ArPolygonsNormals:packed array of TSVertex3f = nil;
 	Plane:TSPlane3D;
 	Vertex:TSVertex3f;
 begin
-if (FObjectPoligonesType<>SR_TRIANGLES) then
+if (FObjectPolygonsType<>SR_TRIANGLES) then
 	Exit;
 if FQuantityFaceArrays<>0 then
 	for i := 0 to FQuantityFaceArrays - 1 do
-		if ArFaces[i].FPoligonesType<>SR_TRIANGLES then
+		if ArFaces[i].FPolygonsType<>SR_TRIANGLES then
 			Exit;
 if not FHasNormals then
 	begin
@@ -819,14 +819,14 @@ if not FHasNormals then
 	SecondArVertex:=nil;
 	FHasNormals:=True;
 	end;
-SetLength(ArPoligonesNormals,Faces[0]);
+SetLength(ArPolygonsNormals,Faces[0]);
 for i:=0 to Faces[0]-1 do
 	begin
 	Plane := SPlane3DFrom3Points(
 		ArVertex3f[ArFacesTriangles(0,i).p[0]]^,
 		ArVertex3f[ArFacesTriangles(0,i).p[1]]^,
 		ArVertex3f[ArFacesTriangles(0,i).p[2]]^);
-	ArPoligonesNormals[i].Import(
+	ArPolygonsNormals[i].Import(
 		Plane.a, Plane.b, Plane.c);
 	end;
 for i:=0 to QuantityVertices-1 do
@@ -842,12 +842,12 @@ for i:=0 to QuantityVertices-1 do
 				Break;
 				end;
 		if iii=1 then
-			Vertex+=ArPoligonesNormals[ii];
+			Vertex+=ArPolygonsNormals[ii];
 		end;
 	Vertex := Vertex.Normalized();
 	ArNormal[i]^:= Vertex;
 	end;
-SetLength(ArPoligonesNormals,0);
+SetLength(ArPolygonsNormals,0);
 end;
 
 procedure TS3DObject.AddFace(const ArIndex:TSLongWord;const FQuantityNewFaces:LongWord = 1);
@@ -1187,9 +1187,9 @@ begin
 Result:=PSVertex2f(TSMaxEnum(ArVertex)+Index*(GetSizeOfOneVertex()));
 end;
 
-class function TS3DObject.GetFaceLength(const FaceLength:TSQuadWord; const ThisPoligoneType:LongWord):TSQuadWord;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+class function TS3DObject.GetFaceLength(const FaceLength:TSQuadWord; const ThisPolygonType:LongWord):TSQuadWord;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
-Result:=FaceLength*GetPoligoneInt(ThisPoligoneType);
+Result:=FaceLength*GetPolygonInt(ThisPolygonType);
 end;
 
 class function TS3DObject.ClassName:string;
@@ -1223,7 +1223,7 @@ SHint([FacePredString,'CountOfFaces    = "',ArFaces[Index].FNOfFaces,'"'], Cases
 SHint([FacePredString,'RealFaceLength  = "',GetFaceLength(Index),'"'], CasesOfPrint);
 SHint([FacePredString,'MaterialID      = "',ArFaces[Index].FMaterial,'"'], CasesOfPrint);
 SHint([FacePredString,'IndexFormat     = "'+SStr3dObjectIndexFormat(ArFaces[Index].FIndexFormat)+'"'], CasesOfPrint);
-SHint([FacePredString,'PoligonesType   = "', SStrPoligonesType(ArFaces[Index].FPoligonesType), '"'], CasesOfPrint);
+SHint([FacePredString,'PolygonsType   = "', SStrPolygonsType(ArFaces[Index].FPolygonsType), '"'], CasesOfPrint);
 TextColor(15);
 SHint([FacePredString,'FacesSize       = "',SMemorySizeToString(GetFaceInt(ArFaces[Index].FIndexFormat) * GetFaceLength(Index),'EN'),'"'], CasesOfPrint);
 TextColor(7);
@@ -1250,7 +1250,7 @@ SHint([PredStr,'  HasTexture          = "',FHasTexture,'"'], CasesOfPrint);
 if FQuantityFaceArrays>0 then TextColor(10) else TextColor(12);
 SHint([PredStr,'  QuantityFaceArrays  = "',FQuantityFaceArrays,'"'], CasesOfPrint);
 WriteFaceArrays();
-SHint([PredStr,'  ObjectPoligonesType = "', SStrPoligonesType(FObjectPoligonesType), '"'], CasesOfPrint);
+SHint([PredStr,'  ObjectPolygonsType = "', SStrPolygonsType(FObjectPolygonsType), '"'], CasesOfPrint);
 SHint([PredStr,'  SizeOfOneVertex     = "',GetSizeOfOneVertex(),'"'], CasesOfPrint);
 SHint([PredStr,'  VertexFormat        = "', SStrVertexFormat(FVertexType), '"'], CasesOfPrint);
 SHint([PredStr,'  CountTextureFloatsInVertexArray = "',FCountTextureFloatsInVertexArray,'"'], CasesOfPrint);
@@ -1287,9 +1287,9 @@ Result:=
 	VerticesSize();
 end;
 
-class function TS3DObject.GetPoligoneInt(const ThisPoligoneType : LongWord):Byte; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+class function TS3DObject.GetPolygonInt(const ThisPolygonType : LongWord):Byte; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
-case ThisPoligoneType of
+case ThisPolygonType of
 SR_POINTS,
 	SR_TRIANGLE_STRIP,
 	SR_LINE_LOOP,
@@ -1302,17 +1302,17 @@ end;
 
 function TS3DObject.GetFaceLength(const Index : TSLongWord):TSQuadWord;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
-Result:=GetFaceLength(ArFaces[Index].FNOfFaces,ArFaces[Index].FPoligonesType);
+Result:=GetFaceLength(ArFaces[Index].FNOfFaces,ArFaces[Index].FPolygonsType);
 end;
 
 procedure TS3DObject.SetFaceLength(const ArIndex:TSLongWord;const NewLength:TSQuadWord); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if (ArFaces[ArIndex].FNOfFaces=0) or (ArFaces[ArIndex].FArray=nil) then
 	GetMem(ArFaces[ArIndex].FArray,
-		GetPoligoneInt(ArFaces[ArIndex].FPoligonesType)*GetFaceInt(ArFaces[ArIndex].FIndexFormat)*(NewLength))
+		GetPolygonInt(ArFaces[ArIndex].FPolygonsType)*GetFaceInt(ArFaces[ArIndex].FIndexFormat)*(NewLength))
 else
 	ReAllocMem(ArFaces[ArIndex].FArray,
-		GetPoligoneInt(ArFaces[ArIndex].FPoligonesType)*GetFaceInt(ArFaces[ArIndex].FIndexFormat)*(NewLength));
+		GetPolygonInt(ArFaces[ArIndex].FPolygonsType)*GetFaceInt(ArFaces[ArIndex].FIndexFormat)*(NewLength));
 ArFaces[ArIndex].FNOfFaces:=NewLength;
 end;
 
@@ -1430,7 +1430,7 @@ FNOfVerts := 0;
 ArVertex := nil;
 ArFaces := nil;
 FObjectMaterial := nil;
-FObjectPoligonesType := SR_TRIANGLES;
+FObjectPolygonsType := SR_TRIANGLES;
 FColorType:=S3dObjectColorType3b;
 FVertexType:=S3dObjectVertexType3f;
 FEnableVBO:=False;
@@ -1525,7 +1525,7 @@ Destination.Context := Context;
 Destination.HasNormals := HasTexture;
 Destination.HasColors := HasColors;
 Destination.HasNormals := HasNormals;
-Destination.ObjectPoligonesType := ObjectPoligonesType;
+Destination.ObjectPolygonsType := ObjectPolygonsType;
 Destination.EnableCullFace := EnableCullFace;
 Destination.VertexType := VertexType;
 Destination.ColorType := ColorType;
@@ -1547,7 +1547,7 @@ if QuantityFaceArrays <> 0 then
 		begin
 		Destination.AddFaceArray();
 		Destination.ArFaces[i].FIndexFormat := ArFaces[i].FIndexFormat;
-		Destination.PoligonesType[i] := PoligonesType[i];
+		Destination.PolygonsType[i] := PolygonsType[i];
 		Destination.Faces[i] := Faces[i];
 		Destination.ArFaces[i].FMaterial := ArFaces[i].FMaterial;
 		Move(
@@ -1760,24 +1760,24 @@ if FEnableVBO then
 			begin
 			InitFaceArrayMeterial(ArFaces[Index].FMaterial);
 			Render.BindBufferARB(SR_ELEMENT_ARRAY_BUFFER_ARB, FFacesBuffers[Index]);
-			Render.DrawElements(ArFaces[Index].FPoligonesType, GetFaceLength(Index),
+			Render.DrawElements(ArFaces[Index].FPolygonsType, GetFaceLength(Index),
 				S3dObjectToRenderIndexFormat(ArFaces[Index].FIndexFormat), nil);
 			DisableFaceArrayMeterial(ArFaces[Index].FMaterial);
 			end
 	else
-		Render.DrawArrays(FObjectPoligonesType, 0, FNOfVerts)
+		Render.DrawArrays(FObjectPolygonsType, 0, FNOfVerts)
 else
 	if FQuantityFaceArrays <> 0 then
 		for Index := 0 to FQuantityFaceArrays - 1 do
 			begin
 			InitFaceArrayMeterial(ArFaces[Index].FMaterial);
-			Render.DrawElements(ArFaces[Index].FPoligonesType, GetFaceLength(Index),
+			Render.DrawElements(ArFaces[Index].FPolygonsType, GetFaceLength(Index),
 				S3dObjectToRenderIndexFormat(ArFaces[Index].FIndexFormat),
 				ArFaces[Index].FArray);
 			DisableFaceArrayMeterial(ArFaces[Index].FMaterial);
 			end
 	else
-		Render.DrawArrays(FObjectPoligonesType, 0, FNOfVerts);
+		Render.DrawArrays(FObjectPolygonsType, 0, FNOfVerts);
 end;
 
 function TS3dObject.LoadToVBO(const ClearAfterLoad : TSBoolean = True) : TSBoolean;

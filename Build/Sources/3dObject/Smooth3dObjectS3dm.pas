@@ -235,7 +235,7 @@ O.ObjectMaterial := IdentifyMaterial(M, ReadString(Stream));
 O.HasTexture := ReadBool(Stream);
 O.HasColors  := ReadBool(Stream);
 O.HasNormals := ReadBool(Stream);
-O.ObjectPoligonesType := ReadEnum(Stream);
+O.ObjectPolygonsType := ReadEnum(Stream);
 O.EnableCullFace := ReadBool(Stream);
 if ReadBool(Stream) then
 	O.ObjectMatrix := ReadMatrix(Stream);
@@ -257,7 +257,7 @@ if O.QuantityFaceArrays <> 0 then
 	for Index := 0 to O.QuantityFaceArrays - 1 do
 		with O.ObjectFace[Index]^ do
 			begin
-			Stream.ReadBuffer(FPoligonesType, SizeOf(FPoligonesType));
+			Stream.ReadBuffer(FPolygonsType, SizeOf(FPolygonsType));
 			Stream.ReadBuffer(FIndexFormat,   SizeOf(FIndexFormat));
 			Stream.ReadBuffer(FNOfFaces,      SizeOf(FNOfFaces));
 			FMaterial := IdentifyMaterial(M, ReadString(Stream));
@@ -286,7 +286,7 @@ WriteString(Stream, MaterialName(O.ObjectMaterial));
 WriteBool(Stream, O.HasTexture);
 WriteBool(Stream, O.HasColors);
 WriteBool(Stream, O.HasNormals);
-WriteEnum(Stream, O.ObjectPoligonesType);
+WriteEnum(Stream, O.ObjectPolygonsType);
 WriteBool(Stream, O.EnableCullFace);
 WriteBool(Stream, O.ObjectMatrixEnabled);
 if O.ObjectMatrixEnabled then
@@ -300,7 +300,7 @@ if O.QuantityFaceArrays <> 0 then
 	for Index := 0 to O.QuantityFaceArrays - 1 do
 		with O.ObjectFace[Index]^ do
 			begin
-			Stream.WriteBuffer(FPoligonesType, SizeOf(FPoligonesType));
+			Stream.WriteBuffer(FPolygonsType, SizeOf(FPolygonsType));
 			Stream.WriteBuffer(FIndexFormat,   SizeOf(FIndexFormat));
 			Stream.WriteBuffer(FNOfFaces,      SizeOf(FNOfFaces));
 			WriteString(Stream, MaterialName(FMaterial));

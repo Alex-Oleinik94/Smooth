@@ -29,7 +29,7 @@ type
 		F3dObject       : TSCustomModel;
 		F3dObjectsInfo  : TSUInt8List;
 		F3dObjectsReady : TSBoolean;
-		FPolygonsShift  : TSFractalIndexInt;
+		FPolygonsLimit  : TSFractalIndexInt;
 		
 		FLightSource    : TSVertex3f;
 		FLightSourceAbs : TSSingle;
@@ -47,17 +47,18 @@ type
 		procedure CkeckConstructedObjects();
 		procedure PaintObject();
 		procedure SaveObject();
-		function CalculatePolygonsShift() : TSUInt64; virtual;
+		function CalculatePolygonsLimit() : TSUInt64; virtual;
 			public
 		procedure DeleteRenderResources();override;
 		procedure LoadRenderResources();override;
 		procedure Paint();override;
 		procedure Construct();override;
-		procedure Set3dObjectArLength(const _ObjectNumber,LFaces,LVertices:int64);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure Construct3dObjects(NumberOfPolygons:Int64;const PoligoneType:LongWord;const VVertexType:TS3dObjectVertexType = S3dObjectVertexType3f;const VertexMultiplier : TSByte = 0);
+		procedure Set3dObjectBuffersSize(const _Object : TS3DObject; const LFaces, LVertices : TSUInt64);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Set3dObjectBuffers(const _Object : TS3DObject; const  _PolygonsCount, _VertexMultiplier : TSUInt64; const _PolygonType : TSUInt32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Construct3dObjects(NumberOfPolygons : TSUInt64; const PolygonType:LongWord;const VVertexType:TS3dObjectVertexType = S3dObjectVertexType3f;const VertexMultiplier : TSByte = 0);
 		procedure Clear3dObject();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure AfterPushingPoligonData(var _ObjectNumber:TSFractalIndexInt;const _DoAtThreads:Boolean;var _VertexIndex, _FaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-		procedure AfterPushingPoligonData(var _ObjectNumber:TSFractalIndexInt;const _DoAtThreads:Boolean;var _VertexIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		procedure AfterPushingPolygonData(var _ObjectNumber:TSFractalIndexInt;const _DoAtThreads:Boolean;var _VertexIndex, _FaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		procedure AfterPushingPolygonData(var _ObjectNumber:TSFractalIndexInt;const _DoAtThreads:Boolean;var _VertexIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 			public
 		property LightingEnable : TSBoolean read FLightingEnable write FLightingEnable;
 		property HasIndexes     : TSBoolean read FHasIndexes     write FHasIndexes;
@@ -84,6 +85,8 @@ uses
 	 Smooth3dObjectS3DM
 	,SmoothStringUtils
 	,SmoothFileUtils
+	,SmoothLog
+	,SmoothBaseUtils
 	;
 
 procedure TS3DFractal.DeleteRenderResources();
@@ -198,30 +201,25 @@ else if F3dObject.QuantityObjects>0 then
 	end;
 end;
 
-procedure TS3DFractal.AfterPushingPoligonData(var _ObjectNumber:TSFractalIndexInt;const _DoAtThreads:Boolean;var _VertexIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure TS3DFractal.AfterPushingPolygonData(var _ObjectNumber:TSFractalIndexInt;const _DoAtThreads:Boolean;var _VertexIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
-if ((HasIndexes) and ((_VertexIndex div F3dObject.Objects[_ObjectNumber].GetPoligoneInt(F3dObject.Objects[_ObjectNumber].PoligonesType[0]))>=FPolygonsShift))
-or ((not HasIndexes) and ((_VertexIndex div F3dObject.Objects[_ObjectNumber].GetPoligoneInt(F3dObject.Objects[_ObjectNumber].ObjectPoligonesType))>=FPolygonsShift))
- then
+if ((HasIndexes) and ((_VertexIndex div F3dObject.Objects[_ObjectNumber].GetPolygonInt(F3dObject.Objects[_ObjectNumber].PolygonsType[0]))>=FPolygonsLimit))
+   or ((not HasIndexes) and ((_VertexIndex div F3dObject.Objects[_ObjectNumber].GetPolygonInt(F3dObject.Objects[_ObjectNumber].ObjectPolygonsType))>=FPolygonsLimit)) then
 	begin
 	if (not _DoAtThreads) and FEnableVBO then
-		begin
 		F3dObject.Objects[_ObjectNumber].LoadToVBO(FClearVBOAfterLoad);
-		end;
 	if FThreadsEnable and (_ObjectNumber>=0) and (_ObjectNumber<=F3dObject.QuantityObjects-1) and (F3dObjectsInfo[_ObjectNumber]=S_FALSE) then
-		F3dObjectsInfo[_ObjectNumber]:=S_TRUE;
-	_ObjectNumber+=1;
-	_VertexIndex:=0;
+		F3dObjectsInfo[_ObjectNumber] := S_TRUE;
+	_ObjectNumber += 1;
+	_VertexIndex := 0;
 	if FEnableVBO and ((_ObjectNumber>=0) and (_ObjectNumber<=F3dObject.QuantityObjects-1)) and (F3dObjectsInfo[_ObjectNumber]=S_FALSE) and (F3dObject.Objects[_ObjectNumber].QuantityVertices=0) then
-		begin
-		Set3dObjectArLength(_ObjectNumber,FPolygonsShift,F3dObject.Objects[_ObjectNumber].GetFaceLength(FPolygonsShift));
-		end;
+		Set3dObjectBuffersSize(F3dObject.Objects[_ObjectNumber], FPolygonsLimit,F3dObject.Objects[_ObjectNumber].GetFaceLength(FPolygonsLimit));
 	end;
 end;
 
-procedure TS3DFractal.AfterPushingPoligonData(var _ObjectNumber:TSFractalIndexInt;const _DoAtThreads:Boolean;var _VertexIndex,_FaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure TS3DFractal.AfterPushingPolygonData(var _ObjectNumber:TSFractalIndexInt;const _DoAtThreads:Boolean;var _VertexIndex,_FaceIndex:TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
-if _FaceIndex>=FPolygonsShift then
+if _FaceIndex>=FPolygonsLimit then
 	begin
 	if (not _DoAtThreads) and FEnableVBO then
 		begin
@@ -233,87 +231,68 @@ if _FaceIndex>=FPolygonsShift then
 	_VertexIndex:=0;
 	_FaceIndex:=0;
 	if FEnableVBO and ((_ObjectNumber>=0) and (_ObjectNumber<=F3dObject.QuantityObjects-1)) and (F3dObjectsInfo[_ObjectNumber]=S_FALSE) and (F3dObject.Objects[_ObjectNumber].QuantityVertices=0) then
-		begin
-		Set3dObjectArLength(_ObjectNumber,FPolygonsShift,F3dObject.Objects[_ObjectNumber].GetFaceLength(FPolygonsShift));
-		end;
+		Set3dObjectBuffersSize(F3dObject.Objects[_ObjectNumber], FPolygonsLimit,F3dObject.Objects[_ObjectNumber].GetFaceLength(FPolygonsLimit));
 	end;
 end;
 
-procedure TS3DFractal.Construct3dObjects(NumberOfPolygons:Int64;const PoligoneType:LongWord;const VVertexType:TS3dObjectVertexType = S3dObjectVertexType3f;const VertexMultiplier : TSByte = 0);
+procedure TS3DFractal.Construct3dObjects(NumberOfPolygons : TSUInt64; const PolygonType:LongWord;const VVertexType:TS3dObjectVertexType = S3dObjectVertexType3f;const VertexMultiplier : TSByte = 0);
 // VertexMultiplier ?
+var
+	AddedObject : TS3DObject;
 begin
-FPolygonsShift := CalculatePolygonsShift();
+SLog.Source([NumberOfPolygons]);
 while NumberOfPolygons<>0 do
 	begin
 	SetLength(F3dObjectsInfo,Length(F3dObjectsInfo)+1);
 	F3dObjectsInfo[High(F3dObjectsInfo)]:=S_FALSE;
-	F3dObject.AddObject();
-	F3dObject.LastObject().ObjectColor:=SColor4fFromUInt32($FFFFFF);
-	F3dObject.LastObject().EnableCullFace:=False;
-	if (PoligoneType=SR_QUADS) and (Render.RenderType<>SRenderOpenGL) then
-		F3dObject.LastObject().ObjectPoligonesType:=SR_TRIANGLES
+	AddedObject := F3dObject.AddObject();
+	AddedObject.ObjectColor := SColor4fFromUInt32($FFFFFF);
+	AddedObject.EnableCullFace := False;
+	if (PolygonType=SR_QUADS) and (Render.RenderType<>SRenderOpenGL) then
+		AddedObject.ObjectPolygonsType:=SR_TRIANGLES
 	else
-		F3dObject.LastObject().ObjectPoligonesType:=PoligoneType;
-	F3dObject.LastObject().VertexType:=VVertexType;
+		AddedObject.ObjectPolygonsType:=PolygonType;
+	AddedObject.VertexType:=VVertexType;
 	if FEnableColors then
-		F3dObject.LastObject().AutoSetColorType();
-	if FEnableNormals then
-		F3dObject.LastObject().HasNormals:=True;
-	F3dObject.LastObject().QuantityFaceArrays := Byte(FHasIndexes);
+		AddedObject.AutoSetColorType();
+	AddedObject.HasNormals := FEnableNormals;
+	AddedObject.QuantityFaceArrays := TSUInt8(FHasIndexes);
 	if FHasIndexes then
-		begin
-		F3dObject.LastObject().PoligonesType[0]:=F3dObject.LastObject().ObjectPoligonesType;
-		end;
-	if NumberOfPolygons<=FPolygonsShift then
-		begin
-		if (PoligoneType=SR_QUADS) and (Render.RenderType<>SRenderOpenGL) then
-			if VertexMultiplier = 0 then
-				Set3dObjectArLength(F3dObject.QuantityObjects-1,NumberOfPolygons*2,
-					TS3DObject.GetFaceLength(NumberOfPolygons,SR_QUADS))
-			else
-				Set3dObjectArLength(F3dObject.QuantityObjects-1,NumberOfPolygons*2,
-					NumberOfPolygons*VertexMultiplier)
-		else
-			if VertexMultiplier = 0 then
-				Set3dObjectArLength(F3dObject.QuantityObjects-1,NumberOfPolygons,
-					TS3DObject.GetFaceLength(NumberOfPolygons,F3dObject.Objects[F3dObject.QuantityObjects-1].ObjectPoligonesType))
-			else
-				Set3dObjectArLength(F3dObject.QuantityObjects-1,NumberOfPolygons,
-					NumberOfPolygons*VertexMultiplier);
-		NumberOfPolygons:=0;
-		end
+		AddedObject.PolygonsType[0] := AddedObject.ObjectPolygonsType;
+	Set3dObjectBuffers(AddedObject, Iff(NumberOfPolygons <= FPolygonsLimit, NumberOfPolygons, FPolygonsLimit), VertexMultiplier, PolygonType);
+	if NumberOfPolygons <= FPolygonsLimit then
+		NumberOfPolygons := 0
 	else
-		begin
-		if (PoligoneType=SR_QUADS) and (Render.RenderType<>SRenderOpenGL) then
-			if VertexMultiplier = 0 then
-				Set3dObjectArLength(F3dObject.QuantityObjects-1,FPolygonsShift*2,
-					TS3DObject.GetFaceLength(FPolygonsShift,SR_QUADS))
-			else
-				Set3dObjectArLength(F3dObject.QuantityObjects-1,FPolygonsShift*2,
-					FPolygonsShift*VertexMultiplier)
-		else
-			if VertexMultiplier = 0 then
-				Set3dObjectArLength(F3dObject.QuantityObjects-1,FPolygonsShift,
-					TS3DObject.GetFaceLength(FPolygonsShift,F3dObject.Objects[F3dObject.QuantityObjects-1].ObjectPoligonesType))
-			else
-				Set3dObjectArLength(F3dObject.QuantityObjects-1,FPolygonsShift,
-					FPolygonsShift*VertexMultiplier);
-		NumberOfPolygons-=FPolygonsShift;
-		end;
+		NumberOfPolygons -= FPolygonsLimit;
+	AddedObject := nil;
 	end;
 end;
 
-procedure TS3DFractal.Set3dObjectArLength(const _ObjectNumber,LFaces,LVertices:int64);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TS3DFractal.Set3dObjectBuffers(const _Object : TS3DObject; const _PolygonsCount, _VertexMultiplier : TSUInt64; const _PolygonType : TSUInt32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if (_PolygonType=SR_QUADS) and (Render.RenderType<>SRenderOpenGL) then
+	if _VertexMultiplier = 0 then
+		Set3dObjectBuffersSize(_Object, _PolygonsCount * 2, TS3DObject.GetFaceLength(_PolygonsCount, SR_QUADS))
+	else
+		Set3dObjectBuffersSize(_Object, _PolygonsCount * 2, _PolygonsCount * _VertexMultiplier)
+else
+	if _VertexMultiplier = 0 then
+		Set3dObjectBuffersSize(_Object, _PolygonsCount, TS3DObject.GetFaceLength(_PolygonsCount, _Object.ObjectPolygonsType))
+	else
+		Set3dObjectBuffersSize(_Object, _PolygonsCount, _PolygonsCount * _VertexMultiplier);
+end;
+
+procedure TS3DFractal.Set3dObjectBuffersSize(const _Object : TS3DObject; const LFaces, LVertices : TSUInt64);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if FHasIndexes then
 	begin
-	F3dObject.Objects[_ObjectNumber].AutoSetIndexFormat(0,LVertices);
-	F3dObject.Objects[_ObjectNumber].SetFaceLength(0,LFaces);
+	_Object.AutoSetIndexFormat(0,LVertices);
+	_Object.SetFaceLength(0,LFaces);
 	end;
-F3dObject.Objects[_ObjectNumber].SetVertexLength(LVertices);
+_Object.SetVertexLength(LVertices);
 end;
 
-function TS3DFractal.CalculatePolygonsShift() : TSUInt64;
+function TS3DFractal.CalculatePolygonsLimit() : TSUInt64;
 begin
 Result := 4608; // 2^9 • 3^2
 if (Render = nil) or (Render.RenderType in [SRenderDirectX9, SRenderDirectX8]) then
@@ -333,7 +312,7 @@ F3dObject := nil;
 FEnableVBO := Render.SupportedGraphicalBuffers();
 FClearVBOAfterLoad := True;
 FHasIndexes := True;
-FPolygonsShift := CalculatePolygonsShift();
+FPolygonsLimit := CalculatePolygonsLimit();
 F3dObjectsInfo := nil;
 F3dObjectsReady := True;
 FEnableColors := True;

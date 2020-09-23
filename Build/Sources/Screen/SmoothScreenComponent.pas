@@ -17,7 +17,7 @@ uses
 	,SmoothContextClasses
 	;
 type
-	TSComponent          = class(TSScreenCustomComponent, ISComponent, ISContextObject, ISRenderObject)
+	TSComponent = class(TSScreenCustomComponent, ISComponent, ISContextObject, ISRenderObject)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;

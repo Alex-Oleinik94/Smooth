@@ -37,9 +37,11 @@ type
 {$ENDIF COMMON_FLOAT64}
 {$ENDIF COMMON_FLOAT80}
 type
-	TSScreenVertexes = object
+	TSScreenVertices = object
+			public
+		function Create (const x1 : TSCommonFloat = 0; const y1 : TSCommonFloat = 0; const x2 : TSCommonFloat = 0; const y2 : TSCommonFloat = 0) : TSScreenVertices; static;
 			private
-		Vertexes : array[0..1] of TSCommonVector2;
+		Vertices : array[0..1] of TSCommonVector2;
 			public
 		procedure Import(const x1 : TSCommonFloat = 0; const y1 : TSCommonFloat = 0; const x2 : TSCommonFloat = 0; const y2 : TSCommonFloat = 0);
 		procedure Write();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -51,13 +53,13 @@ type
 			public
 		property SumX : TSCommonFloat write ProcSumX;
 		property SumY : TSCommonFloat write ProcSumY;
-		property X1   : TSCommonFloat read  Vertexes[0].x write Vertexes[0].x;
-		property Y1   : TSCommonFloat read  Vertexes[0].y write Vertexes[0].y;
-		property X2   : TSCommonFloat read  Vertexes[1].x write Vertexes[1].x;
-		property Y2   : TSCommonFloat read  Vertexes[1].y write Vertexes[1].y;
+		property X1   : TSCommonFloat read  Vertices[0].x write Vertices[0].x;
+		property Y1   : TSCommonFloat read  Vertices[0].y write Vertices[0].y;
+		property X2   : TSCommonFloat read  Vertices[1].x write Vertices[1].x;
+		property Y2   : TSCommonFloat read  Vertices[1].y write Vertices[1].y;
 		end;
 
-operator * (const a : TSScreenVertexes; const b : TSCommonFloat) : TSScreenVertexes;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const a : TSScreenVertices; const b : TSCommonFloat) : TSScreenVertices;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 type
 	TSCustomPosition = record
@@ -331,26 +333,26 @@ Result.FLocation := a.FLocation + b.FLocation;
 Result.FTurn     := a.FTurn     + b.FTurn;
 end;
 
-procedure TSScreenVertexes.ProcSumX(r : TSCommonFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSScreenVertices.ProcSumX(r : TSCommonFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Vertexes[0].x += r;
-Vertexes[1].x += r;
+Vertices[0].x += r;
+Vertices[1].x += r;
 end;
 
-procedure TSScreenVertexes.ProcSumY(r : TSCommonFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSScreenVertices.ProcSumY(r : TSCommonFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Vertexes[0].y += r;
-Vertexes[1].y += r;
+Vertices[0].y += r;
+Vertices[1].y += r;
 end;
 
-procedure TSScreenVertexes.Write;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSScreenVertices.Write;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Vertexes[0].Write();
+Vertices[0].Write();
 System.Write(' ');
-Vertexes[1].WriteLn();
+Vertices[1].WriteLn();
 end;
 
-operator * (const a:TSScreenVertexes; const b : TSCommonFloat):TSScreenVertexes;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const a:TSScreenVertices; const b : TSCommonFloat):TSScreenVertices;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	x,y,x1,y1:real;
 begin
@@ -367,12 +369,17 @@ Result.Import(
 	y+y1);
 end;
 
-procedure TSScreenVertexes.Import(const x1 : TSCommonFloat = 0; const y1 : TSCommonFloat = 0; const x2 : TSCommonFloat = 0; const y2 : TSCommonFloat = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSScreenVertices.Create (const x1 : TSCommonFloat = 0; const y1 : TSCommonFloat = 0; const x2 : TSCommonFloat = 0; const y2 : TSCommonFloat = 0) : TSScreenVertices;
 begin
-Vertexes[0].x := x1;
-Vertexes[0].y := y1;
-Vertexes[1].x := x2;
-Vertexes[1].y := y2;
+Result.Import(x1, y1, x2, y2);
+end;
+
+procedure TSScreenVertices.Import(const x1 : TSCommonFloat = 0; const y1 : TSCommonFloat = 0; const x2 : TSCommonFloat = 0; const y2 : TSCommonFloat = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Vertices[0].x := x1;
+Vertices[0].y := y1;
+Vertices[1].x := x2;
+Vertices[1].y := y2;
 end;
 
 function SVertex2fImport(const x:real = 0;const y:real = 0):TSVertex2f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -380,17 +387,17 @@ begin
 Result.Import(x,y);
 end;
 
-function TSScreenVertexes.AbsX() : TSCommonFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSScreenVertices.AbsX() : TSCommonFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := Abs(X1 - X2);
 end;
 
-function TSScreenVertexes.AbsY() : TSCommonFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSScreenVertices.AbsY() : TSCommonFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := Abs(Y1 - Y2);
 end;
 
-function TSScreenVertexes.VectorInView(const Vector : TSCommonVector2) : TSBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSScreenVertices.VectorInView(const Vector : TSCommonVector2) : TSBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=
 	(Vector.x < Max(X1, X2)) and

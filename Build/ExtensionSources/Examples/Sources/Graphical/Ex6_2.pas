@@ -82,7 +82,7 @@ F3dObject.LastObject().Vertices   := n * 2;
 
 F3dObject.LastObject().AddFaceArray();
 F3dObject.LastObject().AutoSetIndexFormat(0, n * 2);
-F3dObject.LastObject().PoligonesType     [0] := SR_TRIANGLES;
+F3dObject.LastObject().PolygonsType     [0] := SR_TRIANGLES;
 F3dObject.LastObject().Faces             [0] := (n - 1) * 2;
 
 F3dObject.LastObject().ArVertex3f [0]^.Import(cos(0)*r,sin(0)*r, 1);

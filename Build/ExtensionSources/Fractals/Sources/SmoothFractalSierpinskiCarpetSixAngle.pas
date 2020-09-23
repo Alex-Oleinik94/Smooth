@@ -26,10 +26,10 @@ type
 		procedure GenerateInteriorPolygons(const _List, _List1, _List2, _List3 : PSVector2fList6);
 		procedure Generate(const _PointCenter : TSVector2d; const _Radius : TSFloat64);
 		function TypeToSpins(const _Type : TSUInt8) : TSVector4int8;
-		function CalculatePolygonsShift() : TSUInt64; override;
+		function CalculatePolygonsLimit() : TSUInt64; override;
 			public
 		procedure PolygonsConstruction(); override;
-		procedure PushPoligonData(var _ObjectNumber : TSFractalIndexInt; const _VectorList : PSVector2fList6; var _VertexIndex, _FaceIndex : TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure PushPolygonData(var _ObjectNumber : TSFractalIndexInt; const _VectorList : PSVector2fList6; var _VertexIndex, _FaceIndex : TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SetType(const _Type : TSUInt8);
 			protected
 		FTypeComboBox : TSScreenComboBox;
@@ -48,6 +48,7 @@ uses
 	 SmoothMathUtils
 	,SmoothRenderBase
 	,SmoothScreenBase
+	,SmoothLog
 	;
 
 function SVector2fList6Spining(Count : TSInt8; const List : TSVector2fList6): TSVector2fList6; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -116,11 +117,18 @@ end;
 
 // TSFractalSierpinskiCarpetSixAngle
 
-function TSFractalSierpinskiCarpetSixAngle.CalculatePolygonsShift() : TSUInt64;
+function TSFractalSierpinskiCarpetSixAngle.CalculatePolygonsLimit() : TSUInt64;
+var
+	Index : TSMaxEnum;
 begin
-Result := inherited;
-Result := Result div 4;
-Result *= 3;
+Result := 0;
+Index := 0;
+while (inherited > Result + CountingTheNumberOfPolygons(Index) * 2) do
+	begin
+	Result += CountingTheNumberOfPolygons(Index) * 2;
+	Index += 1;
+	end;
+SLog.Source(['dasdasd',Result]);
 end;
 
 procedure TSFractalSierpinskiCarpetSixAngle.SetType(const _Type : TSUInt8);
@@ -168,6 +176,7 @@ var
 begin
 inherited Create(VContext);
 
+FPolygonsLimit := CalculatePolygonsLimit();
 StartType := Random(11);
 FSpins := TypeToSpins(StartType);
 FIs2D := True;
@@ -241,6 +250,7 @@ procedure Rec(const _List : PSVector2fList6; const _Depth : TSUInt32);
 var
 	List1, List2, List3 : PSVector2fList6;
 begin
+//SLog.Source(['TSFractalSierpinskiCarpetSixAngle.Rec(',_Depth,').B']);
 if _Depth > 0 then
 	begin
 	_List^ := SVector2fList6Spining(FSpins.w, _List^);
@@ -259,7 +269,8 @@ if _Depth > 0 then
 	FreeMem(List3);
 	end
 else
-	PushPoligonData(ObjectNumber, _List, VertexIndex, FaceIndex);
+	PushPolygonData(ObjectNumber, _List, VertexIndex, FaceIndex);
+//SLog.Source(['TSFractalSierpinskiCarpetSixAngle.Rec(',_Depth,').E']);
 end;
 
 var
@@ -275,11 +286,14 @@ for Index := 0 to 5 do
 		_PointCenter.x + Sin(Index/6*2*PI) * _Radius,
 		_PointCenter.y + Cos(Index/6*2*PI) * _Radius);
 Rec(PointList, FDepth);
+//SLog.Source(['End1(',FDepth,')']);
 Freemem(PointList);
+//SLog.Source(['End2(',FDepth,')']);
 EndOfPolygonsConstruction(ObjectNumber);
+//SLog.Source(['End3(',FDepth,')']);
 end;
 
-procedure TSFractalSierpinskiCarpetSixAngle.PushPoligonData(var _ObjectNumber : TSFractalIndexInt; const _VectorList : PSVector2fList6; var _VertexIndex, _FaceIndex : TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSFractalSierpinskiCarpetSixAngle.PushPolygonData(var _ObjectNumber : TSFractalIndexInt; const _VectorList : PSVector2fList6; var _VertexIndex, _FaceIndex : TSFractalIndexInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 F3dObject.Objects[_ObjectNumber].SetVertex(_VertexIndex + 0, _VectorList^[0]);
 F3dObject.Objects[_ObjectNumber].SetVertex(_VertexIndex + 1, _VectorList^[1]);
@@ -298,7 +312,7 @@ F3dObject.Objects[_ObjectNumber].SetFaceLine(0, _FaceIndex + 5, _VertexIndex + 5
 _VertexIndex += 6;
 _FaceIndex += 6;
 
-AfterPushingPoligonData(_ObjectNumber, FThreadsEnable, _VertexIndex);
+AfterPushingPolygonData(_ObjectNumber, FThreadsEnable, _VertexIndex);
 end;
 
 end.

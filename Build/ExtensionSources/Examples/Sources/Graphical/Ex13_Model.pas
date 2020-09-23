@@ -612,7 +612,7 @@ if F3dObject <> nil then
 	F3dObject.Destroy();
 F3dObject := TS3DObject.Create();
 F3dObject.Context := Context;
-F3dObject.ObjectPoligonesType := SR_TRIANGLES;
+F3dObject.ObjectPolygonsType := SR_TRIANGLES;
 F3dObject.HasNormals := True;
 F3dObject.HasTexture := True;
 F3dObject.HasColors  := True;

@@ -84,7 +84,7 @@ F3dObject.LastObject().ArNormal[2]^.Import(0,0,1);
 F3dObject.LastObject().ArNormal[3]^.Import(0,0,1);
 F3dObject.LastObject().AddFaceArray();
 F3dObject.LastObject().AutoSetIndexFormat(0,4);
-F3dObject.LastObject().PoligonesType[0] := SR_TRIANGLES;
+F3dObject.LastObject().PolygonsType[0] := SR_TRIANGLES;
 F3dObject.LastObject().Faces [0] := 2;
 F3dObject.LastObject().SetFaceTriangle(0,  0,  0,1,2);
 F3dObject.LastObject().SetFaceTriangle(0,  1,  0,2,3);

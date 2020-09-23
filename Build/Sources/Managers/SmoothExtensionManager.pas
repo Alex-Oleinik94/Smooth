@@ -42,7 +42,7 @@ function SGetRegisteredDrawClasses() : TSPaintableObjectContainerItemList;{$IFDE
 function SExtensionsToMakefile(var Make : TSMakefileReader; const Target : TSString; const BuildFiles : TSBool = False):TSBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SExtensionsToMakefile(var Make : TSMakefileReader; const Target : TSString; const ExtensionsNames : TSStringList):TSBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SExtensionToMakefile(var Make : TSMakefileReader; const Target : TSString; const ExtensionDirectoryName : TSString; const BuildFiles : TSBool = False) : TSBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SExtensionAllreadyInMakefile(var Make : TSMakefileReader; const ExtensionName : TSString) : TSBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SExtensionAlreadyInMakefile(var Make : TSMakefileReader; const ExtensionName : TSString) : TSBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGetExtensionsList(var Make : TSMakefileReader) : TSStringList; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SIsExtensionOpen(var Make : TSMakefileReader;const ExtensionName : TSString) : TSBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SIsExtensionOpen(const ExtensionPath : TSString) : TSBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -105,7 +105,7 @@ if StartSize <> MemStream.Size then
 MemStream.Destroy();
 end;
 
-function SExtensionAllreadyInMakefile(var Make : TSMakefileReader; const ExtensionName : TSString) : TSBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SExtensionAlreadyInMakefile(var Make : TSMakefileReader; const ExtensionName : TSString) : TSBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	AddedExtensions : TSString;
 	ExtensionAppellative : TSString;
@@ -178,8 +178,8 @@ else
 	begin
 	Result := SExtensionsToMakefile(Make, Target, ExtensionInfo.FDependingExtensions);
 	if Result then
-		if SExtensionAllreadyInMakefile(Make, ExtensionInfo.FName) then
-			TSLog.Source(['Extension "', ExtensionInfo.FName, '" allready in makefile.'])
+		if SExtensionAlreadyInMakefile(Make, ExtensionInfo.FName) then
+			TSLog.Source(['Extension "', ExtensionInfo.FName, '" already in makefile.'])
 		else
 			begin
 			Make.SetConstant('ADDEDEXTENSIONS', Make.GetConstant('ADDEDEXTENSIONS', SMRIdentifierTypeDependent) + '"' + ExtensionInfo.FName + '"');

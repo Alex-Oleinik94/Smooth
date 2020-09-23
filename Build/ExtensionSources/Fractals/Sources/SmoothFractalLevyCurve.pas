@@ -22,7 +22,7 @@ type
 			public
 		procedure Construct();override;
 		procedure PolygonsConstruction();
-		procedure PushPoligonData(var ObjectId:TSFractalIndexInt;const v:TSVertex2f;var FVertexIndex:TSFractalIndexInt);Inline;
+		procedure PushPolygonData(var ObjectId:TSFractalIndexInt;const v:TSVertex2f;var FVertexIndex:TSFractalIndexInt);Inline;
 			protected
 		FLD, FLDC : TSScreenLabel;
 		FBPD, FBMD : TSScreenButton;
@@ -44,12 +44,12 @@ begin
 Result := 'Кривая Леви (дракон Хартера)';
 end;
 
-procedure TSFractalLevyCurve.PushPoligonData(var ObjectId:TSFractalIndexInt;const v:TSVertex2f;var FVertexIndex:TSFractalIndexInt);Inline;
+procedure TSFractalLevyCurve.PushPolygonData(var ObjectId:TSFractalIndexInt;const v:TSVertex2f;var FVertexIndex:TSFractalIndexInt);Inline;
 begin
 F3dObject.Objects[ObjectId].SetVertex(FVertexIndex, v);
 FVertexIndex+=1;
 
-AfterPushingPoligonData(ObjectId,FThreadsEnable,FVertexIndex);
+AfterPushingPolygonData(ObjectId,FThreadsEnable,FVertexIndex);
 end;
 
 procedure TSFractalLevyCurve.PolygonsConstruction();
@@ -74,16 +74,16 @@ if NowDepth>0 then
 		Rec(v,t2,NowDepth-1,-1);
 	end
 else
-	PushPoligonData(ObjectId,t2,FVI);
+	PushPolygonData(ObjectId,t2,FVI);
 end;
 
 begin
 ObjectId:=0;
 FVI:=0;
-PushPoligonData(ObjectId,SVertex2fImport(-3,-2),FVI);
+PushPolygonData(ObjectId,SVertex2fImport(-3,-2),FVI);
 if FDepth=0 then
 	begin
-	PushPoligonData(ObjectId,SVertex2fImport(3,-2),FVI);
+	PushPolygonData(ObjectId,SVertex2fImport(3,-2),FVI);
 	end;
 if FDepth>0 then
 	begin
@@ -95,12 +95,10 @@ if FThreadsEnable then
 			F3dObjectsInfo[ObjectId]:=S_TRUE;
 end;
 
-procedure NewLevyCurveThread(FractalData:TSFractalData) ;
+procedure NewLevyCurveThread(FractalThreadData:PSFractalThreadData);
 begin
-(FractalData.FFractal as TSFractalLevyCurve).PolygonsConstruction();
-FractalData.FFractal.FThreadsData[FractalData.FThreadID].FFinished:=True;
-FractalData.FFractal.FThreadsData[FractalData.FThreadID].FData:=nil;
-FractalData.Destroy;
+(FractalThreadData^.Fractal as TSFractalLevyCurve).PolygonsConstruction();
+FractalThreadData^.Finished := True;
 end;
 
 procedure TSFractalLevyCurve.Construct;
@@ -116,8 +114,7 @@ else
 	Construct3dObjects(NumberOfPolygons,SR_LINE_STRIP,S3dObjectVertexType2f);
 if FThreadsEnable then
 	begin
-	FThreadsData[0].FFinished:=False;
-	FThreadsData[0].FData:=nil;
+	FThreadsData[0].Clear(Self);
 	PolygonsConstruction;
 	end
 else

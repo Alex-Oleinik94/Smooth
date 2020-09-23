@@ -121,7 +121,7 @@ begin
 FModel := TS3DObject.Create();
 FModel.Context := Context;
 FModel.CountTextureFloatsInVertexArray := 2;
-FModel.ObjectPoligonesType := SR_TRIANGLES;
+FModel.ObjectPolygonsType := SR_TRIANGLES;
 FModel.HasNormals := True;
 FModel.SetColorType(S3dObjectColorType4f);
 FModel.HasTexture := False;
@@ -132,7 +132,7 @@ FModel.EnableCullFaceBack := True;
 FModel.VertexType := S3dObjectVertexType3f;
 
 FModel.QuantityFaceArrays := 1;
-FModel.PoligonesType[0] := FModel.ObjectPoligonesType;
+FModel.PolygonsType[0] := FModel.ObjectPolygonsType;
 
 Stream := TMemoryStream.Create();
 SResourceFiles.LoadMemoryStreamFromFile(Stream,FileName);

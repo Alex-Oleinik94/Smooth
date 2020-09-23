@@ -6,6 +6,7 @@ interface
 
 uses 
 	 SmoothBase
+	,SmoothFractal
 	,Smooth3DFractal
 	,SmoothScreen
 	,SmoothContextInterface
@@ -26,7 +27,7 @@ type
 		procedure EndOfPolygonsConstruction(const ObjectId : TSUInt32); virtual;
 		class function CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum; virtual; abstract;
 			protected
-		FLD, FLDC : TSScreenLabel; // Label depth and caption of depth label "Итерация"
+		FLabelDepth, FLabelDepthCaption : TSScreenLabel; // Label depth and caption of depth label "Итерация"
 		FBPD, FBMD : TSScreenButton; // Buttons of change depth (plus and minus)
 			protected
 		FIs2D : TSBoolean;
@@ -34,7 +35,7 @@ type
 		FPrimetiveParam : TSUInt32;
 		end;
 
-procedure S3DFractalThreadCallback(Fractal:TS3DFractalForm);
+procedure S3DFractalThreadCallback(FractalThreadData:PSFractalThreadData);
 
 implementation
 
@@ -49,13 +50,15 @@ uses
 procedure TS3DFractalForm.SetDepth(const _Depth : LongInt);
 begin
 inherited;
-if FLD <> nil then
-	FLD.Caption := SStr(FDepth)
+if FLabelDepth <> nil then
+	FLabelDepth.Caption := SStr(FDepth)
 end;
 
-procedure S3DFractalThreadCallback(Fractal:TS3DFractalForm);
+procedure S3DFractalThreadCallback(FractalThreadData:PSFractalThreadData);
 begin
-Fractal.PolygonsConstruction();
+(FractalThreadData^.Fractal as TS3DFractalForm).PolygonsConstruction();
+FractalThreadData^.Finished:=True;
+FractalThreadData^.FreeMemData();
 end;
 
 procedure TS3DFractalForm.Construct();
@@ -64,20 +67,17 @@ var
 begin
 inherited;
 Clear3dObject();
-NumberOfPolygons := CountingTheNumberOfPolygons(FDepth);
-if FIs2D then
-	if (Render.RenderType in [SRenderDirectX9, SRenderDirectX8]) then 
-		Construct3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType3f, FPrimetiveParam)
-	else
-		Construct3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType2f, FPrimetiveParam)
+NumberOfPolygons := CountingTheNumberOfPolygons(FDepth);;
+if (not FIs2D) or (FIs2D and (Render.RenderType in [SRenderDirectX9, SRenderDirectX8])) then 
+	Construct3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType3f, FPrimetiveParam)
 else
-	Construct3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType3f, FPrimetiveParam);
+	Construct3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType2f, FPrimetiveParam);
 if FThreadsEnable then
 	begin
-	FThreadsData[0].FFinished := False;
-	FThreadsData[0].FData     := nil;
-	SKill(FThreadsData[0].FThread);
-	FThreadsData[0].FThread   := TSThread.Create(TSPointerProcedure(@S3DFractalThreadCallback), Self);
+	ThreadData[0]^.KillThread();
+	ThreadData[0]^.Finished := False;
+	ThreadData[0]^.FreeMemData();
+	ThreadData[0]^.Thread   := TSThread.Create(TSPointerProcedure(@S3DFractalThreadCallback), ThreadData[0]);
 	//PolygonsConstruction();
 	end
 else
@@ -106,7 +106,7 @@ with TS3DFractalForm(Button.FUserPointer1) do
 	begin
 	FDepth += 1;
 	Construct();
-	FLD.Caption := SStr(Depth);
+	FLabelDepth.Caption := SStr(Depth);
 	FBMD.Active := True;
 	end;
 end;
@@ -119,7 +119,7 @@ with TS3DFractalForm(Button.FUserPointer1) do
 		begin
 		FDepth -= 1;
 		Construct();
-		FLD.Caption := SStr(Depth);
+		FLabelDepth.Caption := SStr(Depth);
 		if Depth = 0 then
 			FBMD.Active:=False;
 		end;
@@ -129,15 +129,15 @@ end;
 constructor TS3DFractalForm.Create(const VContext : ISContext);
 begin
 inherited;
-FLD  := nil;
-FLDC := nil;
+FLabelDepth  := nil;
+FLabelDepthCaption := nil;
 FBMD := nil;
 FBPD := nil;
 
 InitProjectionComboBox(Render.Width-160,5,150,30,[SAnchRight]).BoundsMakeReal();
 InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]).BoundsMakeReal();
 
-FLDC := SCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SAnchRight], True, True, Self);
+FLabelDepthCaption := SCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SAnchRight], True, True, Self);
 
 FBPD:=TSScreenButton.Create;
 Screen.CreateChild(FBPD);
@@ -149,7 +149,7 @@ FBPD.OnChange:=TSScreenComponentProcedure(@S3DFractalFormButtonDepthPlus);
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsMakeReal();
 
-FLD := SCreateLabel(Screen, '0', Render.Width-160-60,5,20,30, [SAnchRight], True, True, Self);
+FLabelDepth := SCreateLabel(Screen, '0', Render.Width-160-60,5,20,30, [SAnchRight], True, True, Self);
 
 FBMD:=TSScreenButton.Create;
 Screen.CreateChild(FBMD);
@@ -175,8 +175,8 @@ end;
 destructor TS3DFractalForm.Destroy();
 begin
 SKill(FBMD);
-SKill(FLD);
-SKill(FLDC);
+SKill(FLabelDepth);
+SKill(FLabelDepthCaption);
 SKill(FBPD);
 inherited Destroy();
 end;

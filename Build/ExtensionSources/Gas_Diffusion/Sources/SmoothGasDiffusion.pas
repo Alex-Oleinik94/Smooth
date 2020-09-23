@@ -761,7 +761,7 @@ if FRelief <> nil then
 			FRelief^.FData[j].F3dObject.SetColorType (S3dObjectColorType4b);
 			FRelief^.FData[j].F3dObject.Vertices   := Edge * Edge;
 			FRelief^.FData[j].F3dObject.AddFaceArray();
-			FRelief^.FData[j].F3dObject.PoligonesType[0] := SR_TRIANGLES;
+			FRelief^.FData[j].F3dObject.PolygonsType[0] := SR_TRIANGLES;
 			
 			FRelief^.FData[j].F3dObject.Faces[0] := (Edge-1) * (Edge-1) * 2;
 			for i := 0 to Edge - 2 do 
@@ -1115,7 +1115,7 @@ if FInReliafDebug<>0 then
 	if FDinamicQuantityMoleculs <> 0 then
 		begin
 		Result.AddObject();
-		Result.LastObject().ObjectPoligonesType := SR_POINTS;
+		Result.LastObject().ObjectPolygonsType := SR_POINTS;
 		Result.LastObject().HasNormals := False;
 		Result.LastObject().HasTexture := False;
 		Result.LastObject().HasColors  := True;
@@ -1159,7 +1159,7 @@ else
 	if FDinamicQuantityMoleculs <> 0 then
 		begin
 		Result.AddObject();
-		Result.LastObject().ObjectPoligonesType := SR_POINTS;
+		Result.LastObject().ObjectPolygonsType := SR_POINTS;
 		Result.LastObject().HasNormals := False;
 		Result.LastObject().HasTexture := False;
 		Result.LastObject().HasColors  := True;
@@ -1193,7 +1193,7 @@ else
 if VRelief = nil then
 	begin
 	Result.AddObject();
-	Result.LastObject().ObjectPoligonesType := SR_LINES;
+	Result.LastObject().ObjectPolygonsType := SR_LINES;
 	Result.LastObject().HasNormals := False;
 	Result.LastObject().HasTexture := False;
 	Result.LastObject().HasColors  := True;
