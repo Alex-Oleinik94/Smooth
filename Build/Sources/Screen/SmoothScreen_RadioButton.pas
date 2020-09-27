@@ -195,7 +195,7 @@ end;
 constructor TSRadioButton.Create();
 begin
 inherited Create();
-FCanHaveChildren:=False;
+FInternalComponentsAllowed:=False;
 FGroup := nil;
 FChecked := False;
 FType := SCheckButton;
@@ -228,8 +228,8 @@ procedure TSRadioButton.DrawImage(const x,y:TSFloat);{$IFDEF SUPPORTINLINE}{$IFD
 begin
 Render.Color4f(1,1,1,FVisibleTimer);
 FImage.DrawImageFromTwoVertex2fWith2TexPoint(
-	SPoint2int32ToVertex3f(GetVertex([SS_LEFT,SS_TOP],S_VERTEX_FOR_PARENT)),
-	SPoint2int32ToVertex3f(GetVertex([SS_RIGHT,SS_BOTTOM],S_VERTEX_FOR_PARENT)),
+	SPoint2int32ToVertex3f(GetVertex([SS_LEFT,SS_TOP],S_VERTEX_FOR_MainComponent)),
+	SPoint2int32ToVertex3f(GetVertex([SS_RIGHT,SS_BOTTOM],S_VERTEX_FOR_MainComponent)),
 	SVertex2fImport(0,x),
 	SVertex2fImport(1,y),
 	True,S_2D);

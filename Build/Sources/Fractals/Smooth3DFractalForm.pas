@@ -140,26 +140,26 @@ InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]).BoundsMakeRea
 FLabelDepthCaption := SCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SAnchRight], True, True, Self);
 
 FBPD:=TSScreenButton.Create;
-Screen.CreateChild(FBPD);
-Screen.LastChild.SetBounds(Render.Width-160-30,5,20,30);
-Screen.LastChild.Anchors:=[SAnchRight];
-Screen.LastChild.Caption:='+';
-Screen.LastChild.FUserPointer1:=Self;
+Screen.CreateInternalComponent(FBPD);
+Screen.LastInternalComponent.SetBounds(Render.Width-160-30,5,20,30);
+Screen.LastInternalComponent.Anchors:=[SAnchRight];
+Screen.LastInternalComponent.Caption:='+';
+Screen.LastInternalComponent.FUserPointer1:=Self;
 FBPD.OnChange:=TSScreenComponentProcedure(@S3DFractalFormButtonDepthPlus);
-Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsMakeReal();
+Screen.LastInternalComponent.Visible:=True;
+Screen.LastInternalComponent.BoundsMakeReal();
 
 FLabelDepth := SCreateLabel(Screen, '0', Render.Width-160-60,5,20,30, [SAnchRight], True, True, Self);
 
 FBMD:=TSScreenButton.Create;
-Screen.CreateChild(FBMD);
-Screen.LastChild.SetBounds(Render.Width-160-90,5,20,30);
-Screen.LastChild.Anchors:=[SAnchRight];
-Screen.LastChild.Caption:='-';
+Screen.CreateInternalComponent(FBMD);
+Screen.LastInternalComponent.SetBounds(Render.Width-160-90,5,20,30);
+Screen.LastInternalComponent.Anchors:=[SAnchRight];
+Screen.LastInternalComponent.Caption:='-';
 FBMD.OnChange:=TSScreenComponentProcedure(@S3DFractalFormButtonDepthMinus);
-Screen.LastChild.FUserPointer1:=Self;
-Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsMakeReal();
+Screen.LastInternalComponent.FUserPointer1:=Self;
+Screen.LastInternalComponent.Visible:=True;
+Screen.LastInternalComponent.BoundsMakeReal();
 
 FIs2D := False;
 FLightingEnable := False;

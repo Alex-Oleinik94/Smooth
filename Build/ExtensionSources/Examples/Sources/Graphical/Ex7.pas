@@ -79,16 +79,16 @@ if not Result then
 		Ex.Calculate();
 		end;
 	if Length(Ex.Variables)=1 then
-		TSApprFunction(Self.FUserPointer1).FPanelStart.Children[1].Caption:='Введите функцию f('+SPCharToString(Ex.Variable)+')'
+		TSApprFunction(Self.FUserPointer1).FPanelStart.InternalComponents[1].Caption:='Введите функцию f('+SPCharToString(Ex.Variable)+')'
 	else
-		TSApprFunction(Self.FUserPointer1).FPanelStart.Children[1].Caption:='Введите функцию f(?)';
+		TSApprFunction(Self.FUserPointer1).FPanelStart.InternalComponents[1].Caption:='Введите функцию f(?)';
 	Result:=(Ex.ErrorsQuantity=0) and (Length(Ex.Variables)<=1);
 	Ex.Destroy();
 	end
 else
 	begin
 	Result:=False;
-	TSApprFunction(Self.FUserPointer1).FPanelStart.Children[1].Caption:='Введите функцию f(?)';
+	TSApprFunction(Self.FUserPointer1).FPanelStart.InternalComponents[1].Caption:='Введите функцию f(?)';
 	end;
 end;
 
@@ -199,7 +199,7 @@ FGraphic := nil;
 FFont := SCreateFontFromFile(Context, SDefaultFontFileName, True);
 
 FBackButton := TSScreenButton.Create();
-Screen.CreateChild(FBackButton);
+Screen.CreateInternalComponent(FBackButton);
 FBackButton.SetBounds(Render.Width - 230,5 ,220,FFont.FontHeight+4);
 FBackButton.BoundsMakeReal();
 FBackButton.Caption := 'Назад';
@@ -223,7 +223,7 @@ FNumberBEdit := SCreateEdit(FPanelStart, '7', SScreenEditTypeInteger,
 	5+((FPanelStart.Width - 12) div 2),5+(FFont.FontHeight+4)*5,(FPanelStart.Width - 17) div 2,FFont.FontHeight+4, [], True, True, Self);
 
 FGoButton := TSScreenButton.Create();
-FPanelStart.CreateChild(FGoButton);
+FPanelStart.CreateInternalComponent(FGoButton);
 FGoButton.SetBounds(5,5+(FFont.FontHeight+4)*6 + 3,FPanelStart.Width - 12,FFont.FontHeight+4);
 FGoButton.BoundsMakeReal();
 FGoButton.Caption := 'Построить';

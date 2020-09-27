@@ -22,7 +22,8 @@ type
 		FPreviousCursorOver : TSBoolean;
 		FCursorOver : TSBoolean;
 		FCursorOverTimer : TSScreenTimer;
-		procedure UpgradeTimers(const ElapsedTime : TSTimerInt);override;
+		procedure UpdateTimers(const ElapsedTime : TSTimerInt);override;
+		function UpdateAvailable(const _ReqursiveActive : TSBoolean = False) : TSBoolean;
 			public 
 		function GetCursorOverTimer() : TSScreenTimer; virtual;
 		function GetCursorOver() : TSBool; virtual;
@@ -39,7 +40,8 @@ type
 			protected
 		FMouseClick      : TSBoolean;
 		FMouseClickTimer : TSScreenTimer;
-		procedure UpgradeTimers(const ElapsedTime : TSTimerInt);override;
+		FDownMouseClick  : TSBoolean;
+		procedure UpdateTimers(const ElapsedTime : TSTimerInt);override;
 			public
 		function GetMouseClickTimer() : TSScreenTimer;virtual;
 		function GetMouseClick() : TSBool;virtual;
@@ -52,7 +54,7 @@ type
 			protected
 		FOpen      : TSBoolean;
 		FOpenTimer : TSScreenTimer;
-		procedure UpgradeTimers(const ElapsedTime : TSTimerInt);override;
+		procedure UpdateTimers(const ElapsedTime : TSTimerInt);override;
 			public
 		function GetOpen() : TSBoolean;
 		function GetOpenTimer() : TSScreenTimer;
@@ -79,12 +81,12 @@ begin
 Result := FCursorOver;
 end;
 
-procedure TSOverComponent.UpgradeTimers(const ElapsedTime : TSTimerInt);
+procedure TSOverComponent.UpdateTimers(const ElapsedTime : TSTimerInt);
 begin
 inherited;
 FPreviousCursorOver := FCursorOver;
 FCursorOver := CursorOverComponent() and ReqursiveActive;
-UpgradeTimer(FCursorOver, FCursorOverTimer, ElapsedTime, 3, 2);
+UpdateTimer(FCursorOver, FCursorOverTimer, ElapsedTime, 3, 2);
 end;
 
 constructor TSOverComponent.Create();
@@ -100,6 +102,15 @@ begin
 Result := FCursorOverTimer;
 end;
 
+function TSOverComponent.UpdateAvailable(const _ReqursiveActive : TSBoolean = False) : TSBoolean;
+begin
+if (_ReqursiveActive) then
+	Result := ReqursiveActive
+else
+	Result := Active;
+Result := Result and CursorOver and Visible;
+end;
+
 // TSOpenComponent
 
 class function TSOpenComponent.ClassName() : TSString; 
@@ -112,11 +123,11 @@ begin
 Result := FOpen;
 end;
 
-procedure TSOpenComponent.UpgradeTimers(const ElapsedTime : TSTimerInt);
+procedure TSOpenComponent.UpdateTimers(const ElapsedTime : TSTimerInt);
 begin
 inherited;
 FOpen := FOpen and ReqursiveActive;
-UpgradeTimer(FOpen, FOpenTimer, ElapsedTime, 3);
+UpdateTimer(FOpen, FOpenTimer, ElapsedTime, 3);
 end;
 
 constructor TSOpenComponent.Create();
@@ -143,11 +154,11 @@ begin
 Result := FMouseClick;
 end;
 
-procedure TSClickComponent.UpgradeTimers(const ElapsedTime : TSTimerInt);
+procedure TSClickComponent.UpdateTimers(const ElapsedTime : TSTimerInt);
 begin
 inherited;
-FMouseClick := FCursorOver and Context.CursorKeysPressed(SLeftCursorButton) and ReqursiveActive;
-UpgradeTimer(FMouseClick, FMouseClickTimer, ElapsedTime, 4, 2);
+FMouseClick := FDownMouseClick and FCursorOver and Context.CursorKeysPressed(SLeftCursorButton) and ReqursiveActive;
+UpdateTimer(FMouseClick, FMouseClickTimer, ElapsedTime, 4, 2);
 end;
 
 constructor TSClickComponent.Create();
@@ -155,6 +166,7 @@ begin
 inherited;
 FMouseClick := False;
 FMouseClickTimer := 0;
+FDownMouseClick := False;
 end;
 
 function TSClickComponent.GetMouseClickTimer() : TSScreenTimer;

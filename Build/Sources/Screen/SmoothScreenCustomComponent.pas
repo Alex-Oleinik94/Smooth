@@ -63,7 +63,7 @@ type
 		FRealPosition : TSComponentLocationVectorInt;
 		FBordersSize : TSComponentBordersSize;
 		FUnLimited : TSBoolean;
-		FParent    : TSScreenCustomComponent;
+		FComponentOwner    : TSScreenCustomComponent;
 		
 		procedure SetRight (NewRight  : TSScreenInt);virtual;
 		procedure SetBottom(NewBottom : TSScreenInt);virtual;
@@ -84,11 +84,12 @@ type
 		function GetScreenWidth()  : TSScreenInt; virtual;
 		function GetScreenHeight() : TSScreenInt; virtual;
 		function GetLocation() : TSComponentLocation; virtual;
-		function GetChildLocation() : TSComponentLocation; virtual;
+		function GetInternalComponentLocation() : TSComponentLocation; virtual;
 		function GetBordersSize() : TSComponentBordersSize; virtual;
 		
 		procedure UpDateLocation(const ElapsedTime : TSTimerInt);
 		function UpDateValue(var RealObj, Obj : TSComponentLocationInt; const ElapsedTime : TSTimerInt) : TSComponentLocationInt;
+		function UpDateLocationValue(RealObj, Obj : TSComponentLocationInt; const ElapsedTime : TSTimerInt) : TSComponentLocationInt;
 		procedure UpDateObjects();virtual;
 		procedure TestCoords();virtual;
 			public
@@ -96,7 +97,7 @@ type
 		property Height       : TSAreaInt   read GetHeight write SetHeight;
 		property Left         : TSAreaInt   read GetLeft write SetLeft;
 		property Top          : TSAreaInt   read GetTop write SetTop;
-		property Parent       : TSScreenCustomComponent read FParent write FParent;
+		property ComponentOwner       : TSScreenCustomComponent read FComponentOwner write FComponentOwner;
 		property Bottom       : TSScreenInt read GetBottom write SetBottom;
 		property Right        : TSScreenInt read GetRight write SetRight;
 		property ScreenWidth  : TSScreenInt read GetScreenWidth;
@@ -105,7 +106,7 @@ type
 		property BordersSize  : TSComponentBordersSize read GetBordersSize;
 		property RealPosition : TSComponentLocationVectorInt read FRealPosition;
 		property Location     : TSComponentLocation read GetLocation;
-		property ChildLocation: TSComponentLocation read GetChildLocation;
+		property InternalComponentLocation: TSComponentLocation read GetInternalComponentLocation;
 		property RealLocation : TSComponentLocation read FRealLocation write FRealLocation;
 			public
 		procedure BoundsMakeReal();virtual;
@@ -123,15 +124,15 @@ type
 		FAlign:TSByte;
 		FAnchors:TSSetOfByte;
 		FAnchorsData:packed record
-			FParentWidth,FParentHeight:TSScreenInt;
+			FComponentOwnerWidth,FComponentOwnerHeight:TSScreenInt;
 			end;
 		FVisible : TSBoolean;
 		FVisibleTimer : TSScreenTimer;
 		FActive : TSBoolean;
 		FActiveTimer  : TSScreenTimer;
 		FCaption : TSCaption;
-		procedure UpgradeTimers(const ElapsedTime : TSTimerInt);virtual;
-		procedure UpgradeTimer(const Flag : TSBoolean; var Timer : TSScreenTimer; const ElapsedTime : TSTimerInt; const Factor1 : TSInt16 = 1; const Factor2 : TSFloat32 = 1);
+		procedure UpdateTimers(const ElapsedTime : TSTimerInt);virtual;
+		procedure UpdateTimer(const Flag : TSBoolean; var Timer : TSScreenTimer; const ElapsedTime : TSTimerInt; const Factor1 : TSInt16 = 1; const Factor2 : TSFloat32 = 1);
 			protected
 		procedure UpDate();virtual;
 			protected
@@ -153,14 +154,14 @@ type
 		property Active       : Boolean       read FActive       write FActive default False;
 		property Anchors      : TSSetOfByte  read FAnchors      write FAnchors;
 			protected
-		FChildren:TSScreenCustomComponentList;
-		FCanHaveChildren:Boolean;
+		FInternalComponents:TSScreenCustomComponentList;
+		FInternalComponentsAllowed:Boolean;
 		FComponentProcedure:TSScreenCustomComponentProcedure;
-		FChildrenPriority : TSMaxEnum;
+		FPriorityInternalComponent : TSMaxEnum;
 		FMarkedForDestroy : TSBoolean;
 			public
-		function HasChildren() : TSBoolean;virtual;
-		function ChildCount() : TSUInt32;virtual;
+		function HasInternalComponents() : TSBoolean;virtual;
+		function InternalComponentCount() : TSUInt32;virtual;
 		procedure ClearPriority();
 		procedure MakePriority();
 		function GetPriorityComponent() : TSScreenCustomComponent;
@@ -168,29 +169,29 @@ type
 		function GetVertex(const THAT:TSSetOfByte;const FOR_THAT:TSByte): TSPoint2int32;
 		function BottomShift():TSScreenInt;
 		function RightShift():TSScreenInt;
-		procedure ChildToListEnd(const Index : TSMaxEnum);
-		procedure ChildToListEnd(const Component : TSScreenCustomComponent);
+		procedure InternalComponentToListEnd(const Index : TSMaxEnum);
+		procedure InternalComponentToListEnd(const Component : TSScreenCustomComponent);
 			public
 		procedure ToFront();
 		function MustBeDestroyed() : TSBoolean;
 		procedure MarkForDestroy();
-		function GetChild(a:TSInt32):TSScreenCustomComponent;
-		function CreateChild(const Child : TSScreenCustomComponent) : TSScreenCustomComponent;
-		procedure CompleteChild(const VChild : TSScreenCustomComponent); virtual;
-		function LastChild():TSScreenCustomComponent;
+		function GetInternalComponent(a:TSInt32):TSScreenCustomComponent;
+		function CreateInternalComponent(const InternalComponent : TSScreenCustomComponent) : TSScreenCustomComponent;
+		procedure CompleteInternalComponent(const VInternalComponent : TSScreenCustomComponent); virtual;
+		function LastInternalComponent():TSScreenCustomComponent;
 		procedure CreateAlign(const NewAllign:TSByte);
 		procedure DestroyAlign();
-		procedure DestroyParent();
-		procedure KillChildren();
+		procedure DestroyComponentOwner();
+		procedure KillInternalComponents();
 		procedure VisibleAll();
 		function IndexOf(const VComponent : TSScreenCustomComponent): TSLongInt;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function GetChildrenCount() : TSUInt32;
+		function GetInternalComponentsCount() : TSUInt32;
 			public
-		property Children[Index : TSInt32 (* Indexing [1..Size] *)]:TSScreenCustomComponent read GetChild;
-		property ChildrenCount : TSUInt32 read GetChildrenCount;
+		property InternalComponents[Index : TSInt32 (* Indexing [1..Size] *)]:TSScreenCustomComponent read GetInternalComponent;
+		property InternalComponentsCount : TSUInt32 read GetInternalComponentsCount;
 		property MarkedForDestroy : TSBoolean read FMarkedForDestroy;
 		property Align : TSByte read FAlign write CreateAlign;
-		property ChildrenPriority : TSMaxEnum write FChildrenPriority;
+		property PriorityInternalComponent : TSMaxEnum write FPriorityInternalComponent;
 		property ComponentProcedure : TSScreenCustomComponentProcedure read FComponentProcedure write FComponentProcedure;
 			public
 		OnChange : TSScreenCustomComponentProcedure ;
@@ -214,11 +215,11 @@ uses
 	,SmoothContextUtils
 	;
 
-function TSScreenCustomComponent.GetChildrenCount() : TSUInt32;
+function TSScreenCustomComponent.GetInternalComponentsCount() : TSUInt32;
 begin
 Result := 0;
-if (FChildren <> nil) then
-	Result := Length(FChildren);
+if (FInternalComponents <> nil) then
+	Result := Length(FInternalComponents);
 end;
 
 class function TSScreenCustomComponent.ClassName() : TSString;
@@ -236,51 +237,51 @@ begin
 Result := FVisible;
 end;
 
-function TSScreenCustomComponent.HasChildren() : TSBoolean;
+function TSScreenCustomComponent.HasInternalComponents() : TSBoolean;
 begin
 Result := False;
-if FChildren <> nil then
-	if Length(FChildren) > 0 then
+if FInternalComponents <> nil then
+	if Length(FInternalComponents) > 0 then
 		Result := True;
 end;
 
-procedure TSScreenCustomComponent.ChildToListEnd(const Component : TSScreenCustomComponent);
+procedure TSScreenCustomComponent.InternalComponentToListEnd(const Component : TSScreenCustomComponent);
 var
 	Index, i : TSMaxEnum;
 begin
 Index := 0;
-if (FChildren <> nil) and (Length(FChildren) > 0) then
-	for i := 0 to High(FChildren) do
-		if FChildren[i] = Component then
+if (FInternalComponents <> nil) and (Length(FInternalComponents) > 0) then
+	for i := 0 to High(FInternalComponents) do
+		if FInternalComponents[i] = Component then
 			begin
 			Index := i + 1;
 			break;
 			end;
 if (Index > 0) then
-	ChildToListEnd(Index);
+	InternalComponentToListEnd(Index);
 end;
 
-procedure TSScreenCustomComponent.ChildToListEnd(const Index : TSMaxEnum);
+procedure TSScreenCustomComponent.InternalComponentToListEnd(const Index : TSMaxEnum);
 var
 	i : TSMaxEnum;
 	Component : TSScreenCustomComponent;
 begin
 Component := nil;
-if (Index > 0) and (Index <= ChildCount) then
+if (Index > 0) and (Index <= InternalComponentCount) then
 	begin
-	Component := FChildren[Index - 1];
-	for i:= Index - 1 to ChildrenCount - 1 do
-		FChildren[i] := FChildren[i + 1];
-	FChildren[ChildrenCount - 1] := Component;
+	Component := FInternalComponents[Index - 1];
+	for i:= Index - 1 to InternalComponentsCount - 1 do
+		FInternalComponents[i] := FInternalComponents[i + 1];
+	FInternalComponents[InternalComponentsCount - 1] := Component;
 	end;
 end;
 
-function TSScreenCustomComponent.ChildCount() : TSUInt32;
+function TSScreenCustomComponent.InternalComponentCount() : TSUInt32;
 begin
-if not HasChildren() then
+if not HasInternalComponents() then
 	Result := 0
 else
-	Result := Length(FChildren);
+	Result := Length(FInternalComponents);
 end;
 
 function TSScreenCustomComponent.GetVisibleTimer() : TSScreenTimer;
@@ -348,12 +349,12 @@ begin
 Result := FBordersSize;
 end;
 
-function TSScreenCustomComponent.GetChildLocation() : TSComponentLocation;
+function TSScreenCustomComponent.GetInternalComponentLocation() : TSComponentLocation;
 var
 	Position, Size : TSVector2int32;
 begin
-Position := GetVertex([SS_LEFT, SS_TOP], S_VERTEX_FOR_CHILDREN);
-Size := GetVertex([SS_RIGHT, SS_BOTTOM], S_VERTEX_FOR_CHILDREN);
+Position := GetVertex([SS_LEFT, SS_TOP], S_VERTEX_FOR_InternalComponent);
+Size := GetVertex([SS_RIGHT, SS_BOTTOM], S_VERTEX_FOR_InternalComponent);
 Size -= Position;
 Result.Import(
 	TSComponentLocationVectorInt.Create(Position.x, Position.y),
@@ -364,8 +365,8 @@ function TSScreenCustomComponent.GetLocation() : TSComponentLocation;
 var
 	Position, Size : TSVector2int32;
 begin
-Position := GetVertex([SS_LEFT, SS_TOP], S_VERTEX_FOR_PARENT);
-Size := GetVertex([SS_RIGHT, SS_BOTTOM], S_VERTEX_FOR_PARENT);
+Position := GetVertex([SS_LEFT, SS_TOP], S_VERTEX_FOR_MainComponent);
+Size := GetVertex([SS_RIGHT, SS_BOTTOM], S_VERTEX_FOR_MainComponent);
 Size -= Position;
 Result.Import(
 	TSComponentLocationVectorInt.Create(Position.x, Position.y),
@@ -376,19 +377,19 @@ procedure TSScreenCustomComponent.ToFront();
 var
 	Index : TSLongInt;
 begin
-if FParent <> nil then
+if FComponentOwner <> nil then
 	begin
-	if FParent.FChildren <> nil then
+	if FComponentOwner.FInternalComponents <> nil then
 		begin
-		if Length(FParent.FChildren) > 1 then
+		if Length(FComponentOwner.FInternalComponents) > 1 then
 			begin
-			Index := FParent.IndexOf(Self);
+			Index := FComponentOwner.IndexOf(Self);
 			if Index <> -1 then
 				begin
-				if Index <> High(FParent.FChildren) then
+				if Index <> High(FComponentOwner.FInternalComponents) then
 					begin
-					FParent.FChildren[Index] := FParent.FChildren[High(FParent.FChildren)];
-					FParent.FChildren[High(FParent.FChildren)] := Self;
+					FComponentOwner.FInternalComponents[Index] := FComponentOwner.FInternalComponents[High(FComponentOwner.FInternalComponents)];
+					FComponentOwner.FInternalComponents[High(FComponentOwner.FInternalComponents)] := Self;
 					end;
 				end;
 			end;
@@ -403,33 +404,33 @@ var
 begin
 if SAnchBottom in FAnchors then
 	begin
-	if FAnchorsData.FParentHeight=0 then
-		if FParent<>nil then
-			FAnchorsData.FParentHeight:=FParent.Height
+	if FAnchorsData.FComponentOwnerHeight=0 then
+		if FComponentOwner<>nil then
+			FAnchorsData.FComponentOwnerHeight:=FComponentOwner.Height
 		else
-	else if FParent<>nil then
+	else if FComponentOwner<>nil then
 		begin
-		if FAnchorsData.FParentHeight<>FParent.Height then
+		if FAnchorsData.FComponentOwnerHeight<>FComponentOwner.Height then
 			begin
-			I := FAnchorsData.FParentHeight - FParent.Height;
+			I := FAnchorsData.FComponentOwnerHeight - FComponentOwner.Height;
 			FLocation.Top := FLocation.Top - I;
-			FAnchorsData.FParentHeight := FParent.Height;
+			FAnchorsData.FComponentOwnerHeight := FComponentOwner.Height;
 			end;
 		end;
 	end;
 if SAnchRight in FAnchors then
 	begin
-	if FAnchorsData.FParentWidth=0 then
-		if FParent<>nil then
-			FAnchorsData.FParentWidth:=FParent.Width
+	if FAnchorsData.FComponentOwnerWidth=0 then
+		if FComponentOwner<>nil then
+			FAnchorsData.FComponentOwnerWidth:=FComponentOwner.Width
 		else
-	else if FParent<>nil then
+	else if FComponentOwner<>nil then
 		begin
-		if FAnchorsData.FParentWidth<>FParent.Width then
+		if FAnchorsData.FComponentOwnerWidth<>FComponentOwner.Width then
 			begin
-			I:=FAnchorsData.FParentWidth-FParent.Width;
+			I:=FAnchorsData.FComponentOwnerWidth-FComponentOwner.Width;
 			FLocation.Left := FLocation.Left - I;
-			FAnchorsData.FParentWidth:=FParent.Width;
+			FAnchorsData.FComponentOwnerWidth:=FComponentOwner.Width;
 			end;
 		end;
 	end;
@@ -439,13 +440,13 @@ CH:=FLocation.Height;
 case FAlign of
 SAlignRight:
 	begin
-	FLocation.Left+=Parent.Width-ParentWidth;
+	FLocation.Left+=ComponentOwner.Width-ComponentOwnerWidth;
 	end;
 end;
 if FAlign in [SAlignClient] then
 	begin
-	for i:=0 to High(FChildren) do
-		FChildren[i].FromResize(CW,CH);
+	for i:=0 to High(FInternalComponents) do
+		FInternalComponents[i].FromResize(CW,CH);
 	end;}
 for Component in Self do
 	Component.Resize();
@@ -461,8 +462,8 @@ var
 	i : LongInt;
 begin
 Result := -1;
-for i := 0 to High(FChildren) do
-	if FChildren[i] = VComponent then
+for i := 0 to High(FInternalComponents) do
+	if FInternalComponents[i] = VComponent then
 		begin
 		Result := i;
 		break;
@@ -478,20 +479,20 @@ for Component in Self do
 	Component.VisibleAll();
 end;
 
-procedure TSScreenCustomComponent.KillChildren();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSScreenCustomComponent.KillInternalComponents();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-function ChildExists() : TSBool;
+function InternalComponentExists() : TSBool;
 begin
 Result := False;
-if FChildren <> nil then
-	if Length(FChildren) > 0 then
+if FInternalComponents <> nil then
+	if Length(FInternalComponents) > 0 then
 		Result := True;
 end;
 
 begin
-while ChildExists() do
+while InternalComponentExists() do
 	begin
-	FChildren[0].Destroy();
+	FInternalComponents[0].Destroy();
 	end;
 end;
 
@@ -511,10 +512,10 @@ var
 begin
 FLocation.Height := NewHeight;
 FLocation.Width  := NewWidth;
-if (Parent <> nil) then
+if (ComponentOwner <> nil) then
 	begin
-	PW := Parent.Width;
-	PH := Parent.Height;
+	PW := ComponentOwner.Width;
+	PH := ComponentOwner.Height;
 	FLocation.Left := Round((PW-NewWidth)/2);
 	FLocation.Top  := Round((PH-NewHeight)/2);
 	end
@@ -534,26 +535,26 @@ for Component in Self do
 	Component.Visible := Visible;
 end;
 
-function TSScreenCustomComponent.GetChild(a:TSInt32):TSScreenCustomComponent;
+function TSScreenCustomComponent.GetInternalComponent(a:TSInt32):TSScreenCustomComponent;
 begin
-if (a-1 >= 0) and (a-1<=High(FChildren)) then
-	Result:=FChildren[a-1]
+if (a-1 >= 0) and (a-1<=High(FInternalComponents)) then
+	Result:=FInternalComponents[a-1]
 else
 	Result:=nil;
 end;
 
 function TSScreenCustomComponent.GetScreenWidth : longint;
 begin
-if (FParent <> nil) then
-	Result := FParent.Width
+if (FComponentOwner <> nil) then
+	Result := FComponentOwner.Width
 else
 	Result := Width;
 end;
 
 function TSScreenCustomComponent.GetScreenHeight : longint;
 begin
-if (FParent <> nil) then
-	Result := FParent.Height
+if (FComponentOwner <> nil) then
+	Result := FComponentOwner.Height
 else
 	Result := Height;
 end;
@@ -588,11 +589,18 @@ begin
 Result := FBordersSize.Left + FBordersSize.Right;
 end;
 
-function TSScreenCustomComponent.LastChild:TSScreenCustomComponent;
+function TSScreenCustomComponent.LastInternalComponent:TSScreenCustomComponent;
 begin
 Result:=Nil;
-if FChildren <> nil then
-	Result := FChildren[High(FChildren)];
+if FInternalComponents <> nil then
+	Result := FInternalComponents[High(FInternalComponents)];
+end;
+
+
+function TSScreenCustomComponent.UpDateLocationValue(RealObj, Obj : TSComponentLocationInt; const ElapsedTime : TSTimerInt) : TSComponentLocationInt;
+begin
+UpDateValue(RealObj, Obj, ElapsedTime);
+Result := RealObj;
 end;
 
 function TSScreenCustomComponent.UpDateValue(var RealObj, Obj : TSComponentLocationInt; const ElapsedTime : TSTimerInt) : TSComponentLocationInt;
@@ -643,7 +651,7 @@ if (Result = 0) then
 	Result := -1;
 end;
 
-procedure TSScreenCustomComponent.UpgradeTimer(const Flag : TSBoolean; var Timer : TSScreenTimer; const ElapsedTime : TSTimerInt; const Factor1 : TSInt16 = 1; const Factor2 : TSFloat32 = 1);
+procedure TSScreenCustomComponent.UpdateTimer(const Flag : TSBoolean; var Timer : TSScreenTimer; const ElapsedTime : TSTimerInt; const Factor1 : TSInt16 = 1; const Factor2 : TSFloat32 = 1);
 var
 	GeneralFactor : TSFloat32;
 begin
@@ -664,57 +672,57 @@ end;
 
 function TSScreenCustomComponent.ReqursiveActive():Boolean;
 begin
-if (not FActive) or (FParent = nil) then
+if (not FActive) or (FComponentOwner = nil) then
 	Result := FActive
 else
-	Result := FParent.ReqursiveActive();
+	Result := FComponentOwner.ReqursiveActive();
 end;
 
-procedure TSScreenCustomComponent.UpgradeTimers(const ElapsedTime : TSTimerInt);
+procedure TSScreenCustomComponent.UpdateTimers(const ElapsedTime : TSTimerInt);
 begin
-UpgradeTimer(FVisible, FVisibleTimer, ElapsedTime);
-UpgradeTimer(FActive and ReqursiveActive, FActiveTimer, ElapsedTime);
+UpdateTimer(FVisible, FVisibleTimer, ElapsedTime);
+UpdateTimer(FActive and ReqursiveActive, FActiveTimer, ElapsedTime);
 end;
 
-// Deleted self in parent
-procedure TSScreenCustomComponent.DestroyParent;
+// Deleted self in ComponentOwner
+procedure TSScreenCustomComponent.DestroyComponentOwner;
 var
 	ii, i : TSLongInt;
 begin
 {$IFDEF SMoreDebuging}
-	if FParent<>nil then
-		WriteLn('Begin of  "TSScreenCustomComponent.DestroyParent" ( Length='+SStr(Length(FParent.FChildren))+' ).')
+	if FComponentOwner<>nil then
+		WriteLn('Begin of  "TSScreenCustomComponent.DestroyComponentOwner" ( Length='+SStr(Length(FComponentOwner.FInternalComponents))+' ).')
 	else
-		WriteLn('Begin of  "TSScreenCustomComponent.DestroyParent" ( Parent=nil ).');
+		WriteLn('Begin of  "TSScreenCustomComponent.DestroyComponentOwner" ( ComponentOwner=nil ).');
 	{$ENDIF}
-if FParent<>nil then
+if FComponentOwner<>nil then
 	begin
-	ii := FParent.IndexOf(Self);
+	ii := FComponentOwner.IndexOf(Self);
 	if ii <> -1 then
 		begin
-		if ii + 1 = FParent.FChildrenPriority then
+		if ii + 1 = FComponentOwner.FPriorityInternalComponent then
 			ClearPriority();
 		{$IFDEF SMoreDebuging}
-			WriteLn('"TSScreenCustomComponent.DestroyParent" :  Find Self on '+SStr(ii+1)+' position .');
+			WriteLn('"TSScreenCustomComponent.DestroyComponentOwner" :  Find Self on '+SStr(ii+1)+' position .');
 			{$ENDIF}
-		if ii < High(FParent.FChildren) then
-			for i:= ii to High(FParent.FChildren) - 1 do
-				FParent.FChildren[i] := FParent.FChildren[i + 1];
-		SetLength(FParent.FChildren, Length(FParent.FChildren) - 1);
+		if ii < High(FComponentOwner.FInternalComponents) then
+			for i:= ii to High(FComponentOwner.FInternalComponents) - 1 do
+				FComponentOwner.FInternalComponents[i] := FComponentOwner.FInternalComponents[i + 1];
+		SetLength(FComponentOwner.FInternalComponents, Length(FComponentOwner.FInternalComponents) - 1);
 		end;
 	end;
 {$IFDEF SMoreDebuging}
-	if FParent<>nil then
-		WriteLn('End of  "TSScreenCustomComponent.DestroyParent" ( Length='+SStr(Length(FParent.FChildren))+' ).')
+	if FComponentOwner<>nil then
+		WriteLn('End of  "TSScreenCustomComponent.DestroyComponentOwner" ( Length='+SStr(Length(FComponentOwner.FInternalComponents))+' ).')
 	else
-		WriteLn('End of  "TSScreenCustomComponent.DestroyParent" ( Parent=nil ).');
+		WriteLn('End of  "TSScreenCustomComponent.DestroyComponentOwner" ( ComponentOwner=nil ).');
 	{$ENDIF}
 end;
 
 destructor TSScreenCustomComponent.Destroy();
 begin
-KillChildren();
-DestroyParent();
+KillInternalComponents();
+DestroyComponentOwner();
 inherited;
 end;
 
@@ -722,36 +730,36 @@ function TSScreenCustomComponent.GetVertex(const THAT:TSSetOfByte;const FOR_THAT
 begin
 if (SS_LEFT in THAT) and (SS_TOP in THAT) then
 	begin
-	if FOR_THAT = S_VERTEX_FOR_PARENT then
+	if FOR_THAT = S_VERTEX_FOR_MainComponent then
 		Result.Import(FRealPosition.x,FRealPosition.y)
-	else if FOR_THAT = S_VERTEX_FOR_CHILDREN then
+	else if FOR_THAT = S_VERTEX_FOR_InternalComponent then
 		Result.Import(FRealPosition.x + FBordersSize.Left, FRealPosition.y + FBordersSize.Top)
 	else
 		Result.Import(0,0);
 	end
 else if (SS_TOP in THAT) and (SS_RIGHT in THAT) then
 	begin
-	if FOR_THAT = S_VERTEX_FOR_PARENT then
+	if FOR_THAT = S_VERTEX_FOR_MainComponent then
 		Result.Import(FRealPosition.x + FRealLocation.Width, FRealPosition.y)
-	else if FOR_THAT = S_VERTEX_FOR_CHILDREN then
+	else if FOR_THAT = S_VERTEX_FOR_InternalComponent then
 		Result.Import(FRealPosition.x + FRealLocation.Width - FBordersSize.Right, FRealPosition.y + FBordersSize.Top)
 	else
 		Result.Import(0,0);
 	end
 else if (SS_BOTTOM in THAT) and (SS_RIGHT in THAT) then
 	begin
-	if FOR_THAT = S_VERTEX_FOR_PARENT then
+	if FOR_THAT = S_VERTEX_FOR_MainComponent then
 		Result.Import(FRealPosition.x + FRealLocation.Width, FRealPosition.y + FRealLocation.Height)
-	else if FOR_THAT = S_VERTEX_FOR_CHILDREN then
+	else if FOR_THAT = S_VERTEX_FOR_InternalComponent then
 		Result.Import(FRealPosition.x + FRealLocation.Width - FBordersSize.Right, FRealPosition.y + FRealLocation.Height - FBordersSize.Bottom)
 	else
 		Result.Import(0,0);
 	end 
 else if (SS_LEFT in THAT) and (SS_BOTTOM in THAT) then
 	begin
-	if FOR_THAT = S_VERTEX_FOR_PARENT then
+	if FOR_THAT = S_VERTEX_FOR_MainComponent then
 		Result.Import(FRealPosition.x,FRealPosition.y + FRealLocation.Height)
-	else if FOR_THAT = S_VERTEX_FOR_CHILDREN then
+	else if FOR_THAT = S_VERTEX_FOR_InternalComponent then
 		Result.Import(FRealPosition.x + FBordersSize.Left, FRealPosition.y + FRealLocation.Height - FBordersSize.Bottom)
 	else
 		Result.Import(0,0);
@@ -760,25 +768,25 @@ else
 	Result.Import(0, 0);
 end;
 
-procedure TSScreenCustomComponent.CompleteChild(const VChild : TSScreenCustomComponent);
+procedure TSScreenCustomComponent.CompleteInternalComponent(const VInternalComponent : TSScreenCustomComponent);
 var
 	Component : TSScreenCustomComponent;
 begin
-if VChild.Parent = nil then
-	VChild.Parent := Self;
-for Component in VChild do
-	VChild.CompleteChild(Component);
+if VInternalComponent.ComponentOwner = nil then
+	VInternalComponent.ComponentOwner := Self;
+for Component in VInternalComponent do
+	VInternalComponent.CompleteInternalComponent(Component);
 end;
 
-function TSScreenCustomComponent.CreateChild(const Child : TSScreenCustomComponent) : TSScreenCustomComponent;
+function TSScreenCustomComponent.CreateInternalComponent(const InternalComponent : TSScreenCustomComponent) : TSScreenCustomComponent;
 begin
 Result := nil;
-if (Child <> nil) and FCanHaveChildren then
+if (InternalComponent <> nil) and FInternalComponentsAllowed then
 	begin
-	Result := Child;
-	SetLength(FChildren, Length(FChildren) + 1);
-	FChildren[High(FChildren)] := Result;
-	CompleteChild(Result);
+	Result := InternalComponent;
+	SetLength(FInternalComponents, Length(FInternalComponents) + 1);
+	FInternalComponents[High(FInternalComponents)] := Result;
+	CompleteInternalComponent(Result);
 	end;
 end;
 
@@ -818,9 +826,9 @@ if PriorityComponent <> nil then
 	PriorityComponent.UpDate();
 
 Index := 0;
-while Index < Length(FChildren) do
+while Index < Length(FInternalComponents) do
 	begin
-	Component := FChildren[Index];
+	Component := FInternalComponents[Index];
 	if Component.MustBeDestroyed() then
 		Component.Destroy()
 	else
@@ -887,14 +895,14 @@ procedure TSScreenCustomComponent.ClearPriority();
 var
 	ii : TSMaxEnum;
 begin
-FChildrenPriority:=0;
-if FParent<>nil then
+FPriorityInternalComponent:=0;
+if FComponentOwner<>nil then
 	begin
-	if FParent.FChildrenPriority <> 0 then
+	if FComponentOwner.FPriorityInternalComponent <> 0 then
 		begin
-		ii := Parent.IndexOf(Self) + 1;
-		if (ii = FParent.FChildrenPriority) then
-			FParent.ClearPriority();
+		ii := ComponentOwner.IndexOf(Self) + 1;
+		if (ii = FComponentOwner.FPriorityInternalComponent) then
+			FComponentOwner.ClearPriority();
 		end;
 	end;
 end;
@@ -908,13 +916,13 @@ procedure TSScreenCustomComponent.MakePriority();
 var
 	ii : TSMaxEnum;
 begin
-if FParent<>nil then
+if FComponentOwner<>nil then
 	begin
-	ii := Parent.IndexOf(Self) + 1;
+	ii := ComponentOwner.IndexOf(Self) + 1;
 	if ii <> 0 then
 		begin
-		FParent.FChildrenPriority := ii;
-		FParent.MakePriority();
+		FComponentOwner.FPriorityInternalComponent := ii;
+		FComponentOwner.MakePriority();
 		end;
 	end;
 end;
@@ -930,10 +938,10 @@ constructor TSScreenCustomComponent.Create();
 begin
 inherited Create();
 FMarkedForDestroy := False;
-FChildrenPriority:=0;
+FPriorityInternalComponent:=0;
 FUnLimited:=False;
 OnChange:=nil;
-FParent:=nil;
+FComponentOwner:=nil;
 FLocation.Import(0, 0, 0, 0);
 FRealLocation := FLocation;
 FDefaultLocation := FLocation;
@@ -946,14 +954,14 @@ FVisibleTimer:=0;
 FActive:=True;
 FActiveTimer:=0;
 FCaption:='';
-FChildren:=nil;
-FCanHaveChildren:=True;
+FInternalComponents:=nil;
+FInternalComponentsAllowed:=True;
 ComponentProcedure:=nil;
 FUserPointer1:=nil;
 FUserPointer2:=nil;
 FUserPointer3:=nil;
-FAnchorsData.FParentHeight:=0;
-FAnchorsData.FParentWidth:=0;
+FAnchorsData.FComponentOwnerHeight:=0;
+FAnchorsData.FComponentOwnerWidth:=0;
 end;
 
 procedure TSScreenCustomComponent.SetBordersSize(const _L, _T, _R, _B : TSScreenInt);
@@ -967,9 +975,9 @@ end;
 function TSScreenCustomComponent.GetPriorityComponent() : TSScreenCustomComponent;
 begin
 Result := nil;
-if (FChildrenPriority > 0) and (FChildren <> nil) then
-	if FChildrenPriority <= Length(FChildren) then
-		Result := FChildren[FChildrenPriority - 1];
+if (FPriorityInternalComponent > 0) and (FInternalComponents <> nil) then
+	if FPriorityInternalComponent <= Length(FInternalComponents) then
+		Result := FInternalComponents[FPriorityInternalComponent - 1];
 end;
 
 function TSScreenCustomComponent.CursorInComponentCaption():boolean;
@@ -1004,28 +1012,28 @@ end;
 
 procedure TSScreenCustomComponent.TestCoords;
 begin
-if (FParent<>nil) and (FParent.FParent<>nil) and (not FUnLimited) then
+if (FComponentOwner<>nil) and (FComponentOwner.FComponentOwner<>nil) and (not FUnLimited) then
 	begin
-	if FRealLocation.Height>FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom then
-		FRealLocation.Height:=FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom;
-	if FRealLocation.Width>FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right then
-		FRealLocation.Width:=FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right;
+	if FRealLocation.Height>FComponentOwner.FRealLocation.Height-FComponentOwner.FBordersSize.Top-FComponentOwner.FBordersSize.Bottom then
+		FRealLocation.Height:=FComponentOwner.FRealLocation.Height-FComponentOwner.FBordersSize.Top-FComponentOwner.FBordersSize.Bottom;
+	if FRealLocation.Width>FComponentOwner.FRealLocation.Width-FComponentOwner.FBordersSize.Left-FComponentOwner.FBordersSize.Right then
+		FRealLocation.Width:=FComponentOwner.FRealLocation.Width-FComponentOwner.FBordersSize.Left-FComponentOwner.FBordersSize.Right;
 	if FRealLocation.Top < 0 then
 		FRealLocation.Top:=0;
 	if FRealLocation.Left < 0 then
 		FRealLocation.Left:=0;
-	if (FRealLocation.Left+FRealLocation.Width)>FParent.FRealLocation.Width-FParent.RightShift then
-		FRealLocation.Left:=FParent.FRealLocation.Width-FRealLocation.Width-FParent.RightShift;
-	if (FRealLocation.Top+FRealLocation.Height)>FParent.FRealLocation.Height-FParent.BottomShift then
-		FRealLocation.Top:=FParent.FRealLocation.Height-FRealLocation.Height-FParent.BottomShift;
+	if (FRealLocation.Left+FRealLocation.Width)>FComponentOwner.FRealLocation.Width-FComponentOwner.RightShift then
+		FRealLocation.Left:=FComponentOwner.FRealLocation.Width-FRealLocation.Width-FComponentOwner.RightShift;
+	if (FRealLocation.Top+FRealLocation.Height)>FComponentOwner.FRealLocation.Height-FComponentOwner.BottomShift then
+		FRealLocation.Top:=FComponentOwner.FRealLocation.Height-FRealLocation.Height-FComponentOwner.BottomShift;
 	if FLocation.Top < 0 then
 		FLocation.Top := 0;
 	if FLocation.Left < 0 then
 		FLocation.Left:=0;
-	if (FLocation.Left+FLocation.Width)>FParent.FLocation.Width-FParent.RightShift then
-		FLocation.Left:=FParent.FLocation.Width-FLocation.Width-FParent.RightShift;
-	if (FLocation.Top+FLocation.Height)>FParent.FLocation.Height-FParent.BottomShift then
-		FLocation.Top:=FParent.FLocation.Height-FLocation.Height-FParent.BottomShift;
+	if (FLocation.Left+FLocation.Width)>FComponentOwner.FLocation.Width-FComponentOwner.RightShift then
+		FLocation.Left:=FComponentOwner.FLocation.Width-FLocation.Width-FComponentOwner.RightShift;
+	if (FLocation.Top+FLocation.Height)>FComponentOwner.FLocation.Height-FComponentOwner.BottomShift then
+		FLocation.Top:=FComponentOwner.FLocation.Height-FLocation.Height-FComponentOwner.BottomShift;
 	end;
 end;
 
@@ -1035,28 +1043,11 @@ FCaption := NewCaption;
 end;
 
 procedure TSScreenCustomComponent.UpDateLocation(const ElapsedTime : TSTimerInt);
-var
-	Value, RealValue : TSComponentLocationInt;
 begin
-Value := FLocation.Height;
-RealValue := FRealLocation.Height;
-UpDateValue(RealValue, Value, ElapsedTime);
-FRealLocation.Height := RealValue;
-
-Value := FLocation.Top;
-RealValue := FRealLocation.Top;
-UpDateValue(RealValue, Value, ElapsedTime);
-FRealLocation.Top := RealValue;
-
-Value := FLocation.Left;
-RealValue := FRealLocation.Left;
-UpDateValue(RealValue, Value, ElapsedTime);
-FRealLocation.Left := RealValue;
-
-Value := FLocation.Width;
-RealValue := FRealLocation.Width;
-UpDateValue(RealValue, Value, ElapsedTime);
-FRealLocation.Width := RealValue;
+FRealLocation.Width := UpDateLocationValue(FRealLocation.Width, FLocation.Width, ElapsedTime);
+FRealLocation.Height := UpDateLocationValue(FRealLocation.Height, FLocation.Height, ElapsedTime);
+FRealLocation.Left := UpDateLocationValue(FRealLocation.Left, FLocation.Left, ElapsedTime);
+FRealLocation.Top := UpDateLocationValue(FRealLocation.Top, FLocation.Top, ElapsedTime);
 end;
 
 procedure TSScreenCustomComponent.UpDateObjects();
@@ -1067,41 +1058,41 @@ var
 	ValueLeft   : TSScreenInt = 0;
 	ValueTop    : TSScreenInt = 0;
 begin
-if (FParent <> nil) then
+if (FComponentOwner <> nil) then
 	case FAlign of
 	SAlignLeft:
 		begin
 		FLocation.Position := TSComponentLocationVectorInt.Create();
-		FLocation.Height:=FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom;
+		FLocation.Height:=FComponentOwner.FRealLocation.Height-FComponentOwner.FBordersSize.Top-FComponentOwner.FBordersSize.Bottom;
 		end;
 	SAlignTop:
 		begin
 		FLocation.Position := TSComponentLocationVectorInt.Create();
-		FLocation.Width:=FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right;
+		FLocation.Width:=FComponentOwner.FRealLocation.Width-FComponentOwner.FBordersSize.Left-FComponentOwner.FBordersSize.Right;
 		end;
 	SAlignRight:
 		begin
 		FLocation.Top := 0;
-		FLocation.Left:=FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right-FRealLocation.Width;
-		FLocation.Height:=FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom;
+		FLocation.Left:=FComponentOwner.FRealLocation.Width-FComponentOwner.FBordersSize.Left-FComponentOwner.FBordersSize.Right-FRealLocation.Width;
+		FLocation.Height:=FComponentOwner.FRealLocation.Height-FComponentOwner.FBordersSize.Top-FComponentOwner.FBordersSize.Bottom;
 		end;
 	SAlignBottom:
 		begin
 		FLocation.Left := 0;
-		FLocation.Width:=FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right;
-		FLocation.Top:=FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom-FRealLocation.Height;
+		FLocation.Width:=FComponentOwner.FRealLocation.Width-FComponentOwner.FBordersSize.Left-FComponentOwner.FBordersSize.Right;
+		FLocation.Top:=FComponentOwner.FRealLocation.Height-FComponentOwner.FBordersSize.Top-FComponentOwner.FBordersSize.Bottom-FRealLocation.Height;
 		end;
 	SAlignClient:
 		begin
 		FLocation.Position := TSComponentLocationVectorInt.Create();
-		FLocation.Width:=FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right;
-		FLocation.Height:=FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom;
+		FLocation.Width:=FComponentOwner.FRealLocation.Width-FComponentOwner.FBordersSize.Left-FComponentOwner.FBordersSize.Right;
+		FLocation.Height:=FComponentOwner.FRealLocation.Height-FComponentOwner.FBordersSize.Top-FComponentOwner.FBordersSize.Bottom;
 		end;
 	SAlignNone: begin end;
 	else begin end;
 	end;
-if (FParent <> nil) then
-	FRealPosition := FParent.FRealPosition + FRealLocation.Position + TSComponentLocationVectorInt.Create(FParent.FBordersSize.Left, FParent.FBordersSize.Top);
+if (FComponentOwner <> nil) then
+	FRealPosition := FComponentOwner.FRealPosition + FRealLocation.Position + TSComponentLocationVectorInt.Create(FComponentOwner.FBordersSize.Left, FComponentOwner.FBordersSize.Top);
 end;
 
 // ==========================
@@ -1129,14 +1120,14 @@ end;
 constructor TSScreenCustomComponentEnumeratorReverse.Create(const VComponent : TSScreenCustomComponent);
 begin
 inherited Create(VComponent);
-FIndex := Length(VComponent.FChildren) + 1;
+FIndex := Length(VComponent.FInternalComponents) + 1;
 end;
 
 function TSScreenCustomComponentEnumeratorNormal.MoveNext(): TSBoolean;
 begin
 FIndex += 1;
-if (FIndex >= 1) and (FIndex <= Length(FComponent.FChildren)) then
-	FCurrent := FComponent.Children[FIndex]
+if (FIndex >= 1) and (FIndex <= Length(FComponent.FInternalComponents)) then
+	FCurrent := FComponent.InternalComponents[FIndex]
 else
 	FCurrent := nil;
 Result := FCurrent <> nil;
@@ -1145,8 +1136,8 @@ end;
 function TSScreenCustomComponentEnumeratorReverse.MoveNext(): TSBoolean;
 begin
 FIndex -= 1;
-if (FIndex >= 1) and (FIndex <= Length(FComponent.FChildren)) then
-	FCurrent := FComponent.Children[FIndex]
+if (FIndex >= 1) and (FIndex <= Length(FComponent.FInternalComponents)) then
+	FCurrent := FComponent.InternalComponents[FIndex]
 else
 	FCurrent := nil;
 Result := FCurrent <> nil;

@@ -21,7 +21,7 @@ type
 		procedure UpDate();override;
 		procedure Paint(); override;
 			protected
-		procedure Click(); virtual;
+		procedure StartCallBack(); virtual;
 		end;
 
 implementation
@@ -32,7 +32,7 @@ uses
 	,SmoothContextUtils
 	;
 
-procedure TSButton.Click();
+procedure TSButton.StartCallBack();
 begin
 if (OnChange <> nil) then
 	OnChange(Self);
@@ -45,17 +45,28 @@ end;
 
 procedure TSButton.UpDate();
 begin
-if CursorOver and Active and Visible and ((Context.CursorKeyPressed=SLeftCursorButton) and (Context.CursorKeyPressedType=SUpKey)) then
+if UpdateAvailable() and (Context.CursorKeyPressed=SLeftCursorButton) then
 	begin
-	Click();
-	Context.SetCursorKey(SNullKey, SNullCursorButton);
-	end;
+	if (Context.CursorKeyPressedType=SDownKey) then
+		begin
+		FDownMouseClick := True;
+		Context.SetCursorKey(SNullKey, SNullCursorButton);
+		end
+	else if (Context.CursorKeyPressedType=SUpKey) and FDownMouseClick then
+		begin
+		FDownMouseClick := False;
+		Context.SetCursorKey(SNullKey, SNullCursorButton);
+		StartCallBack();
+		end;
+	end
+else if FDownMouseClick and ((not Active) or (not Visible) or (not (Context.CursorKeyPressed = SNullCursorButton))) then
+	FDownMouseClick := False;
 if CursorOver and ReqursiveActive and Visible then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SC_HAND)) then
 		Context.Cursor := TSCursor.Create(SC_HAND);
 if PreviousCursorOver and (not CursorOver) then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle = SC_HAND)) then
-	Context.Cursor := TSCursor.Create(SC_NORMAL);
+		Context.Cursor := TSCursor.Create(SC_NORMAL);
 inherited;
 end;
 
@@ -69,7 +80,7 @@ end;
 constructor TSButton.Create();
 begin
 inherited;
-FCanHaveChildren    := False;
+FInternalComponentsAllowed    := False;
 end;
 
 destructor TSButton.Destroy();

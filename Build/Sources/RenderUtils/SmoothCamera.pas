@@ -27,6 +27,7 @@ type
 		FViewMode  : TSCameraViewMode; // SMotileObject, SMotileObjective
 		FLocation, FView, FUp : TSCameraVector; // Location is point, View and Up is vectors
 		FMotile : TSBoolean;
+		FMouseClick : TSBoolean;
 			protected
 		procedure MoveMotileObjective();
 		procedure MoveMotileObject();
@@ -160,6 +161,7 @@ end;
 constructor TSCamera.Create();
 begin
 inherited;
+FMouseClick := False;
 FMatrixMode := S_3D;
 FMotile := True;
 Clear();
@@ -208,23 +210,33 @@ if FMotile then
 		FLocation*=1/0.89;
 	if  (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedByte=187) and (Context.KeyPressedType=SDownKey))  then
 		FLocation*=0.89;
-	X := -TSUInt8(Context.CursorKeysPressed(SLeftCursorButton)) * Context.CursorPosition(SDeferenseCursorPosition).y * RotateConst;
-	Y := TSUInt8(Context.CursorKeysPressed(SLeftCursorButton)) * Context.CursorPosition(SDeferenseCursorPosition).x * RotateConst;
-	if Abs(X) + Abs(Y) > 0.0001 then
+	if FMouseClick then
 		begin
-		LocationAbs := Abs(FLocation);
-		LocationVector := FLocation / LocationAbs;
-		if x<>0 then
+		X := -TSUInt8(Context.CursorKeysPressed(SLeftCursorButton)) * Context.CursorPosition(SDeferenseCursorPosition).y * RotateConst;
+		Y := TSUInt8(Context.CursorKeysPressed(SLeftCursorButton)) * Context.CursorPosition(SDeferenseCursorPosition).x * RotateConst;
+		if Abs(X) + Abs(Y) > 0.0001 then
 			begin
-			Sidewards := (LocationVector * Up).Normalized();
-			LocationVector := SRotatePoint(LocationVector, Sidewards, -X).Normalized();
-			Up := (Sidewards * LocationVector).Normalized();
+			LocationAbs := Abs(FLocation);
+			LocationVector := FLocation / LocationAbs;
+			if x<>0 then
+				begin
+				Sidewards := (LocationVector * Up).Normalized();
+				LocationVector := SRotatePoint(LocationVector, Sidewards, -X).Normalized();
+				Up := (Sidewards * LocationVector).Normalized();
+				end;
+			if y<>0 then
+				LocationVector := SRotatePoint(LocationVector, Up, -Y).Normalized();
+			FLocation := LocationVector * LocationAbs;
+			FView := -LocationVector;
 			end;
-		if y<>0 then
-			LocationVector := SRotatePoint(LocationVector, Up, -Y).Normalized();
-		FLocation := LocationVector * LocationAbs;
-		FView := -LocationVector;
+		end
+	else if (Context.CursorKeyPressed=SLeftCursorButton) and (Context.CursorKeyPressedType=SDownKey) then
+		begin
+		FMouseClick := True;
+		Context.SetCursorKey(SNullKey, SNullCursorButton);
 		end;
+	if (not Context.CursorKeysPressed(SLeftCursorButton)) then
+		FMouseClick := False;
 	end;
 end;
 

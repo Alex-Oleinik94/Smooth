@@ -975,7 +975,7 @@ if FFont = nil then
 if FPrimetiveTypeButtonPoints = nil then
 	begin
 	FPrimetiveTypeButtonPoints := TSScreenButton.Create();
-	Screen.CreateChild(FPrimetiveTypeButtonPoints);
+	Screen.CreateInternalComponent(FPrimetiveTypeButtonPoints);
 	FPrimetiveTypeButtonPoints.Caption := 'Управление точками';
 	FPrimetiveTypeButtonPoints.SetBounds(Context.Width - a - 10, Context.Height div 2 + 0, a, 27);
 	FPrimetiveTypeButtonPoints.BoundsMakeReal();
@@ -988,7 +988,7 @@ FPrimetiveTypeButtonPoints.Active := False;
 if FPrimetiveTypeButtonLines = nil then
 	begin
 	FPrimetiveTypeButtonLines := TSScreenButton.Create();
-	Screen.CreateChild(FPrimetiveTypeButtonLines);
+	Screen.CreateInternalComponent(FPrimetiveTypeButtonLines);
 	FPrimetiveTypeButtonLines.Caption := 'Управление линиями';
 	FPrimetiveTypeButtonLines.SetBounds(Context.Width - a - 10, Context.Height div 2 + 30, a, 27);
 	FPrimetiveTypeButtonLines.BoundsMakeReal();
@@ -1001,7 +1001,7 @@ FPrimetiveTypeButtonLines.Active := True;
 if FPrimetiveTypeButtonPolygones = nil then
 	begin
 	FPrimetiveTypeButtonPolygones := TSScreenButton.Create();
-	Screen.CreateChild(FPrimetiveTypeButtonPolygones);
+	Screen.CreateInternalComponent(FPrimetiveTypeButtonPolygones);
 	FPrimetiveTypeButtonPolygones.Caption := 'Управление полигонами';
 	FPrimetiveTypeButtonPolygones.SetBounds(Context.Width - a - 10, Context.Height div 2 + 60, a, 27);
 	FPrimetiveTypeButtonPolygones.BoundsMakeReal();
@@ -1014,7 +1014,7 @@ FPrimetiveTypeButtonPolygones.Active := True;
 if FCutPolygoneButton = nil then
 	begin
 	FCutPolygoneButton := TSScreenButton.Create();
-	Screen.CreateChild(FCutPolygoneButton);
+	Screen.CreateInternalComponent(FCutPolygoneButton);
 	FCutPolygoneButton.Caption := 'Разрезать полигон';
 	FCutPolygoneButton.SetBounds(Context.Width - a - 10, Context.Height div 2 + 90, a, 27);
 	FCutPolygoneButton.BoundsMakeReal();

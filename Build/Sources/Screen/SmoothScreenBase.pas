@@ -32,8 +32,8 @@ const
 	SAnchorTop =                        $00000F;
 	SAnchorBottom =                     $000010;
 	
-	S_VERTEX_FOR_CHILDREN =             $000013;
-	S_VERTEX_FOR_PARENT =               $000014;
+	S_VERTEX_FOR_InternalComponent =             $000013;
+	S_VERTEX_FOR_MainComponent =               $000014;
 	
 	S_LEFT =                            $000015;
 	S_TOP =                             $000016;
@@ -122,7 +122,7 @@ type
 		function GetScreenWidth()  : TSScreenInt;
 		function GetScreenHeight() : TSScreenInt;
 		function GetLocation() : TSComponentLocation;
-		function GetChildLocation() : TSComponentLocation;
+		function GetInternalComponentLocation() : TSComponentLocation;
 		
 		procedure SetBordersSize(const _L, _T, _R, _B : TSScreenInt);
 		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSScreenInt);
@@ -133,7 +133,7 @@ type
 
 		procedure UpDateObjects();
 		procedure TestCoords();
-		procedure UpgradeTimers(const ElapsedTime : TSTimerInt);
+		procedure UpdateTimers(const ElapsedTime : TSTimerInt);
 
 		procedure AddToLeft(const Value:TSScreenInt);
 		procedure AddToWidth(const Value:TSScreenInt);
@@ -160,8 +160,8 @@ type
 		procedure MarkForDestroy();
 		procedure CreateAlign(const NewAllign:TSByte);
 		procedure DestroyAlign();
-		procedure DestroyParent();
-		procedure KillChildren();
+		procedure DestroyComponentOwner();
+		procedure KillInternalComponents();
 		procedure VisibleAll();
 
 		function GetVisibleTimer() : TSScreenTimer;
@@ -177,7 +177,7 @@ type
 		property VisibleTimer : TSScreenTimer read GetVisibleTimer;
 		property ActiveTimer : TSScreenTimer read GetActiveTimer;
 		property BordersSize : TSComponentBordersSize read GetBordersSize;
-		property ChildLocation : TSComponentLocation read GetChildLocation;
+		property InternalComponentLocation : TSComponentLocation read GetInternalComponentLocation;
 		property Location : TSComponentLocation read GetLocation;
 		end;
 

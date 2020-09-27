@@ -48,57 +48,57 @@ end;
 
 procedure TSForm.UpDate();
 var
-	ParentBordersSize : TSComponentBordersSize;
-	ParentRealPosition : TSComponentLocationVectorInt;
-	ParentLocation : TSComponentLocation;
+	ComponentOwnerBordersSize : TSComponentBordersSize;
+	ComponentOwnerRealPosition : TSComponentLocationVectorInt;
+	ComponentOwnerLocation : TSComponentLocation;
 	CursorPosition : TSVector2int32;
 begin
 inherited;
 if CursorOverComponent() and ((Context.CursorKeyPressed=SLeftCursorButton) and (Context.CursorKeyPressedType=SDownKey)) then
 	FRePlace:=True;
-if (FParent <> nil) and ((Context.CursorKeyPressed = SLeftCursorButton) and (Context.CursorKeyPressedType = SDownKey)) then
-	FParent.ChildToListEnd(Self);
+if (FComponentOwner <> nil) and ((Context.CursorKeyPressed = SLeftCursorButton) and (Context.CursorKeyPressedType = SDownKey)) then
+	FComponentOwner.InternalComponentToListEnd(Self);
 if FRePlace then
 	begin
 	if Context.CursorKeysPressed(SRightCursorButton) then
 		begin
-		if FParent<>nil then
+		if FComponentOwner<>nil then
 			begin
-			ParentBordersSize := FParent.BordersSize;
-			ParentRealPosition := FParent.RealPosition;
-			ParentLocation := FParent.Location;
+			ComponentOwnerBordersSize := FComponentOwner.BordersSize;
+			ComponentOwnerRealPosition := FComponentOwner.RealPosition;
+			ComponentOwnerLocation := FComponentOwner.Location;
 			CursorPosition := Context.CursorPosition(SNowCursorPosition);
-			if  (CursorPosition.x>ParentRealPosition.x) and 
-				(CursorPosition.x<ParentRealPosition.x+ParentBordersSize.Left+10) and 
-				(CursorPosition.y>ParentRealPosition.y+ParentBordersSize.Top) and 
-				(CursorPosition.y<ParentRealPosition.y+ParentBordersSize.Top+ParentBordersSize.Bottom+ParentLocation.Height) then
+			if  (CursorPosition.x>ComponentOwnerRealPosition.x) and 
+				(CursorPosition.x<ComponentOwnerRealPosition.x+ComponentOwnerBordersSize.Left+10) and 
+				(CursorPosition.y>ComponentOwnerRealPosition.y+ComponentOwnerBordersSize.Top) and 
+				(CursorPosition.y<ComponentOwnerRealPosition.y+ComponentOwnerBordersSize.Top+ComponentOwnerBordersSize.Bottom+ComponentOwnerLocation.Height) then
 					begin
 					if FAlign<>SAlignNone then
 						DestroyAlign;
 					FAlign:=SAlignLeft;
 					end
-			else if  (CursorPosition.x>ParentRealPosition.x) and 
-				(CursorPosition.x<ParentRealPosition.x+ParentLocation.Width) and 
-				(CursorPosition.y>ParentRealPosition.y) and 
-				(CursorPosition.y<ParentRealPosition.y+ParentBordersSize.Top+10) then
+			else if  (CursorPosition.x>ComponentOwnerRealPosition.x) and 
+				(CursorPosition.x<ComponentOwnerRealPosition.x+ComponentOwnerLocation.Width) and 
+				(CursorPosition.y>ComponentOwnerRealPosition.y) and 
+				(CursorPosition.y<ComponentOwnerRealPosition.y+ComponentOwnerBordersSize.Top+10) then
 					begin
 					if FAlign<>SAlignNone then
 						DestroyAlign;
 					FAlign:=SAlignTop;
 					end
-			else if  (CursorPosition.x>ParentRealPosition.x+ParentLocation.Width-ParentBordersSize.Right-10) and 
-				(CursorPosition.x<ParentRealPosition.x+ParentLocation.Width) and 
-				(CursorPosition.y>ParentRealPosition.y+ParentBordersSize.Top) and 
-				(CursorPosition.y<ParentRealPosition.y+ParentLocation.Height-ParentBordersSize.Bottom) then
+			else if  (CursorPosition.x>ComponentOwnerRealPosition.x+ComponentOwnerLocation.Width-ComponentOwnerBordersSize.Right-10) and 
+				(CursorPosition.x<ComponentOwnerRealPosition.x+ComponentOwnerLocation.Width) and 
+				(CursorPosition.y>ComponentOwnerRealPosition.y+ComponentOwnerBordersSize.Top) and 
+				(CursorPosition.y<ComponentOwnerRealPosition.y+ComponentOwnerLocation.Height-ComponentOwnerBordersSize.Bottom) then
 					begin
 					if FAlign<>SAlignNone then
 						DestroyAlign;
 					FAlign:=SAlignRight;
 					end
-			else if  (CursorPosition.x>ParentRealPosition.x) and 
-				(CursorPosition.x<ParentRealPosition.x+ParentLocation.Width) and 
-				(CursorPosition.y>ParentRealPosition.y+ParentLocation.Height-ParentBordersSize.Bottom-10) and 
-				(CursorPosition.y<ParentRealPosition.y+ParentLocation.Height) then
+			else if  (CursorPosition.x>ComponentOwnerRealPosition.x) and 
+				(CursorPosition.x<ComponentOwnerRealPosition.x+ComponentOwnerLocation.Width) and 
+				(CursorPosition.y>ComponentOwnerRealPosition.y+ComponentOwnerLocation.Height-ComponentOwnerBordersSize.Bottom-10) and 
+				(CursorPosition.y<ComponentOwnerRealPosition.y+ComponentOwnerLocation.Height) then
 					begin
 					if FAlign<>SAlignNone then
 						DestroyAlign;

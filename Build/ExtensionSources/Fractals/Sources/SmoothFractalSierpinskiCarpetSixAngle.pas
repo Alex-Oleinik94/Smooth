@@ -186,7 +186,7 @@ Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
 Depth := 7;
 
 FTypeComboBox := TSScreenComboBox.Create();
-Screen.CreateChild(FTypeComboBox);
+Screen.CreateInternalComponent(FTypeComboBox);
 with FTypeComboBox do
 	begin
 	Anchors := [SAnchRight];

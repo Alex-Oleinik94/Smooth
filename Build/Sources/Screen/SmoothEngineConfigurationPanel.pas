@@ -127,7 +127,7 @@ var
 	Component : TSScreenCustomComponent;
 begin
 Result := True;
-if VScreen.HasChildren then
+if VScreen.HasInternalComponents then
 	for Component in VScreen do
 		if Component is TSEngineConfigurationPanel then
 			begin
@@ -138,7 +138,7 @@ end;
 
 procedure TSEngineConfigurationPanel_CloseButton_OnChange(VButton : TSScreenButton);
 begin
-VButton.Parent.MarkForDestroy();
+VButton.ComponentOwner.MarkForDestroy();
 end;
 
 procedure TSEngineConfigurationPanel_ContextsComboBox_OnChange(VOldIndex, VNewIndex : TSLongInt; VComboBox : TSScreenComboBox);
@@ -241,7 +241,7 @@ ProcessValue(CalculateRendersComboBoxWidth(), Result);
 end;
 
 begin
-if Parent <> nil then
+if ComponentOwner <> nil then
 	SetMiddleBounds(CalculateWidth(), TotalHeight)
 else
 	SetBounds(0, 0, CalculateWidth(), TotalHeight);
@@ -362,8 +362,8 @@ var
 
 begin
 Color := FSkin.Colors.FNormal.FFirst.WithAlpha(0.8);
-Vertex1 := PointToVert3f(GetVertex([SS_LEFT, SS_TOP], S_VERTEX_FOR_PARENT));
-Vertex2 := PointToVert3f(GetVertex([SS_RIGHT, SS_BOTTOM], S_VERTEX_FOR_PARENT));
+Vertex1 := PointToVert3f(GetVertex([SS_LEFT, SS_TOP], S_VERTEX_FOR_MainComponent));
+Vertex2 := PointToVert3f(GetVertex([SS_RIGHT, SS_BOTTOM], S_VERTEX_FOR_MainComponent));
 Distanse := DistanseToQuad(Vertex1, Vertex2, PointToVert3f(Context.CursorPosition())) / 3;
 Alpha := DistanseToAlpha(Distanse);
 Alpha *= VisibleTimer;

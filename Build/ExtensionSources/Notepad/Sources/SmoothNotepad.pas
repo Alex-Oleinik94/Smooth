@@ -120,7 +120,7 @@ constructor TSNotepadApplication.Create(const VContext : ISContext);
 begin
 inherited Create(VContext);
 FNotepad := TSNotepad.Create();
-TSScreen(Context.Screen).CreateChild(FNotepad);
+TSScreen(Context.Screen).CreateInternalComponent(FNotepad);
 FNotepad.SetBounds(0, 50, Render.Width, Render.Height - 50);
 FNotepad.BoundsMakeReal();
 FNotepad.Visible := True;
@@ -324,7 +324,7 @@ begin
 if CountInsets() > 0 then
 	begin
 	Shift := 1;
-	Vertex := SPoint2int32ToVertex3f(GetVertex([SS_LEFT,SS_TOP],S_VERTEX_FOR_PARENT));
+	Vertex := SPoint2int32ToVertex3f(GetVertex([SS_LEFT,SS_TOP],S_VERTEX_FOR_MainComponent));
 	for i := 0 to CountInsets() - 1 do
 		begin
 		if FInsets[i] = ActiveInset() then
@@ -431,7 +431,7 @@ procedure TSNotepad.AddInset(const VInset : TSNInset);
 begin
 SetLength(FInsets, CountInsets() + 1);
 FInsets[High(FInsets)] := VInset;
-CreateChild(VInset);
+CreateInternalComponent(VInset);
 VInset.Owner := Self;
 VInset.SetBounds(0, Skin.Font.FontHeight + 10, Width, Height - (Skin.Font.FontHeight + 10));
 VInset.BoundsMakeReal();

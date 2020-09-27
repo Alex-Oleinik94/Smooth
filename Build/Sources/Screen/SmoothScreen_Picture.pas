@@ -54,8 +54,8 @@ begin
 if (FVisible or (FVisibleTimer > SZero)) and (FImage <> nil) then
 	begin
 	Render.Color4f(1, 1, 1, FVisibleTimer);
-	a := SPoint2int32ToVertex3f(GetVertex([SS_LEFT,SS_TOP], S_VERTEX_FOR_PARENT));
-	b := SPoint2int32ToVertex3f(GetVertex([SS_RIGHT,SS_BOTTOM], S_VERTEX_FOR_PARENT));
+	a := SPoint2int32ToVertex3f(GetVertex([SS_LEFT,SS_TOP], S_VERTEX_FOR_MainComponent));
+	b := SPoint2int32ToVertex3f(GetVertex([SS_RIGHT,SS_BOTTOM], S_VERTEX_FOR_MainComponent));
 	FImage.DrawImageFromTwoVertex2fWithTexPoint(a, b, FSecondPoint, True, S_2D);
 	if FEnableLines then
 		begin

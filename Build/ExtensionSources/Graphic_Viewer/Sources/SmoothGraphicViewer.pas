@@ -435,7 +435,7 @@ end;
 procedure TSGraphViewer_FormClose(Button:TSScreenComponent);
 begin
 TSGraphViewer(Button.FUserPointer1).FNewFunctionButton.Active := True;
-Button.Parent.MarkForDestroy();
+Button.ComponentOwner.MarkForDestroy();
 end;
 
 procedure GoNewGrafic2(Button:TSScreenComponent);
@@ -444,7 +444,7 @@ var
 begin
 with TSGraphViewer(Button.FUserPointer1) do
 	begin
-	EulatuonEdit2 := (Button.Parent.Children[1] as TSScreenEdit);
+	EulatuonEdit2 := (Button.ComponentOwner.InternalComponents[1] as TSScreenEdit);
 	MathGraphics := MathGraphics + 1;
 	ArMathGraphics[MathGraphics - 1].Expression := SStringToPChar(EulatuonEdit2.Caption);
 	View.Import(-15,-15*(Render.Height/Render.Width),15,15*(Render.Height/Render.Width));
@@ -452,13 +452,13 @@ with TSGraphViewer(Button.FUserPointer1) do
 	Changet := True;
 	
 	FNewFunctionButton.Active := True;
-	Button.Parent.MarkForDestroy();
+	Button.ComponentOwner.MarkForDestroy();
 	end;
 end;
 
 procedure mmmComboBoxProcedure1234567(a,b:LongInt;VComboBox:TSScreenComboBox);
 begin with TSGraphViewer(VComboBox.FUserPointer1) do begin
-	(VComboBox.Parent.Children[3] as TSScreenEdit).Active := Boolean(b);
+	(VComboBox.ComponentOwner.InternalComponents[3] as TSScreenEdit).Active := Boolean(b);
 end; end;
 
 
@@ -471,7 +471,7 @@ with TSGraphViewer(Button.FUserPointer1) do
 	Button.Active := False;
 	
 	Form := TSScreenForm.Create();
-	Screen.CreateChild(Form);
+	Screen.CreateInternalComponent(Form);
 	Form.SetMiddleBounds(400,133);
 	Form.BoundsMakeReal();
 	Form.Visible := True;
@@ -481,34 +481,34 @@ with TSGraphViewer(Button.FUserPointer1) do
 	
 	SCreateEdit(Form, 'x*sin(x)', 5,5,380,25, True, True);
 	
-	Form.CreateChild(TSScreenComboBox.Create());
-	Form.LastChild.SetBounds(5,35,300,25);
-	Form.LastChild.Visible:=True;
-	Form.LastChild.Active:=True;
-	(Form.LastChild as TSScreenComboBox).CreateItem('Функция');
-	(Form.LastChild as TSScreenComboBox).CreateItem('Производная функции');
-	(Form.LastChild as TSScreenComboBox).SelectItem := 0;
-	(Form.LastChild as TSScreenComboBox).CallBackProcedure:=TSScreenComboBoxProcedure(@mmmComboBoxProcedure1234567);
-	Form.LastChild.FUserPointer1 := Button.FUserPointer1;
+	Form.CreateInternalComponent(TSScreenComboBox.Create());
+	Form.LastInternalComponent.SetBounds(5,35,300,25);
+	Form.LastInternalComponent.Visible:=True;
+	Form.LastInternalComponent.Active:=True;
+	(Form.LastInternalComponent as TSScreenComboBox).CreateItem('Функция');
+	(Form.LastInternalComponent as TSScreenComboBox).CreateItem('Производная функции');
+	(Form.LastInternalComponent as TSScreenComboBox).SelectItem := 0;
+	(Form.LastInternalComponent as TSScreenComboBox).CallBackProcedure:=TSScreenComboBoxProcedure(@mmmComboBoxProcedure1234567);
+	Form.LastInternalComponent.FUserPointer1 := Button.FUserPointer1;
 	
 	SCreateEdit(Form, '0', SScreenEditTypeNumber, 310,35,75,25, [], True, True);
-	Form.LastChild.Active:=False;
+	Form.LastInternalComponent.Active:=False;
 	
-	Form.CreateChild(TSScreenButton.Create());
-	Form.LastChild.SetBounds(5,65,188,25);
-	Form.LastChild.Visible := True;
-	Form.LastChild.Active  := True;
-	Form.LastChild.Caption := 'Добавить';
-	(Form.LastChild as TSScreenButton).OnChange := TSScreenComponentProcedure(@GoNewGrafic2);
-	Form.LastChild.FUserPointer1 := Button.FUserPointer1;
+	Form.CreateInternalComponent(TSScreenButton.Create());
+	Form.LastInternalComponent.SetBounds(5,65,188,25);
+	Form.LastInternalComponent.Visible := True;
+	Form.LastInternalComponent.Active  := True;
+	Form.LastInternalComponent.Caption := 'Добавить';
+	(Form.LastInternalComponent as TSScreenButton).OnChange := TSScreenComponentProcedure(@GoNewGrafic2);
+	Form.LastInternalComponent.FUserPointer1 := Button.FUserPointer1;
 	
-	Form.CreateChild(TSScreenButton.Create());
-	Form.LastChild.SetBounds(195,65,190,25);
-	Form.LastChild.Visible := True;
-	Form.LastChild.Active  := True;
-	Form.LastChild.Caption := 'Отмена';
-	Form.LastChild.FUserPointer1 := Button.FUserPointer1;
-	(Form.LastChild as TSScreenButton).OnChange := TSScreenComponentProcedure(@TSGraphViewer_FormClose);
+	Form.CreateInternalComponent(TSScreenButton.Create());
+	Form.LastInternalComponent.SetBounds(195,65,190,25);
+	Form.LastInternalComponent.Visible := True;
+	Form.LastInternalComponent.Active  := True;
+	Form.LastInternalComponent.Caption := 'Отмена';
+	Form.LastInternalComponent.FUserPointer1 := Button.FUserPointer1;
+	(Form.LastInternalComponent as TSScreenButton).OnChange := TSScreenComponentProcedure(@TSGraphViewer_FormClose);
 	end;
 end;
 
@@ -519,12 +519,12 @@ SelectPointEnabled:=False;
 Image := SCreateImageFromFile(Context, STextureDirectory + DirectorySeparator + 'IconArea-hover.png');
 
 FNewFunctionButton:=TSScreenButton.Create;
-Screen.CreateChild(FNewFunctionButton);
-Screen.LastChild.SetBounds(Render.Width-140,Render.Height-28,130,23);
-Screen.LastChild.Visible:=True;
-Screen.LastChild.Caption:='Добавить функцию';
-Screen.LastChild.OnChange:=TSScreenComponentProcedure(@GoNewFunction);
-Screen.LastChild.FUserPointer1:=Self;
+Screen.CreateInternalComponent(FNewFunctionButton);
+Screen.LastInternalComponent.SetBounds(Render.Width-140,Render.Height-28,130,23);
+Screen.LastInternalComponent.Visible:=True;
+Screen.LastInternalComponent.Caption:='Добавить функцию';
+Screen.LastInternalComponent.OnChange:=TSScreenComponentProcedure(@GoNewFunction);
+Screen.LastInternalComponent.FUserPointer1:=Self;
 end;
 
 destructor TSGraphViewer.Destroy;

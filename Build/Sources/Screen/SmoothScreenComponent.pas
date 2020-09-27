@@ -49,7 +49,7 @@ type
 			public
 		function CursorOverComponent():TSBoolean;virtual;
 			public
-		procedure CompleteChild(const VChild : TSScreenCustomComponent); override;
+		procedure CompleteInternalComponent(const VInternalComponent : TSScreenCustomComponent); override;
 			public
 		FDrawClass:TSPaintableObject;
 			public
@@ -99,7 +99,7 @@ end;
 
 procedure TSComponent.UpDateSkin();
 begin
-if (FSkin <> nil) and ((FParent = nil) or ((FParent <> nil) and (FParent is TSComponent) and ((FParent as TSComponent).Skin <> FSkin))) then
+if (FSkin <> nil) and ((FComponentOwner = nil) or ((FComponentOwner <> nil) and (FComponentOwner is TSComponent) and ((FComponentOwner as TSComponent).Skin <> FSkin))) then
 	Skin.UpDate();
 end;
 
@@ -116,7 +116,7 @@ end;
 
 procedure TSComponent.DestroySkin();
 begin
-if (FSkin <> nil) and ((FParent = nil) or ((FParent <> nil) and (FParent is TSComponent) and ((FParent as TSComponent).Skin <> FSkin))) then
+if (FSkin <> nil) and ((FComponentOwner = nil) or ((FComponentOwner <> nil) and (FComponentOwner is TSComponent) and ((FComponentOwner as TSComponent).Skin <> FSkin))) then
 	SKill(FSkin);
 end;
 
@@ -127,11 +127,11 @@ SKill(FDrawClass);
 DestroySkin();
 end;
 
-procedure TSComponent.CompleteChild(const VChild : TSScreenCustomComponent);
+procedure TSComponent.CompleteInternalComponent(const VInternalComponent : TSScreenCustomComponent);
 var
 	Component : TSComponent;
 begin
-Component := VChild as TSComponent;
+Component := VInternalComponent as TSComponent;
 if (Component <> nil) then
 	begin
 	if ContextAssigned() then
@@ -156,7 +156,7 @@ end;
 
 procedure TSComponent.UpDate();
 begin
-UpgradeTimers(Context.ElapsedTime);
+UpdateTimers(Context.ElapsedTime);
 UpDateSkin();
 inherited;
 end;

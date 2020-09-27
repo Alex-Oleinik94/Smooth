@@ -715,7 +715,7 @@ if (KeysPressed(S_CTRL_KEY)) and
    (KeyPressedChar = 'O') and
    TSEngineConfigurationPanel.CanCreate(FScreen) then
 	begin
-	FScreen.CreateChild(TSEngineConfigurationPanel.Create()).Resize();
+	FScreen.CreateInternalComponent(TSEngineConfigurationPanel.Create()).Resize();
 	SetKey(SNullKey, 0);
 	end;
 

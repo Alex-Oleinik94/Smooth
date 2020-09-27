@@ -194,7 +194,7 @@ constructor TSExample13.Create(const VContext : ISContext);
 procedure CreateButton(var VButton : TSScreenButton; const x, y : TSLongWord; const VCaption : TSString; const VProc : Pointer);inline;
 begin
 VButton := TSScreenButton.Create();
-Screen.CreateChild(VButton);
+Screen.CreateInternalComponent(VButton);
 VButton.Skin := VButton.Skin.CreateDependentSkinWithAnotherFont(FFont);
 VButton.SetBounds(x,y,100,FFont.FontHeight+3);
 VButton.BoundsMakeReal();

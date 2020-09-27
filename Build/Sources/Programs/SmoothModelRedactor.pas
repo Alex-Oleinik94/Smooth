@@ -58,8 +58,8 @@ procedure ModelRedactorButtonFormEsc(Button : TSScreenButton);
 begin
 with TSModelRedactor(Button.FUserPointer1) do
 	begin
-	Button.Parent.Visible:=False;
-	Button.Parent.Active :=False;
+	Button.ComponentOwner.Visible:=False;
+	Button.ComponentOwner.Active :=False;
 	end;
 end;
 
@@ -76,8 +76,8 @@ with TSModelRedactor(Button.FUserPointer1) do
 	if Suc then
 		begin
 		LoadToVBO();
-		Button.Parent.Visible:=False;
-		Button.Parent.Active :=False;
+		Button.ComponentOwner.Visible:=False;
+		Button.ComponentOwner.Active :=False;
 		end;
 	end;
 end;
@@ -143,7 +143,7 @@ var
 	Edit : TSScreenEdit;
 begin
 Form := TSScreenForm.Create();
-Screen.CreateChild(Form);
+Screen.CreateInternalComponent(Form);
 Form.SetBounds((Context.Width - 600 ) div 2, (Context.Height - 300) div 2,600,100);
 Form.Caption := 'Загрузка обьекта';
 Form.FUserPointer1:=Self;
@@ -153,7 +153,7 @@ Edit := SCreateEdit(Form, './../data\tron/motoBike.3ds' {SModelsDirectory+Slash}
 Edit.FUserPointer2:=Edit;
 
 EscButton:=TSScreenButton.Create();
-Form.CreateChild(EscButton);
+Form.CreateInternalComponent(EscButton);
 EscButton.SetBounds(375,35,100,24);
 EscButton.Caption:='Отмена';
 EscButton.OnChange:=TSScreenComponentProcedure(@ModelRedactorButtonFormEsc);
@@ -161,7 +161,7 @@ EscButton.FUserPointer1:=Self;
 EscButton.FUserPointer2:=Edit;
 
 GoButton:=TSScreenButton.Create();
-Form.CreateChild(GoButton);
+Form.CreateInternalComponent(GoButton);
 GoButton.SetBounds(485,35,100,24);
 GoButton.Caption:='Загрузить';
 GoButton.OnChange:=TSScreenComponentProcedure(@ModelRedactorButtonFormGo);

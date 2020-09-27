@@ -167,53 +167,53 @@ InitProjectionComboBox(Render.Width-250-90-125-155,5,150,30,[SAnchRight]).Bounds
 InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]).BoundsMakeReal();
 
 FComboBox2:=TSScreenComboBox.Create;
-Screen.CreateChild(FComboBox2);
-Screen.LastChild.SetBounds(Render.Width-250,40,230,30);
-Screen.LastChild.Anchors:=[SAnchRight];
-(Screen.LastChild as TSScreenComboBox).CreateItem('Нормали и Цвета');
-(Screen.LastChild as TSScreenComboBox).CreateItem('Только Нормали');
-(Screen.LastChild as TSScreenComboBox).CreateItem('Только Цвета');
-(Screen.LastChild as TSScreenComboBox).CreateItem('Ваще Ничего');
-(Screen.LastChild as TSScreenComboBox).CallBackProcedure:=TSScreenComboBoxProcedure(@FractalMengerSpongeReleaseComboBoxProcedure2);
-(Screen.LastChild as TSScreenComboBox).SelectItem:=0;
-Screen.LastChild.FUserPointer1:=Self;
-Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsMakeReal();
+Screen.CreateInternalComponent(FComboBox2);
+Screen.LastInternalComponent.SetBounds(Render.Width-250,40,230,30);
+Screen.LastInternalComponent.Anchors:=[SAnchRight];
+(Screen.LastInternalComponent as TSScreenComboBox).CreateItem('Нормали и Цвета');
+(Screen.LastInternalComponent as TSScreenComboBox).CreateItem('Только Нормали');
+(Screen.LastInternalComponent as TSScreenComboBox).CreateItem('Только Цвета');
+(Screen.LastInternalComponent as TSScreenComboBox).CreateItem('Ваще Ничего');
+(Screen.LastInternalComponent as TSScreenComboBox).CallBackProcedure:=TSScreenComboBoxProcedure(@FractalMengerSpongeReleaseComboBoxProcedure2);
+(Screen.LastInternalComponent as TSScreenComboBox).SelectItem:=0;
+Screen.LastInternalComponent.FUserPointer1:=Self;
+Screen.LastInternalComponent.Visible:=True;
+Screen.LastInternalComponent.BoundsMakeReal();
 
 FComboBox1:=TSScreenComboBox.Create();
-Screen.CreateChild(FComboBox1);
-Screen.LastChild.SetBounds(Render.Width-250,5,230,30);
-Screen.LastChild.Anchors:=[SAnchRight];
-(Screen.LastChild as TSScreenComboBox).CreateItem('Губка Менгера');
-(Screen.LastChild as TSScreenComboBox).CreateItem('Звездочка');
-(Screen.LastChild as TSScreenComboBox).CreateItem('Снежинка (beta)');
-(Screen.LastChild as TSScreenComboBox).CallBackProcedure:=TSScreenComboBoxProcedure(@FractalMengerSpongeReleaseComboBoxProcedure);
-(Screen.LastChild as TSScreenComboBox).SelectItem:=1; //because strange bug
-Screen.LastChild.FUserPointer1:=Self;
-Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsMakeReal();
+Screen.CreateInternalComponent(FComboBox1);
+Screen.LastInternalComponent.SetBounds(Render.Width-250,5,230,30);
+Screen.LastInternalComponent.Anchors:=[SAnchRight];
+(Screen.LastInternalComponent as TSScreenComboBox).CreateItem('Губка Менгера');
+(Screen.LastInternalComponent as TSScreenComboBox).CreateItem('Звездочка');
+(Screen.LastInternalComponent as TSScreenComboBox).CreateItem('Снежинка (beta)');
+(Screen.LastInternalComponent as TSScreenComboBox).CallBackProcedure:=TSScreenComboBoxProcedure(@FractalMengerSpongeReleaseComboBoxProcedure);
+(Screen.LastInternalComponent as TSScreenComboBox).SelectItem:=1; //because strange bug
+Screen.LastInternalComponent.FUserPointer1:=Self;
+Screen.LastInternalComponent.Visible:=True;
+Screen.LastInternalComponent.BoundsMakeReal();
 
 FButtonDepthPlus:=TSScreenButton.Create();
-Screen.CreateChild(FButtonDepthPlus);
-Screen.LastChild.SetBounds(Render.Width-250-30,5,20,30);
-Screen.LastChild.Anchors:=[SAnchRight];
-Screen.LastChild.Caption:='+';
-Screen.LastChild.FUserPointer1:=Self;
+Screen.CreateInternalComponent(FButtonDepthPlus);
+Screen.LastInternalComponent.SetBounds(Render.Width-250-30,5,20,30);
+Screen.LastInternalComponent.Anchors:=[SAnchRight];
+Screen.LastInternalComponent.Caption:='+';
+Screen.LastInternalComponent.FUserPointer1:=Self;
 FButtonDepthPlus.OnChange:=TSScreenComponentProcedure(@MengerSpongeButtonDepthPlusOnChange);
-Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsMakeReal();
+Screen.LastInternalComponent.Visible:=True;
+Screen.LastInternalComponent.BoundsMakeReal();
 
 FLabelDepth := SCreateLabel(Screen, '0', Render.Width-250-60,5,20,30, [SAnchRight], True, True, Self);
 
 FButtonDepthMinus:=TSScreenButton.Create();
-Screen.CreateChild(FButtonDepthMinus);
-Screen.LastChild.SetBounds(Render.Width-250-90,5,20,30);
-Screen.LastChild.Anchors:=[SAnchRight];
-Screen.LastChild.Caption:='-';
+Screen.CreateInternalComponent(FButtonDepthMinus);
+Screen.LastInternalComponent.SetBounds(Render.Width-250-90,5,20,30);
+Screen.LastInternalComponent.Anchors:=[SAnchRight];
+Screen.LastInternalComponent.Caption:='-';
 FButtonDepthMinus.OnChange:=TSScreenComponentProcedure(@MengerSpongeButtonDepthMinusOnChange);
-Screen.LastChild.FUserPointer1:=Self;
-Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsMakeReal();
+Screen.LastInternalComponent.FUserPointer1:=Self;
+Screen.LastInternalComponent.Visible:=True;
+Screen.LastInternalComponent.BoundsMakeReal();
 
 FLabelDepthCaption := SCreateLabel(Screen, 'Итерация:', Render.Width-250-90-125,5,115,30, [SAnchRight], True, True, Self);
 

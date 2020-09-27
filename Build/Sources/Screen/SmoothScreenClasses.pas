@@ -173,7 +173,7 @@ function SCreateButton(const Parent : TSScreenCustomComponent; const IsVisible :
 begin
 Result := TSScreenButton.Create();
 if Parent <> nil then
-	Parent.CreateChild(Result);
+	Parent.CreateInternalComponent(Result);
 Result.Visible := IsVisible;
 Result.UserPointer := InterfaceData;
 end;
@@ -223,7 +223,7 @@ function SCreateComboBox(const Parent : TSScreenCustomComponent; const IsVisible
 begin
 Result := TSScreenComboBox.Create();
 if Parent <> nil then
-	Parent.CreateChild(Result);
+	Parent.CreateInternalComponent(Result);
 Result.Visible := IsVisible;
 Result.UserPointer := InterfaceData;
 end;
@@ -253,7 +253,7 @@ function SCreatePicture(const Parent : TSScreenCustomComponent; const IsVisible 
 begin
 Result := TSScreenPicture.Create();
 if (Parent <> nil) then
-	Parent.CreateChild(Result);
+	Parent.CreateInternalComponent(Result);
 Result.Visible := IsVisible;
 Result.UserPointer := InterfaceData;
 end;
@@ -314,7 +314,7 @@ function SCreateEdit(const Parent : TSScreenCustomComponent; const IsVisible : T
 begin
 Result := TSScreenEdit.Create();
 if (Parent <> nil) then
-	Parent.CreateChild(Result);
+	Parent.CreateInternalComponent(Result);
 Result.Visible := IsVisible;
 Result.UserPointer := InterfaceData;
 end;
@@ -378,7 +378,7 @@ function SCreatePanel(const Parent : TSScreenCustomComponent; const IsVisible : 
 begin
 Result := TSScreenPanel.Create();
 if Parent <> nil then
-	Parent.CreateChild(Result);
+	Parent.CreateInternalComponent(Result);
 Result.Visible := IsVisible;
 Result.UserPointer := InterfaceData;
 end;
@@ -468,7 +468,7 @@ function SCreateLabel(const Parent : TSScreenCustomComponent; const LabelCaption
 begin
 Result := TSScreenLabel.Create();
 if Parent <> nil then
-	Parent.CreateChild(Result);
+	Parent.CreateInternalComponent(Result);
 Result.Caption := LabelCaption;
 Result.Visible := IsVisible;
 Result.UserPointer := InterfaceData;

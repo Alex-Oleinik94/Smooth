@@ -58,7 +58,7 @@ if (FConnectionHandler.LogonConnectionsNumber = 0) and (FLogonConnectionPanel <>
 else if (FConnectionHandler.LogonConnectionsNumber > 0) and (FLogonConnectionPanel = nil) then
 	begin
 	FLogonConnectionPanel := TSWorldOfWarcraftWatcherLogonConnectionPanel.Create();
-	Screen.CreateChild(FLogonConnectionPanel);
+	Screen.CreateInternalComponent(FLogonConnectionPanel);
 	FLogonConnectionPanel.SetBounds(0, 0, Screen.Width, Screen.Height);
 	FLogonConnectionPanel.BoundsMakeReal();
 	FLogonConnectionPanel.Visible := True;

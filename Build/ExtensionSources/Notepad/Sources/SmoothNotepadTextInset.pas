@@ -453,7 +453,7 @@ if FOwner <> nil then
 	Visible := FOwner.ActiveInset() = Self;
 if Visible then
 	begin
-	UpgradeTimer(False, FScrolTimer, 1, 3);
+	UpdateTimer(False, FScrolTimer, 1, 3);
 	if CursorOverComponent or FCursorOverText or FCursorOverTextPrev then
 		ProcessCursor();
 	ProcessTyping();
@@ -517,7 +517,7 @@ var
 begin
 MaxLinesShift := Skin.Font.StringLength(SStr(CountLines())) + 5;
 ii := Trunc(FBegin);
-Vertex := SPoint2int32ToVertex3f(GetVertex([SS_LEFT,SS_TOP],S_VERTEX_FOR_PARENT));
+Vertex := SPoint2int32ToVertex3f(GetVertex([SS_LEFT,SS_TOP],S_VERTEX_FOR_MainComponent));
 Shift := Abs(FBegin - ii);
 Vertex.y -= Shift * Skin.Font.FontHeight;
 for i := ii to Trunc(FEnd) + 1 do
@@ -599,8 +599,8 @@ var
 	VertexTopLeft, VertexBottomLeft : TSVertex3f;
 	AreaAll : TSFloat;
 begin
-VertexTop := SPoint2int32ToVertex3f(GetVertex([SS_RIGHT,SS_TOP],S_VERTEX_FOR_PARENT));
-VertexBottom := SPoint2int32ToVertex3f(GetVertex([SS_RIGHT,SS_BOTTOM],S_VERTEX_FOR_PARENT));
+VertexTop := SPoint2int32ToVertex3f(GetVertex([SS_RIGHT,SS_TOP],S_VERTEX_FOR_MainComponent));
+VertexBottom := SPoint2int32ToVertex3f(GetVertex([SS_RIGHT,SS_BOTTOM],S_VERTEX_FOR_MainComponent));
 VertexBottomLeft := VertexBottom; VertexBottomLeft.x -= ScrollBarWidth * FScrolTimer;
 VertexTopLeft := VertexTop; VertexTopLeft.x -= ScrollBarWidth * FScrolTimer;
 AreaAll := CountLines();

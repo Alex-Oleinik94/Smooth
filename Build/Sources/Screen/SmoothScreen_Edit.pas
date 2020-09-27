@@ -387,9 +387,9 @@ if CursorOver and ReqursiveActive and Visible then
 if PreviousCursorOver and (not CursorOver) then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle = SC_IBEAM)) then
 	Context.Cursor := TSCursor.Create(SC_NORMAL);
-UpgradeTimer(FNowChanget,FNowChangetTimer,3);
-UpgradeTimer(FTextComplite,FTextCompliteTimer,1);
-UpgradeTimer(FDrawCursor,FDrawCursorTimer,4);
+UpdateTimer(FNowChanget,FNowChangetTimer,3);
+UpdateTimer(FTextComplite,FTextCompliteTimer,1);
+UpdateTimer(FDrawCursor,FDrawCursorTimer,4);
 end;
 
 constructor TSEdit.Create;

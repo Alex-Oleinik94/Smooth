@@ -24,7 +24,7 @@ type
 	TSScreenSkinColors = object
 			public
 		FNormal   : TSScreenSkinFrameColor;
-		FClick    : TSScreenSkinFrameColor;
+		FClick    : TSScreenSkinFrameColor; // dinamic change colour O_O
 		FDisabled : TSScreenSkinFrameColor;
 		FOver     : TSScreenSkinFrameColor;
 		FText     : TSScreenSkinFrameColor;
@@ -598,7 +598,7 @@ if (ActiveTimer < 1 - SZero) then
 		FColors.FDisabled.FSecond.WithAlpha(0.7 * VisibleTimer * (1-ActiveTimer)) * 0.8);
 if  (ActiveTimer > SZero) and 
 	(ClickTimer > SZero) and
-	(OpenTimer < 1 - SZero) and
+	(1 - OpenTimer > SZero) and
 	(VisibleTimer > SZero) then
 	PaintQuad(Location,
 		FColors.FClick.FFirst.WithAlpha(0.4 * VisibleTimer * ClickTimer * (1-OpenTimer) * ActiveTimer),
@@ -753,14 +753,14 @@ end;
 
 procedure TSScreenSkin.PaintForm(constref Form : ISForm);
 var
-	Location, ChildLocation, TextLocation : TSComponentLocation;
+	Location, InternalComponentLocation, TextLocation : TSComponentLocation;
 	Borders : TSComponentBordersSize;
 	Active, Visible : TSBool;
 	ActiveTimer, VisibleTimer : TSScreenTimer;
 	FrameColor : TSScreenSkinFrameColor;
 begin
 Location := Form.Location;
-ChildLocation := Form.ChildLocation;
+InternalComponentLocation := Form.InternalComponentLocation;
 Borders := Form.BordersSize;
 TextLocation.Position := Location.Position;
 TextLocation.Width := Location.Width;
@@ -774,7 +774,7 @@ FrameColor := FColors.FNormal;
 if (VisibleTimer > SZero) and (ActiveTimer > SZero) then
 	SRoundWindowQuad(Render,
 		Location.FloatPosition, Location.FloatPositionAndSize,
-		ChildLocation.FloatPosition, ChildLocation.FloatPositionAndSize,
+		InternalComponentLocation.FloatPosition, InternalComponentLocation.FloatPositionAndSize,
 		Borders.Left, Borders.Left,
 		10,
 		FrameColor.FFirst .WithAlpha(0.4 * VisibleTimer * ActiveTimer),

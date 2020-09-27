@@ -98,7 +98,7 @@ constructor TSNotepadFileOpenerDrawable.Create(const VContext : ISContext);
 begin
 inherited;
 FNotepad := TSNotepad.Create();
-Context.Screen.CreateChild(FNotepad);
+Context.Screen.CreateInternalComponent(FNotepad);
 FNotepad.SetBounds(0, 0, Render.Width, Render.Height);
 FNotepad.BoundsMakeReal();
 FNotepad.Visible := True;

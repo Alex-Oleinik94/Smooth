@@ -34,8 +34,14 @@ type
 		FBodyColor : TSColor4f;
 			protected
 		procedure OverItem(const Index : TSUInt32); virtual;
+		procedure ClearItemOver();
 		procedure SelectItemFromIndex(const Index : TSInt32); virtual;
 		procedure SelectingItem(const ItemIndex : TSInt32); virtual;
+		function GetItems() : PSComboBoxItem;
+		function GetItemsCount() : TSUInt32;
+		function GetLinesCount() : TSUInt32;
+		procedure MouseWheelSelecting();
+		procedure CursorSelecting();
 			public
 		procedure UpDate();override;
 		procedure Paint(); override;
@@ -43,12 +49,8 @@ type
 			public
 		procedure CreateItem(const ItemCaption:TSCaption;const ItemImage:TSImage = nil;const FIdent:TSInt32 = -1; const VActive : TSBoolean = True);
 		procedure ClearItems();
-		function GetItems() : PSComboBoxItem;
-		function GetItemsCount() : TSUInt32;
-		function GetLinesCount() : TSUInt32;
 		function GetSelectedItem() : PSComboBoxItem;
 		function GetFirstItemIndex() : TSUInt32;
-		procedure MouseWheelSelecting();
 			public
 		property SelectedItemIndex : LongInt  read FSelectedItemIndex write SelectItemFromIndex;
 		property SelectItem        : LongInt  read FSelectedItemIndex write SelectItemFromIndex;
@@ -83,13 +85,22 @@ if ItemsCount > 0 then
 		FItems[i].Selected := Index = i;
 end;
 
-procedure TSComboBox.OverItem(const Index : TSUInt32);
+procedure TSComboBox.ClearItemOver();
 var
-	i : TSUInt32;
+	Index : TSUInt32;
 begin
 if ItemsCount > 0 then
-	for i := 0 to ItemsCount - 1 do
-		FItems[i].Over := Index = i;
+	for Index := 0 to ItemsCount - 1 do
+		FItems[Index].Over := False;
+end;
+
+procedure TSComboBox.OverItem(const Index : TSUInt32);
+var
+	Index2 : TSUInt32;
+begin
+if ItemsCount > 0 then
+	for Index2 := 0 to ItemsCount - 1 do
+		FItems[Index2].Over := Index = Index2;
 end;
 
 function TSComboBox.GetItems() : PSComboBoxItem;
@@ -189,33 +200,38 @@ if (NewSelectedItemIndex <> -1) then
 	SelectingItem(NewSelectedItemIndex);
 end;
 
-procedure TSComboBox.UpDate();
+procedure TSComboBox.CursorSelecting();
 var
-	i : TSMaxEnum;
+	Index : TSMaxEnum;
+begin
+for Index := 0 to LinesCount - 1 do
+	if  (Context.CursorPosition(SNowCursorPosition).y>=FRealPosition.y+FRealLocation.Height*Index*FOpenTimer) and
+		(Context.CursorPosition(SNowCursorPosition).y<=FRealPosition.y+FRealLocation.Height*(Index+1)*FOpenTimer) and
+		(((FMaxLines < Length(FItems)) and
+		(Context.CursorPosition(SNowCursorPosition).x<=FRealPosition.x+Width-FScrollWidth)) or (FMaxLines>=Length(FItems))) and
+		FItems[Index].Active then
+			begin
+			FCursorOverThisItem := FFirstScrollItem + Index;
+			OverItem(FCursorOverThisItem);
+			if ((Context.CursorKeyPressed=SLeftCursorButton) and (Context.CursorKeyPressedType=SUpKey)) then
+				begin
+				FOpen := False;
+				SelectingItem(FCursorOverThisItem);
+				Context.SetCursorKey(SNullKey, SNullCursorButton);
+				end;
+			break;
+			end;
+end;
+
+procedure TSComboBox.UpDate();
 begin
 inherited;
 {$IFDEF SCREEN_DEBUG}
 WriteLn('TSComboBox__UpDate() : Begining');
 	{$ENDIF}
-if CursorOver and Active and Visible then
+if UpdateAvailable() then
 	begin
-	if (not FOpen) then
-		begin
-		if ((Context.CursorKeyPressed=SLeftCursorButton) and (Context.CursorKeyPressedType=SUpKey)) then
-			begin
-			FOpen := True;
-			Context.SetCursorKey(SNullKey, SNullCursorButton);
-			MakePriority();
-			end
-		else
-			FCursorOverThisItem := -1;
-		if (Context.CursorWheel <> SNullCursorWheel) then
-			begin
-			MouseWheelSelecting();
-			Context.SetCursorWheel(SNullCursorWheel);
-			end;
-		end
-	else if (Context.CursorWheel<>SNullCursorWheel) then
+	if FOpen and (Context.CursorWheel<>SNullCursorWheel) then
 		begin
 		if Context.CursorWheel=SUpCursorWheel then
 			begin
@@ -229,34 +245,43 @@ if CursorOver and Active and Visible then
 			end;
 		Context.SetCursorWheel(SNullCursorWheel);
 		end;
+	if (not FOpen) then
+		begin
+		if (Context.CursorKeyPressed=SLeftCursorButton) then
+			begin
+			if (Context.CursorKeyPressedType=SDownKey) then
+				begin
+				FDownMouseClick := True;
+				Context.SetCursorKey(SNullKey, SNullCursorButton);
+				end;
+			if (Context.CursorKeyPressedType=SUpKey) and FDownMouseClick then
+				begin
+				FOpen := True;
+				FDownMouseClick := False;
+				Context.SetCursorKey(SNullKey, SNullCursorButton);
+				MakePriority();
+				end
+			else
+				FCursorOverThisItem := -1;
+			end;
+		if (Context.CursorWheel <> SNullCursorWheel) then
+			begin
+			MouseWheelSelecting();
+			Context.SetCursorWheel(SNullCursorWheel);
+			end;
+		end;
 	end
+else if FDownMouseClick and ((not Active) or (not Visible) or (not (Context.CursorKeyPressed = SNullCursorButton))) then
+	FDownMouseClick := False
 else if FOpen and (((not CursorOver) and (Context.CursorKeyPressed <> SNullCursorButton)) or (not Active) or (not Visible))  then
 	begin
 	FOpen := False;
 	ClearPriority();
 	end;
-if FOpen and CursorOver and Active and Visible then
-	for i := 0 to LinesCount - 1 do
-		if  (Context.CursorPosition(SNowCursorPosition).y>=FRealPosition.y+FRealLocation.Height*i*FOpenTimer) and
-			(Context.CursorPosition(SNowCursorPosition).y<=FRealPosition.y+FRealLocation.Height*(i+1)*FOpenTimer) and
-			(((FMaxLines < Length(FItems)) and
-			(Context.CursorPosition(SNowCursorPosition).x<=FRealPosition.x+Width-FScrollWidth)) or (FMaxLines>=Length(FItems))) and
-			FItems[i].Active then
-				begin
-				FCursorOverThisItem := FFirstScrollItem + i;
-				OverItem(FCursorOverThisItem);
-				if ((Context.CursorKeyPressed=SLeftCursorButton) and (Context.CursorKeyPressedType=SUpKey)) then
-					begin
-					FOpen := False;
-					SelectingItem(FCursorOverThisItem);
-					Context.SetCursorKey(SNullKey, SNullCursorButton);
-					end;
-				break;
-				end
-		else
-			OverItem(ItemsCount)
+if UpdateAvailable() and FOpen then
+	CursorSelecting()
 else
-	OverItem(ItemsCount);
+	ClearItemOver();
 {$IFDEF SCREEN_DEBUG}
 WriteLn('TSComboBox__UpDate() : End');
 	{$ENDIF}
