@@ -30,7 +30,6 @@ BmpStream := TMemoryStream.Create();
 SaveBMP(_BitMap, BmpStream);
 BmpStream.Position := 0;
 SaveJPEG(BmpStream, _Stream);
-BmpStream.Destroy();
 SKill(BmpStream);
 end;
 
@@ -42,7 +41,7 @@ Stream := TMemoryStream.Create();
 LoadJPEG(_Stream, Stream, True, 0, nil);
 Stream.Position := 0;
 LoadBMP(Stream, _BitMap);
-Stream.Destroy();
+SKill(Stream);
 end;
 
 end.

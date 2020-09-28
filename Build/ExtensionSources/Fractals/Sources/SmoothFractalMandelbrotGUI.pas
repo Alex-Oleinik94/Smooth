@@ -17,6 +17,7 @@ uses
 	,SmoothFont
 	,SmoothComplex
 	,SmoothDateTime
+	,SmoothLists
 	;
 
 type
@@ -54,7 +55,7 @@ type
 		
 		SelectZNimberFlag:Boolean;
 		
-		ButtonSelectZNumber:TSScreenButton;
+		ButtonSelectSingularPoint:TSScreenButton;
 		
 		MandelbrotInitialized:Boolean;
 		
@@ -62,7 +63,7 @@ type
 		Changet : TSBoolean;
 		
 		FStartPanel : TSScreenPanel;
-		VtxForZN : TSVertex2f;
+		VectorBySingularPoint : TSVertex2f;
 		
 		Procent : TSFloat64;
 		iiiC : TSUInt32;
@@ -87,22 +88,22 @@ type
 		FBezierCurveKadrProgressBar : TSScreenProgressBar;
 		
 		FEnablePictureStripAddingPoints : TSBoolean;
-		FKomponentsNowOffOn : TSBoolean;
+		FIsComponentsActive : TSBoolean;
 		FBezierNowSelectPoint : TSMaxEnum;
-		FNowRenderitsiaVideo : TSBoolean;
+		FRenderVideo : TSBoolean;
 		
 		FVideoBuffer : TSString;
 		
 		FNowKadr : TSUInt64;
 		FAllKadrs : TSUInt64;
 		
-		FCurveArPoints : packed array of TSUInt8;
+		FCurveArPoints : TSUInt8List;
 		FCurveSelectPoint:Int64;
 		
 		FCurvePointPanel : TSScreenPanel;
 		FCurvePCB : TSScreenComboBox;
 		FCurveInfoLbl : TSScreenLabel;
-		FCurveBeginDataTime : TSDateTime;
+		FCurveBeginDateTime : TSDateTime;
 		
 		FTNRF:TSFont;
 		
@@ -113,7 +114,7 @@ type
 		procedure OffComponents();inline;
 		procedure OnComponents();inline;
 		procedure InitMandelbrot();inline;
-		function GetPointOnPosOnMand(const Point:TSPoint2int32):TSComplexNumber;inline;
+		function PointOfASetByCoordinates(const Point:TSPoint2int32):TSComplexNumber;inline;
 		procedure UpDateLabelCoordCaption();inline;
 		end;
 
@@ -129,7 +130,6 @@ uses
 	,SmoothBaseUtils
 	,SmoothContextUtils
 	,SmoothScreen_Edit
-	,SmoothLists
 	,SmoothImageFormatDeterminer
 	,SmoothBitMapUtils
 	,SmoothRenderBase
@@ -160,7 +160,7 @@ var
 	A:TSVertex3f;
 	i:TSMaxEnum;
 	S:Extended;
-	PC:TSVertex2f;
+	PC:TSComplexNumber;
 begin
 if (FBezierCurve<>nil) and (FBezierCurve.VertexQuantity>0) then
 	begin
@@ -176,10 +176,10 @@ if (FBezierCurve<>nil) and (FBezierCurve.VertexQuantity>0) then
 		Render.Vertex2f(A.x-S,A.y+S);
 		Render.Vertex2f(A.x-S,A.y-S);
 		Render.Vertex2f(A.x+S,A.y-S);
-		if not FNowRenderitsiaVideo then
+		if not FRenderVideo then
 		if (Context.CursorKeyPressed=SLeftCursorButton) and (Context.CursorKeyPressedType=SDownKey) then
 			begin
-			PC:=GetPointOnPosOnMand(Context.CursorPosition(SNowCursorPosition));
+			PC:=PointOfASetByCoordinates(Context.CursorPosition(SNowCursorPosition));
 			if (abs(PC.x-A.x)<(S)) and ((abs(PC.y-A.y)<(S))) and (FCurveSelectPoint<>i) then
 				begin
 				FCurveSelectPoint:=i;
@@ -215,9 +215,9 @@ var
 	Point: TSPoint2int32;
 begin
 Point:=Context.CursorPosition(SNowCursorPosition);
-LabelCoord.Caption:=SStringToPChar('( '+SFloatToString(Mandelbrot.ZNumber.x,3)+' ; '+SFloatToString(Mandelbrot.ZNumber.y,3)+' ) , ( '+
-	SFloatToString(GetPointOnPosOnMand(Point).x,7)+' ; '
-	+SFloatToString(GetPointOnPosOnMand(Point).y,7)+' )');
+LabelCoord.Caption:=SStringToPChar('( '+SFloatToString(Mandelbrot.SingularPoint.x,3)+' ; '+SFloatToString(Mandelbrot.SingularPoint.y,3)+' ) , ( '+
+	SFloatToString(PointOfASetByCoordinates(Point).x,7)+' ; '
+	+SFloatToString(PointOfASetByCoordinates(Point).y,7)+' )');
 end;
 
 
@@ -231,8 +231,8 @@ TypeComboBox.Visible:=False;
 TypeComboBox.Active:=False;
 ZumButton.Visible:=False;
 ZumButton.Active:=False;
-ButtonSelectZNumber.Visible:=False;
-ButtonSelectZNumber.Active:=False;
+ButtonSelectSingularPoint.Visible:=False;
+ButtonSelectSingularPoint.Active:=False;
 FButtonEnableCurve.Visible:=False;
 FButtonEnableCurve.Active:=False;
 StepenComboBox.Visible:=False;
@@ -241,14 +241,14 @@ QuantityRecComboBox.Visible:=False;
 QuantityRecComboBox.Active:=False;
 FBezierCurvePanel.Active:=False;
 FBezierCurvePanel.Visible:=False;
-FKomponentsNowOffOn:=False;
 FCurvePointPanel.Visible:=False;
 FCurvePointPanel.Active:=False;
+FIsComponentsActive:=False;
 end;
 
 procedure TSFractalMandelbrotGUI.OnComponents();inline;
 begin
-FKomponentsNowOffOn:=True;
+FIsComponentsActive:=True;
 ScreenshotPanel.Visible:=not FEnablePictureStripPanel;
 ScreenshotPanel.Active:=not FEnablePictureStripPanel;
 FBezierCurvePanel.Active:=FEnablePictureStripPanel;
@@ -259,8 +259,8 @@ TypeComboBox.Visible:=True;
 TypeComboBox.Active:=True;
 ZumButton.Visible:=True;
 ZumButton.Active:=True;
-ButtonSelectZNumber.Visible:=True;
-ButtonSelectZNumber.Active:=True;
+ButtonSelectSingularPoint.Visible:=True;
+ButtonSelectSingularPoint.Active:=True;
 FButtonEnableCurve.Visible:=True;
 FButtonEnableCurve.Active:=True;
 StepenComboBox.Visible:=True;
@@ -312,7 +312,10 @@ procedure TypeComboBoxProcedure(a,b:LongInt;Button:TSScreenComponent);
 begin
 with TSFractalMandelbrotGUI(Button.FUserPointer1) do
 	begin
-	Mandelbrot.ZMandelbrot:=Boolean(b);
+	case b of
+	0 : Mandelbrot.FractalType := SJuliaSet;
+	1 : Mandelbrot.FractalType := SMandelbrotSet;
+	end;
 	if a<>b then
 		begin
 		Changet:=True;
@@ -334,7 +337,7 @@ with TSFractalMandelbrotGUI(Button.FUserPointer1) do
 	end;
 end;
 
-procedure ButtonSelectZNumberOnChange(Button:TSScreenButton);
+procedure ButtonSelectSingularPointOnChange(Button:TSScreenButton);
 begin
 with TSFractalMandelbrotGUI(Button.FUserPointer1) do
 	begin
@@ -347,7 +350,7 @@ procedure QuantityRecComboBoxProcedure(a,b:LongInt;aaa:TSScreenComponent);
 BEGIN
 with TSFractalMandelbrotGUI(aaa.FUserPointer1) do
 	begin
-	Mandelbrot.ZQuantityRecursion:=QuantityRecComboBox.Items[b].Identifier;
+	Mandelbrot.RecursionLimit:=QuantityRecComboBox.Items[b].Identifier;
 	Changet:=True;
 	SelectPoint.Import;
 	SelectSecondPoint.Import;
@@ -358,7 +361,7 @@ procedure StepenComboBoxProcedure(a,b:LongInt;aaa:TSScreenComponent);
 begin
 with TSFractalMandelbrotGUI(aaa.FUserPointer1) do
 	begin
-	Mandelbrot.ZDegree:=StepenComboBox.Items[b].Identifier;
+	Mandelbrot.DegreeOfAComplexNumber:=StepenComboBox.Items[b].Identifier;
 	Changet:=True;
 	SelectPoint.Import;
 	SelectSecondPoint.Import;
@@ -422,16 +425,16 @@ with TSFractalMandelbrotGUI(Button.FUserPointer1) do
 	FBezierCurveKadrProgressBar.Progress:=0;
 	FNowKadr:=0;
 	FAllKadrs:=SVal(FBezierCurveEditKadr.Caption);
-	FNowRenderitsiaVideo:=True;
+	FRenderVideo:=True;
 	Changet:=True;
 	SelectPoint.Import();
 	SelectSecondPoint.Import();
-	Mandelbrot.ZMandelbrot:=False;
+	Mandelbrot.FractalType:=SJuliaSet;
 	FVideoBuffer:=SFreeDirectoryName(SImagesDirectory + DirectorySeparator + 'Mandelbrot Buffer', 'Part');
 	SMakeDirectory(FVideoBuffer);
 	Mandelbrot.Width:=1920;//*5;
 	Mandelbrot.Height:=1080;//*5;
-	FCurveBeginDataTime.Get();
+	FCurveBeginDateTime.Get();
 	end;
 end;
 
@@ -484,9 +487,9 @@ AddNameTheme('Оранжевая пыль');
 Mandelbrot := TSFractalMandelbrot.Create(Context);
 Mandelbrot.Width:=StartDepth;
 Mandelbrot.Height:=StartDepth;
-Mandelbrot.ZNumber := TSComplexNumber.Create(-0.181,0.66);
-Mandelbrot.ZMandelbrot:=False;
-Mandelbrot.ZDegree:=2;
+Mandelbrot.SingularPoint := TSComplexNumber.Create(-0.181,0.66);
+Mandelbrot.FractalType:=SJuliaSet;
+Mandelbrot.DegreeOfAComplexNumber:=2;
 Mandelbrot.View := TSScreenVertices.Create(-2.5,-2.5*(Render.Height/Render.Width),2.5,2.5*(Render.Height/Render.Width));
 Mandelbrot.CreateThreads(QuantityThreads);
 Mandelbrot.BeginConstruct;
@@ -565,8 +568,8 @@ Screen.CreateInternalComponent(TSScreenButton.Create);
 Screen.LastInternalComponent.SetBounds(Render.Width-50-125-185-105+45-125,5{+Context.TopShift},120,20);
 Screen.LastInternalComponent.Anchors:=[SAnchRight];
 Screen.LastInternalComponent.Caption:='Установ. тчк.';
-ButtonSelectZNumber:=Screen.LastInternalComponent as TSScreenButton;
-ButtonSelectZNumber.OnChange:=TSScreenComponentProcedure(@ButtonSelectZNumberOnChange);
+ButtonSelectSingularPoint:=Screen.LastInternalComponent as TSScreenButton;
+ButtonSelectSingularPoint.OnChange:=TSScreenComponentProcedure(@ButtonSelectSingularPointOnChange);
 Screen.LastInternalComponent.FUserPointer1:=Self;
 
 StepenComboBox:=TSScreenComboBox.Create;
@@ -687,9 +690,9 @@ FTNRF := nil;
 FCurvePointPanel := nil;
 FCurveSelectPoint := -1;
 FCurveArPoints := nil;
-FNowRenderitsiaVideo := False;
+FRenderVideo := False;
 FBezierNowSelectPoint := 0;
-FKomponentsNowOffOn := False;
+FIsComponentsActive := False;
 FBezierCurveEditKadr := nil;
 FEnablePictureStripAddingPoints := False;
 FBezierCurvePanel := nil;
@@ -713,7 +716,7 @@ ZumButton := nil;
 StepenComboBox := nil;
 QuantityRecComboBox := nil;
 SelectZNimberFlag := False;
-ButtonSelectZNumber := nil;
+ButtonSelectSingularPoint := nil;
 MandelbrotInitialized := False;
 VideoPanel := nil;
 FStartPanel := nil;
@@ -796,7 +799,7 @@ SKill(TypeComboBox);
 SKill(ZumButton);
 SKill(StepenComboBox);
 SKill(QuantityRecComboBox);
-SKill(ButtonSelectZNumber);
+SKill(ButtonSelectSingularPoint);
 SKill(VideoPanel);
 SKill(FStartPanel);
 if Mandelbrot<>nil then
@@ -815,7 +818,7 @@ begin
 Result := 'Множество Мандельброта и подобное';
 end;
 
-function TSFractalMandelbrotGUI.GetPointOnPosOnMand(const Point: TSPoint2int32):TSComplexNumber;inline;
+function TSFractalMandelbrotGUI.PointOfASetByCoordinates(const Point: TSPoint2int32):TSComplexNumber;inline;
 begin
 Result.Import(
 	Mandelbrot.View.x1+(Point.x/(Render.Width)*abs(Mandelbrot.View.x1-Mandelbrot.View.x2)),
@@ -921,10 +924,10 @@ if SelectPointEnabled and (Context.CursorKeysPressed(SLeftCursorButton)) then
 		Swap(SelectPoint.y,SelectSecondPoint.y);
 	FOldView:=Mandelbrot.View;
 	Mandelbrot.View := TSScreenVertices.Create(
-		GetPointOnPosOnMand(SelectPoint).x,
-		GetPointOnPosOnMand(SelectSecondPoint).y,
-		GetPointOnPosOnMand(SelectSecondPoint).x,
-		GetPointOnPosOnMand(SelectPoint).y
+		PointOfASetByCoordinates(SelectPoint).x,
+		PointOfASetByCoordinates(SelectSecondPoint).y,
+		PointOfASetByCoordinates(SelectSecondPoint).x,
+		PointOfASetByCoordinates(SelectPoint).y
 		);
 	Changet:=True;
 	end;
@@ -950,7 +953,7 @@ if MandelbrotInitialized then
 			end;
 		
 		FDateTime.Get();
-		if not FNowRenderitsiaVideo then
+		if not FRenderVideo then
 			begin
 			LabelProcent.Visible:=False;
 			LblProcent.Visible:=False;
@@ -961,7 +964,7 @@ if MandelbrotInitialized then
 			SSecondsToStringTime(
 			(FDateTime-FBeginCalc).GetPastSeconds))+'.');
 		
-		if (not NowSave)  and (not FNowRenderitsiaVideo) then
+		if (not NowSave)  and (not FRenderVideo) then
 			begin
 			Mandelbrot.ToTexture();
 			OnComponents();
@@ -976,7 +979,7 @@ if MandelbrotInitialized then
 				begin
 				if not SExistsDirectory(SImagesDirectory) then
 					SMakeDirectory(SImagesDirectory);
-				if FNowRenderitsiaVideo then
+				if FRenderVideo then
 					begin
 					//Mandelbrot.FImage.Image.SetBounds(1920,1080);
 					Mandelbrot.Image.FileName:=FVideoBuffer+DirectorySeparator+
@@ -985,18 +988,18 @@ if MandelbrotInitialized then
 					end;
 				FTNRF.AddWaterString('made by Smooth', Mandelbrot.Image,0);
 				Mandelbrot.Image.Save(SDefaultSaveImageFormat(Mandelbrot.Image.BitMap.Channels));
-				if not FNowRenderitsiaVideo then
+				if not FRenderVideo then
 					begin
 					Mandelbrot.Width:=StartDepth;
 					Mandelbrot.Height:=StartDepth;
 					end;
 				Mandelbrot.KillImage();
-				if not FNowRenderitsiaVideo then
+				if not FRenderVideo then
 					begin
 					Mandelbrot.Image:=SecondImage;
 					SecondImage:=nil;
 					end;
-				if FNowRenderitsiaVideo then
+				if FRenderVideo then
 					Changet:=True;
 				NowSave:=False;
 				end;
@@ -1038,12 +1041,12 @@ if MandelbrotInitialized then
 						(
 						(
 						(FDateTime-
-						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.FBeginData).GetPastMilliseconds
+						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.FBeginDate).GetPastMilliseconds
 						)/FArProgressBar[ii].Progress*(1 - FArProgressBar[ii].Progress)
 						>150
 						) then
 						// i - Только что Завершивший свою работу поток
-						//ii - Освободившийся поток
+						//ii - Свободный для вычислительной деятельности поток
 						begin
 						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.FWait:=True;
 						
@@ -1082,7 +1085,7 @@ if MandelbrotInitialized then
 						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.NowPos:=0;
 						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FWait:=False;
 						Mandelbrot.ThreadData[i]^.Finished:=False;
-						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FBeginData.Get;
+						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FBeginDate.Get;
 						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FHePr:=iiiC;
 						FArProgressBar[i].Progress:=0;
 						FArProgressBar[i].ProgressTimer:=0;
@@ -1124,32 +1127,29 @@ if MandelbrotInitialized then
 		begin
 		Render.Color3f(1,1,1);
 		Mandelbrot.Paint();
-		//if Mandelbrot.FView.VertexInView(Mandelbrot.FZNumber) then
-			//begin
-			VtxForZN.Import(
-				abs(Mandelbrot.ZNumber.x-Min(Mandelbrot.View.X1,Mandelbrot.View.X2))/Mandelbrot.View.AbsX*Render.Width,
-				abs(Mandelbrot.ZNumber.Y-Max(Mandelbrot.View.Y1,Mandelbrot.View.Y2))/Mandelbrot.View.AbsY*Render.Height
-				);
-			Render.Color3f(1,1,1);
-			Render.BeginScene(SR_TRIANGLES);
-			Render.Vertex2f(VtxForZN.x+5,VtxForZN.y);
-			Render.Vertex2f(VtxForZN.x-2,VtxForZN.y-4);
-			Render.Vertex2f(VtxForZN.x-2,VtxForZN.y+4);
-			Render.EndScene();
-			//end;
-			{
-		else
-			Mandelbrot.FZNumber.WriteLn;}
+		
+		// PointOfAScreenByCoordinates (Coordinates is complex)
+		VectorBySingularPoint.Import(
+			abs(Mandelbrot.SingularPoint.x-Min(Mandelbrot.View.X1,Mandelbrot.View.X2))/Mandelbrot.View.AbsX*Render.Width,
+			abs(Mandelbrot.SingularPoint.Y-Max(Mandelbrot.View.Y1,Mandelbrot.View.Y2))/Mandelbrot.View.AbsY*Render.Height
+			);
+		Render.Color3f(1,1,1);
+		Render.BeginScene(SR_TRIANGLES);
+		Render.Vertex2f(VectorBySingularPoint.x+5,VectorBySingularPoint.y);
+		Render.Vertex2f(VectorBySingularPoint.x-2,VectorBySingularPoint.y-4);
+		Render.Vertex2f(VectorBySingularPoint.x-2,VectorBySingularPoint.y+4);
+		Render.EndScene();
+			
 		if (SelectZNimberFlag and ((Context.CursorKeysPressed(SLeftCursorButton)))) or (Context.CursorKeysPressed(SMiddleCursorButton)) then
 			begin
-			ComplexNumber:=GetPointOnPosOnMand(Context.CursorPosition(SNowCursorPosition));
-			if Mandelbrot.ZNumber <> ComplexNumber then
+			ComplexNumber:=PointOfASetByCoordinates(Context.CursorPosition(SNowCursorPosition));
+			if Mandelbrot.SingularPoint <> ComplexNumber then
 				begin
-				Mandelbrot.ZNumber:=ComplexNumber;
+				Mandelbrot.SingularPoint:=ComplexNumber;
 				SelectZNimberFlag:=False;
 				OnComponents();
 				Context.SetCursorKey(SUpKey,SLeftCursorButton);
-				if not Mandelbrot.ZMandelbrot then
+				if Mandelbrot.FractalType = SJuliaSet then
 					Changet:=True;
 				SelectPoint.Import;
 				SelectSecondPoint.Import;
@@ -1188,7 +1188,7 @@ if MandelbrotInitialized then
 			end;
 		end;
 	
-	if (not FNowRenderitsiaVideo) and LabelProcent.Visible and ( not Mandelbrot.ThreadsReady) then
+	if (not FRenderVideo) and LabelProcent.Visible and ( not Mandelbrot.ThreadsReady) then
 	if (Context.KeyPressedByte=27) and 
 		(Context.KeyPressedType=SUpKey) and (SecondImage<>nil) then
 			begin
@@ -1215,8 +1215,8 @@ if MandelbrotInitialized then
 		FCurveArPoints[High(FCurveArPoints)]:=Mandelbrot.ColorScheme;
 		FBezierCurve.AddVertex(
 			SVertex3fImport(
-				GetPointOnPosOnMand(Context.CursorPosition(SNowCursorPosition)).x,
-				GetPointOnPosOnMand(Context.CursorPosition(SNowCursorPosition)).y));
+				PointOfASetByCoordinates(Context.CursorPosition(SNowCursorPosition)).x,
+				PointOfASetByCoordinates(Context.CursorPosition(SNowCursorPosition)).y));
 		FBezierCurve.Detalization:=FBezierCurve.VertexQuantity*10;
 		FBezierCurve.Construct();
 		Context.SetKey(SNullKey, Context.KeyPressedByte());
@@ -1224,20 +1224,20 @@ if MandelbrotInitialized then
 		FBezierCurveGoButton.Active:=(FBezierCurve.VertexQuantity>=2) and (TSEditTextTypeFunctionNumber(FBezierCurveEditKadr));
 		end;
 	
-	if FNowRenderitsiaVideo or 
-	(FEnablePictureStripPanel and FKomponentsNowOffOn)  then
+	if FRenderVideo or 
+	(FEnablePictureStripPanel and FIsComponentsActive)  then
 		begin
 		//Mandelbrot.FView.Write();
 		Render.InitOrtho2d(Mandelbrot.View.x1,Mandelbrot.View.y1,Mandelbrot.View.x2,Mandelbrot.View.y2);
 		if (FBezierCurve<>nil) then
 			begin
 			FBezierCurve.Paint();
-			if FNowRenderitsiaVideo then
+			if FRenderVideo then
 				begin
 				Render.Color3f(1,0,1);
 				Render.PointSize(5);
 				Render.BeginScene(SR_POINTS);
-				Render.Vertex(Mandelbrot.ZNumber);
+				Render.Vertex(Mandelbrot.SingularPoint);
 				Render.EndScene();
 				Render.PointSize(1);
 				end;
@@ -1247,12 +1247,12 @@ if MandelbrotInitialized then
 	
 	if Changet then
 		begin
-		if FNowRenderitsiaVideo then
+		if FRenderVideo then
 			begin
 			FNowKadr+=1;
 			if FNowKadr>FAllKadrs then
 				begin
-				FNowRenderitsiaVideo:=False;
+				FRenderVideo:=False;
 				Changet:=False;
 				Mandelbrot.Image:=SecondImage;
 				SecondImage:=nil;
@@ -1265,17 +1265,17 @@ if MandelbrotInitialized then
 				FBezierCurveKadrProgressBar.Progress:=(FNowKadr-1)/FAllKadrs;
 			end;
 		OffComponents();
-		if not FNowRenderitsiaVideo then
+		if not FRenderVideo then
 			if SecondImage<>nil then
 				SecondImage.Destroy;
-		if (not FNowRenderitsiaVideo) or (FNowRenderitsiaVideo and (Mandelbrot.Image<>nil)) then
+		if (not FRenderVideo) or (FRenderVideo and (Mandelbrot.Image<>nil)) then
 			begin
 			SecondImage:=Mandelbrot.Image;
 			Mandelbrot.Image:=nil;
 			end;
-		if FNowRenderitsiaVideo then
+		if FRenderVideo then
 			begin
-			Mandelbrot.ZNumber := TSComplexNumber.Create(FBezierCurve.GetResultVertex(FNowKadr/FAllKadrs).x, FBezierCurve.GetResultVertex(FNowKadr/FAllKadrs).y);
+			Mandelbrot.SingularPoint := TSComplexNumber.Create(FBezierCurve.GetResultVertex(FNowKadr/FAllKadrs).x, FBezierCurve.GetResultVertex(FNowKadr/FAllKadrs).y);
 			Mandelbrot.AttitudeForThemeEnable:=True;
 			Mandelbrot.AttitudeForTheme:=FBezierCurve.LowAttitude;
 			if FBezierCurve.LowIndex<>FBezierCurve.VertexQuantity-1 then
@@ -1291,14 +1291,14 @@ if MandelbrotInitialized then
 			TDT.Get();
 			if FNowKadr<>1 then
 				FCurveInfoLbl.Caption:='Прошло: '+
-					SSecondsToStringTime((TDT-FCurveBeginDataTime).GetPastSeconds)
+					SSecondsToStringTime((TDT-FCurveBeginDateTime).GetPastSeconds)
 					+', Осталось: '+
 					SSecondsToStringTime(Trunc(
-					(TDT-FCurveBeginDataTime).GetPastSeconds/((FNowKadr-1)/FAllKadrs)*(1-(FNowKadr-1)/FAllKadrs)
+					(TDT-FCurveBeginDateTime).GetPastSeconds/((FNowKadr-1)/FAllKadrs)*(1-(FNowKadr-1)/FAllKadrs)
 					))
-					+', FPS: '+SStrReal(FNowKadr/(TDT-FCurveBeginDataTime).GetPastSeconds,3)+' к/с';
+					+', FPS: '+SStrReal(FNowKadr/(TDT-FCurveBeginDateTime).GetPastSeconds,3)+' к/с';
 			end;
-		if (not FNowRenderitsiaVideo) and (not NowSave) then
+		if (not FRenderVideo) and (not NowSave) then
 			begin
 			Mandelbrot.Width:=StartDepth;
 			Mandelbrot.Height:=StartDepth;

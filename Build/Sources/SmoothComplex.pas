@@ -10,7 +10,7 @@ uses
 	;
 
 type
-	TSComplexNumber = TSVector2f;
+	TSComplexNumber = TSVector2d;
 
 operator + (const a,b:TSComplexNumber):TSComplexNumber;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator * (const a,b:TSComplexNumber):TSComplexNumber;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;

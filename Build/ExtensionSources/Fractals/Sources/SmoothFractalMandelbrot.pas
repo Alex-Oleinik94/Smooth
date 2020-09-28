@@ -33,23 +33,23 @@ type
 		FNumber:LongInt;
 		VBuffer : array[False..True] of PBoolean;
 		
-		FBeginData:TSDateTime;//время начала потока
+		FBeginDate:TSDateTime;//время начала потока
 		
 		FHePr:LongWord;//Уже сделаный прогресс потока по Height
 		end;
+		
+	TSFractalType = (SMandelbrotSet, SJuliaSet);
 	
-	TSMandelbrotPixel = record
-		r, g, b : TSByte;
-		end;
+	TSFractalDepth = TSUInt16;
 	
 	TSFractalMandelbrot = class(TSImageFractal)
 			public
 		constructor Create(const _Context : ISContext); override;
 			protected
-		FZNumber      : TSComplexNumber;
-		FZDegree      : LongInt;
-		FZMandelbrot  : Boolean;
-		FZQuantityRecursion : LongInt;
+		FSingularPoint      : TSComplexNumber;
+		FDegreeOfAComplexNumber      : LongInt;
+		FFractalType  : TSFractalType;
+		FRecursionLimit : LongInt;
 		FColorScheme  : TSUInt8;
 		
 		FAttitudeForThemeEnable : Boolean;
@@ -58,10 +58,10 @@ type
 		
 		FSmosh : Byte;
 		procedure InitColor(const x,y:LongInt;const RecNumber:LongInt);override;
-		function Rec(Number:TSComplexNumber):Word;inline;
-		function MandelbrotRec(const Number:TSComplexNumber;const dx,dy:single):Word;inline;
+		function Rec(Number:TSComplexNumber):TSFractalDepth;inline;
+		function MandelbrotRec(const Number:TSComplexNumber;const dx,dy:single):TSFractalDepth;inline;
 			public
-		function GetPixelColor(const VColorSceme:TSByte;const RecNumber:Word):TSMandelbrotPixel;inline;
+		function GetPixelColor(const VColorSceme:TSByte;const RecNumber:TSFractalDepth):TSVector3ui8;inline;
 		procedure ImageDepict(_ThreadData:PSFractalMandelbrotThreadData); overload;
 		procedure ImageDepict(); overload;
 		procedure Construct();override;
@@ -70,10 +70,10 @@ type
 		procedure BeginConstruct();override;
 		procedure BeginThread(const Number:LongInt;const Real:Pointer);
 			public
-		property ZNumber:TSComplexNumber read FZNumber write FZNumber;
-		property ZDegree:LongInt read FZDegree write FZDegree;
-		property ZMandelbrot:TSBoolean read FZMandelbrot write FZMandelbrot;
-		property ZQuantityRecursion:LongInt read FZQuantityRecursion write FZQuantityRecursion;
+		property SingularPoint:TSComplexNumber read FSingularPoint write FSingularPoint;
+		property DegreeOfAComplexNumber:LongInt read FDegreeOfAComplexNumber write FDegreeOfAComplexNumber;
+		property FractalType:TSFractalType read FFractalType write FFractalType;
+		property RecursionLimit:LongInt read FRecursionLimit write FRecursionLimit;
 		property ColorScheme : TSUInt8 read FColorScheme write FColorScheme;
 		property AttitudeForThemeEnable : TSBoolean read FAttitudeForThemeEnable write FAttitudeForThemeEnable;
 		property AttitudeForTheme : Real read FAttitudeForTheme write FAttitudeForTheme;
@@ -120,7 +120,7 @@ FractalThreadData^.Data := FractalMandelbrotThreadData;
 FractalMandelbrotThreadData^.NewPos:=0;
 FractalMandelbrotThreadData^.NowPos:=0;
 FractalMandelbrotThreadData^.FWait:=False;
-FractalMandelbrotThreadData^.FBeginData.Get;
+FractalMandelbrotThreadData^.FBeginDate.Get;
 
 FractalThreadData^.Thread:=
 	TSThread.Create(
@@ -192,20 +192,20 @@ FTheme2:=0;
 FAttitudeForTheme:=0;
 FAttitudeForThemeEnable:=False;
 FImage:=nil;
-FZNumber.Import(0,0.65);
+FSingularPoint.Import(0,0.65);
 FView.Import(-1.5,-1.5*(Render.Height/Render.Width),1.5,1.5*(Render.Height/Render.Width));
-FZMandelbrot:=False;
-FZDegree:=2;
-FZQuantityRecursion:=256;
+FFractalType:=SMandelbrotSet;
+FDegreeOfAComplexNumber:=2;
+FRecursionLimit:=256;
 FColorScheme:=0;
 FSmosh:=1;
 end;
 
-function TSFractalMandelbrot.GetPixelColor(const VColorSceme:TSByte;const RecNumber:Word):TSMandelbrotPixel;inline;
+function TSFractalMandelbrot.GetPixelColor(const VColorSceme:TSByte;const RecNumber:TSFractalDepth):TSVector3ui8;inline;
 var
 	Color : TSLongWord;
 
-function YellowPil():TSMandelbrotPixel;
+function YellowPil():TSVector3ui8;
 begin
 	Result.r := trunc(abs(cos(Color) * Color)) mod 255;
 	Result.g := GetColor(Color Div 2,Color * Color,trunc(abs((cos(Color) * cos(Color)) * Result.r))mod 500);
@@ -237,7 +237,7 @@ Color := Round((RecNumber/20)*255);
 case VColorSceme of
 1:
 	begin
-	if RecNumber=FZQuantityRecursion then
+	if RecNumber=FRecursionLimit then
 		begin
 		Result.r:=200;
 		Result.g:=0;
@@ -252,13 +252,13 @@ case VColorSceme of
 	end;
 2:
 	begin
-	Result.r:=GetColorOne(FZQuantityRecursion div 4,FZQuantityRecursion,Color);
-	Result.g:=GetColorOne(0,FZQuantityRecursion,Color);
-	Result.b:=GetColorOne(FZQuantityRecursion div 2,FZQuantityRecursion,Color);
+	Result.r:=GetColorOne(FRecursionLimit div 4,FRecursionLimit,Color);
+	Result.g:=GetColorOne(0,FRecursionLimit,Color);
+	Result.b:=GetColorOne(FRecursionLimit div 2,FRecursionLimit,Color);
 	end;
 3:
 	begin
-	Color:=Trunc(RecNumber/FZQuantityRecursion*255);
+	Color:=Trunc(RecNumber/FRecursionLimit*255);
 	Result.r:=Color;
 	Result.g:=Color;
 	Result.b:=Color; 
@@ -324,33 +324,33 @@ case VColorSceme of
 12:
 	begin
 		Result:=YellowPil();
-		SwapByte(Result.r,Result.b);
+		SwapByte(Result.Data[0],Result.Data[2]);
 	end;
 13:
 	begin
 		Result:=YellowPil();
-		SwapByte(Result.g,Result.b);
+		SwapByte(Result.Data[1],Result.Data[2]);
 	end;
 14:
 	begin
 		Result:=YellowPil();
-		SwapByte(Result.r,Result.b);
-		SwapByte(Result.g,Result.r);
+		SwapByte(Result.Data[0],Result.Data[2]);
+		SwapByte(Result.Data[1],Result.Data[0]);
 	end;
 15:
 	begin
 		Result:=YellowPil();
-		SwapByte(Result.r,Result.b);
-		SwapByte(Result.g,Result.b);
+		SwapByte(Result.Data[0],Result.Data[2]);
+		SwapByte(Result.Data[1],Result.Data[2]);
 	end;
 16:
 	begin
 		Result:=YellowPil();
-		SwapByte(Result.r,Result.g);
+		SwapByte(Result.Data[0],Result.Data[1]);
 	end;
 else
 	begin
-	if RecNumber=FZQuantityRecursion then
+	if RecNumber=FRecursionLimit then
 		begin
 		Result.r:=255;
 		Result.g:=127;
@@ -368,7 +368,7 @@ end;
 
 procedure TSFractalMandelbrot.InitColor(const x,y:LongInt;const RecNumber:LongInt);
 var
-	MandelbrotPixel1,MandelbrotPixel2:TSMandelbrotPixel;
+	MandelbrotPixel1,MandelbrotPixel2:TSVector3ui8;
 begin
 if FAttitudeForThemeEnable then
 	begin
@@ -387,7 +387,7 @@ FImage.BitMap.Data[(Y*Width+X)*3+1]:=MandelbrotPixel1.g;
 FImage.BitMap.Data[(Y*Width+X)*3+2]:=MandelbrotPixel1.b;
 end;
 
-function TSFractalMandelbrot.MandelbrotRec(const Number:TSComplexNumber;const dx,dy:single):Word;inline;
+function TSFractalMandelbrot.MandelbrotRec(const Number:TSComplexNumber;const dx,dy:single):TSFractalDepth;inline;
 var
 	i,ii:Byte;
 begin
@@ -396,8 +396,8 @@ for i:=0 to FSmosh-1 do
 	for ii:=0 to FSmosh-1 do
 		Result+=Rec(TSComplexNumber.Create(Number.x+i*dx/FSmosh,Number.y+ii*dy/FSmosh));
 Result:=Round(Result/sqr(FSmosh));
-if Result>FZQuantityRecursion then
-	Result:=FZQuantityRecursion;
+if Result>FRecursionLimit then
+	Result:=FRecursionLimit;
 end;
 
 procedure TSFractalMandelbrot.ImageDepict(_ThreadData:PSFractalMandelbrotThreadData);
@@ -408,7 +408,7 @@ var
 	VReady:Boolean = False;
 	VBufferNow:Boolean = False;
 	
-	VKolRec:LongInt;
+	RecursionResult:LongInt;
 	IsComponent:Boolean = False;
 begin
 if _ThreadData^.FPoint<>nil then
@@ -427,16 +427,16 @@ for i:=_ThreadData^.h1 to _ThreadData^.h2 do
 	ii:=Byte(VBufferNow);
 	while (ii<Width) do
 		begin
-		VKolRec:=MandelbrotRec(TSComplexNumber.Create(FView.x1+dX*ii,FView.y1+dY*i),dx,dy);//(ii/FDepth)*r?
-		InitColor(ii,i,VKolRec);
-		_ThreadData^.VBuffer[VBufferNow][ii div 2]:=VKolRec=FZQuantityRecursion;
+		RecursionResult:=MandelbrotRec(TSComplexNumber.Create(FView.x1+dX*ii,FView.y1+dY*i),dx,dy);//(ii/FDepth)*r?
+		InitColor(ii,i,RecursionResult);
+		_ThreadData^.VBuffer[VBufferNow][ii div 2]:=RecursionResult=FRecursionLimit;
 		if (VReady) then
 			begin
 			if (_ThreadData^.VBuffer[VBufferNow][ii div 2]) and (_ThreadData^.VBuffer[not VBufferNow][ii div 2]) and 
 				(((not VBufferNow) and (ii<>0) and (_ThreadData^.VBuffer[not VBufferNow][(ii-1) div 2])) 
 				or 
 				((VBufferNow) and (ii<>Width-1) and (_ThreadData^.VBuffer[not VBufferNow][(ii+1) div 2]))) then
-					InitColor(ii,i-1,FZQuantityRecursion)
+					InitColor(ii,i-1,FRecursionLimit)
 			else
 				InitColor(ii,i-1,
 					MandelbrotRec(TSComplexNumber.Create(FView.x1+dX*ii,FView.y1+dY*(i-1)),dx,dy));
@@ -472,28 +472,27 @@ for i:=_ThreadData^.h1 to _ThreadData^.h2 do
 ii:=Byte(VBufferNow);
 while ii<Width do
 	begin
-	VKolRec:=Rec(TSComplexNumber.Create(FView.x1+dX*ii,FView.y1+dY*i));
-	InitColor(ii,i,VKolRec);
+	RecursionResult:=Rec(TSComplexNumber.Create(FView.x1+dX*ii,FView.y1+dY*i));
+	InitColor(ii,i,RecursionResult);
 	ii+=2;
 	end;
 end;
 
-function TSFractalMandelbrot.Rec(Number:TSComplexNumber):Word;inline;
+function TSFractalMandelbrot.Rec(Number:TSComplexNumber):TSFractalDepth;inline;
 var 
-	Depth2:Word = 0;
-	Number2:TSComplexNumber;
+	StartNumber:TSComplexNumber;
 begin
-Number2:=Number;
-While (Depth2<FZQuantityRecursion) and(sqrt(sqr(Number.x)+sqr(Number.y))<2) do
+StartNumber:=Number;
+Result := 0;
+While (Result<FRecursionLimit) and(sqrt(sqr(Number.x)+sqr(Number.y))<2) do
 	begin
-	Depth2+=1;
-	Number:=Number**FZDegree;
-	if FZMandelbrot then
-		Number+=Number2
-	else
-		Number+=FZNumber;
+	Result+=1;
+	Number:=Number**FDegreeOfAComplexNumber;
+	case FFractalType of
+	SMandelbrotSet : Number += StartNumber;
+	SJuliaSet : Number += FSingularPoint;
 	end;
-Result:=Depth2;
+	end;
 end;
 
 procedure TSFractalMandelbrot.ImageDepict();
