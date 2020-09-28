@@ -54,6 +54,7 @@ FDrawClasses.Add(TSFractalSierpinskiCarpet2);
 FDrawClasses.Add(TSFractalSierpinskiCarpetSixAngle);
 FDrawClasses.Initialize();
 FDrawClasses.ComboBox.SetBounds(FDrawClasses.ComboBox.Left, 28, FDrawClasses.ComboBox.Width, FDrawClasses.ComboBox.Height);
+FDrawClasses.ComboBox.CursorQuickSelect := True;
 end;
 
 destructor TSAllFractals.Destroy();

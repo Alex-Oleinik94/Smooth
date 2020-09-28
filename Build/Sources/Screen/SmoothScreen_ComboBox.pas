@@ -29,7 +29,8 @@ type
 		FFirstScrollItem : TSInt32;
 		FCursorOverThisItem : TSInt32;
 		FScrollWidth : TSInt32;
-
+		FCursorSelecting : TSBoolean;
+		FCursorQuickSelect : TSBoolean;
 		FTextColor : TSColor4f;
 		FBodyColor : TSColor4f;
 			protected
@@ -42,6 +43,7 @@ type
 		function GetLinesCount() : TSUInt32;
 		procedure MouseWheelSelecting();
 		procedure CursorSelecting();
+		procedure CursorSelect(const Index : TSMaxEnum);
 			public
 		procedure UpDate();override;
 		procedure Paint(); override;
@@ -61,6 +63,8 @@ type
 
 		property ItemsCount : TSUInt32 read GetItemsCount;
 		property Items : PSComboBoxItem read GetItems;
+		
+		property CursorQuickSelect : TSBoolean read FCursorQuickSelect write FCursorQuickSelect;
 		end;
 
 implementation
@@ -200,6 +204,35 @@ if (NewSelectedItemIndex <> -1) then
 	SelectingItem(NewSelectedItemIndex);
 end;
 
+
+procedure TSComboBox.CursorSelect(const Index : TSMaxEnum);
+begin
+FCursorOverThisItem := FFirstScrollItem + Index;
+OverItem(FCursorOverThisItem);
+if (Context.CursorKeyPressed=SLeftCursorButton) then
+	begin
+	if (Context.CursorKeyPressedType=SDownKey) then
+		begin
+		Context.SetCursorKey(SNullKey, SNullCursorButton);
+		if FCursorQuickSelect then
+			begin
+			FCursorSelecting := True;
+			SelectingItem(FCursorOverThisItem);
+			end;
+		end;
+	if (Context.CursorKeyPressedType=SUpKey) then
+		begin
+		FCursorSelecting := False;
+		FOpen := False;
+		Context.SetCursorKey(SNullKey, SNullCursorButton);
+		if (not FCursorQuickSelect) then
+			SelectingItem(FCursorOverThisItem);
+		end;
+	end;
+if (FCursorSelecting) and (FCursorQuickSelect) and Context.CursorKeysPressed(SLeftCursorButton) then
+	SelectingItem(FCursorOverThisItem);
+end;
+
 procedure TSComboBox.CursorSelecting();
 var
 	Index : TSMaxEnum;
@@ -211,14 +244,7 @@ for Index := 0 to LinesCount - 1 do
 		(Context.CursorPosition(SNowCursorPosition).x<=FRealPosition.x+Width-FScrollWidth)) or (FMaxLines>=Length(FItems))) and
 		FItems[Index].Active then
 			begin
-			FCursorOverThisItem := FFirstScrollItem + Index;
-			OverItem(FCursorOverThisItem);
-			if ((Context.CursorKeyPressed=SLeftCursorButton) and (Context.CursorKeyPressedType=SUpKey)) then
-				begin
-				FOpen := False;
-				SelectingItem(FCursorOverThisItem);
-				Context.SetCursorKey(SNullKey, SNullCursorButton);
-				end;
+			CursorSelect(Index);
 			break;
 			end;
 end;
@@ -333,6 +359,7 @@ FSelectedItemIndex:=-1;
 FFirstScrollItem:=0;
 FCursorOverThisItem:=0;
 FScrollWidth:=20;
+FCursorSelecting := False;
 end;
 
 destructor TSComboBox.Destroy;

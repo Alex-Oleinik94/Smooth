@@ -12,6 +12,7 @@ uses
 	,SmoothMath
 	,SmoothCasesOfPrint
 	,SmoothContextInterface
+	,SmoothCursor
 	;
 type
 	TSCameraMatrixMode = TSUInt32;
@@ -28,6 +29,7 @@ type
 		FLocation, FView, FUp : TSCameraVector; // Location is point, View and Up is vectors
 		FMotile : TSBoolean;
 		FMouseClick : TSBoolean;
+		FCursorDragAndDropPressed : TSCursor; // drag and drop cursor (pressed)
 			protected
 		procedure MoveMotileObjective();
 		procedure MoveMotileObject();
@@ -69,6 +71,7 @@ uses
 	,SmoothCommon
 	,SmoothStringUtils
 	,SmoothContextUtils
+	,SmoothFileUtils
 	;
 
 procedure SKill(var Camera : TSCamera); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
@@ -161,6 +164,7 @@ end;
 constructor TSCamera.Create();
 begin
 inherited;
+FCursorDragAndDropPressed := SCreateCursorFromFile(SEngineDirectory + DirectorySeparator + 'drag and drop cursor (pressed).cur');
 FMouseClick := False;
 FMatrixMode := S_3D;
 FMotile := True;
@@ -234,9 +238,13 @@ if FMotile then
 		begin
 		FMouseClick := True;
 		Context.SetCursorKey(SNullKey, SNullCursorButton);
+		Context.Cursor := TSCursor.Copy(FCursorDragAndDropPressed);
 		end;
-	if (not Context.CursorKeysPressed(SLeftCursorButton)) then
+	if (not Context.CursorKeysPressed(SLeftCursorButton)) and FMouseClick then
+		begin
 		FMouseClick := False;
+		Context.Cursor := TSCursor.Create(SC_NORMAL);
+		end;
 	end;
 end;
 

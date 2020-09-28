@@ -84,6 +84,7 @@ FPaintableObjectContainer.Add(TSExample16);
 FPaintableObjectContainer.Add(TSKraftExamples);
 FPaintableObjectContainer.Initialize();
 FPaintableObjectContainer.ComboBox.SetBounds(FPaintableObjectContainer.ComboBox.Left, 28, FPaintableObjectContainer.ComboBox.Width, FPaintableObjectContainer.ComboBox.Height);
+FPaintableObjectContainer.ComboBox.CursorQuickSelect := True;
 end;
 
 destructor TSAllExamples.Destroy();
