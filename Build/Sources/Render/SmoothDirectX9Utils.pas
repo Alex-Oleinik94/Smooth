@@ -67,6 +67,11 @@ if AdapterCount > 0 then
 end;
 
 function SD3D9StrErrorCodeHex(const ErrorCode : HRESULT) : TSString;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+{For example, if CreateDevice returns 0x8876086c, the first 4 digits are 0x8876 - that first 8 means "failure" (The high bit is set), 
+the 876 part means "D3D", 
+and the 086c part is the error code - 2156 in decimal. 
+If you search d3d9.h for that number, you'll come across this:
+#define D3DERR_INVALIDCALL MAKE_D3DHRESULT(2156)}
 var
 	Index : TSByte;
 begin

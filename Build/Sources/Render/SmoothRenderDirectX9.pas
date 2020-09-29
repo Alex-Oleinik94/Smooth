@@ -909,6 +909,7 @@ else
 		SLog.Source('TSRenderDirectX9__TexImage2D : "IDirect3DTexture9__LockRect" failed...')
 	else
 		begin
+		//SLog.Source(['rcLockedRect.pBits',rcLockedRect.pBits]); try debug directx 9 64 bit
 		if (VTFormat=D3DFMT_A8R8G8B8) and (VFormatType=SR_RGBA) then
 			begin
 			RGBAToD3D_ARGB();
@@ -1686,13 +1687,14 @@ d3dpp.BackBufferFormat       := D3DFMT_X8R8G8B8;
 d3dpp.BackBufferWidth        := Context.ClientWidth;
 d3dpp.BackBufferHeight       := Context.ClientHeight;
 d3dpp.EnableAutoDepthStencil := True;
-d3dpp.AutoDepthStencilFormat := D3DFMT_D24S8;
+d3dpp.AutoDepthStencilFormat := D3DFMT_D24S8; // переопределяется после вызова
 d3dpp.PresentationInterval   := D3DPRESENT_INTERVAL_IMMEDIATE;
 d3dpp.MultiSampleType        := MultiSampleType;
 d3dpp.MultiSampleQuality     := 0;
 end;
 
 procedure TryCreateDevice();
+// for 64 bit if use D3DDEVTYPE_NULLREF device created and runtime exception while copy texture data
 var
 	Index : TSByte;
 	DirectXErrorCode   : HRESULT = 0;

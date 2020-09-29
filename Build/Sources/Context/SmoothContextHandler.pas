@@ -97,7 +97,7 @@ var
 	Settings : TSContextSettings = nil;
 begin
 Settings := SContextSettingsCopy(_Settings);
-if not ('AUDIORENDER' in Settings) then if TSCompatibleAudioRender <> nil then
+if (not ('AUDIORENDER' in Settings)) and (TSCompatibleAudioRender <> nil) then
 	Settings += SContextOptionAudioRender(TSCompatibleAudioRender);
 SRunPaintable(_PaintableClass, TSCompatibleContext, TSCompatibleRender, Settings);
 SetLength(Settings, 0);
