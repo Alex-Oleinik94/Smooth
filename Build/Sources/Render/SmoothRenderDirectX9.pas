@@ -1680,15 +1680,20 @@ var
 procedure FillPresendParameters(var d3dpp : D3DPRESENT_PARAMETERS);
 begin
 FillChar(d3dpp, SizeOf(d3dpp), 0);
+//d3dpp.Flags :=(D3DPRESENTFLAG_VIDEO or D3DPRESENTFLAG_DEVICECLIP) and D3DPRESENTFLAG_LOCKABLE_BACKBUFFER
+//D3DPRESENTFLAG_LOCKABLE_BACKBUFFER  Указывает, что вторичный буфер может быть заблокирован. Обратите внимание, что использование блокируемого вторичного буфера снижает производительность.
+//D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL Указывает, что буфер глубины и трафарета после показа вторичного буфера становится некорректным. Под словом «некорректным» мы подразумеваем, что данные, хранящиеся в буфере глубины и трафарета могут стать неверными. Это может увеличить производительность.
 d3dpp.Windowed               := True;
-d3dpp.SwapEffect             := D3DSWAPEFFECT_DISCARD;
 d3dpp.hDeviceWindow          := TSMaxEnum(Context.Window);
-d3dpp.BackBufferFormat       := D3DFMT_X8R8G8B8;
 d3dpp.BackBufferWidth        := Context.ClientWidth;
 d3dpp.BackBufferHeight       := Context.ClientHeight;
+//d3dpp.BackBufferCount := 0;
+d3dpp.BackBufferFormat       := D3DFMT_X8R8G8B8;
+d3dpp.SwapEffect             := D3DSWAPEFFECT_DISCARD;
 d3dpp.EnableAutoDepthStencil := True;
 d3dpp.AutoDepthStencilFormat := D3DFMT_D24S8; // переопределяется после вызова
 d3dpp.PresentationInterval   := D3DPRESENT_INTERVAL_IMMEDIATE;
+d3dpp.FullScreen_RefreshRateInHz := D3DPRESENT_RATE_DEFAULT;
 d3dpp.MultiSampleType        := MultiSampleType;
 d3dpp.MultiSampleQuality     := 0;
 end;
@@ -1699,14 +1704,24 @@ var
 	Index : TSByte;
 	DirectXErrorCode   : HRESULT = 0;
 	FmtErrList : TSStringList = nil;
+	DeviceType : D3DDEVTYPE;
+	Caps : D3DCAPS9;
+	BehaviorFlags : TSUInt32;
 begin
+DeviceType := D3DDEVTYPE_HAL;
+BehaviorFlags := 0;
+pD3D.GetDeviceCaps(D3DADAPTER_DEFAULT, DeviceType, Caps);
+if (Caps.DevCaps and D3DDEVCAPS_HWTRANSFORMANDLIGHT <> 0) then
+	BehaviorFlags := BehaviorFlags or D3DCREATE_HARDWARE_VERTEXPROCESSING
+else
+	BehaviorFlags := BehaviorFlags or D3DCREATE_SOFTWARE_VERTEXPROCESSING;
 for Index := High(D3DFMT_List) downto Low(D3DFMT_List) do
 	begin
 	FillPresendParameters(d3dpp);
 	d3dpp.AutoDepthStencilFormat := D3DFMT_List[Index];
 	
-	DirectXErrorCode :=  pD3D.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, TSMaxEnum(Context.Window),
-			D3DCREATE_HARDWARE_VERTEXPROCESSING, @d3dpp, pDevice);
+	DirectXErrorCode :=  pD3D.CreateDevice(D3DADAPTER_DEFAULT, DeviceType, TSMaxEnum(Context.Window),
+			BehaviorFlags, @d3dpp, pDevice);
 	
 	if( DirectXErrorCode <> D3D_OK) then
 		FmtErrList += SD3D9StrDepthFormat(d3dpp.AutoDepthStencilFormat) + ' : ' + SD3D9StrErrorCodeHex(DirectXErrorCode)
@@ -1726,16 +1741,26 @@ var
 	Index : TSByte;
 	DirectXErrorCode : HRESULT = 0;
 	FmtErrList : TSStringList = nil;
+	DeviceType : D3DDEVTYPE;
+	Caps : D3DCAPS9;
+	BehaviorFlags : TSUInt32;
 begin
 if pD3DEx = nil then
 	exit;
+DeviceType := D3DDEVTYPE_HAL;
+BehaviorFlags := 0;
+pD3D.GetDeviceCaps(D3DADAPTER_DEFAULT, DeviceType, Caps);
+if (Caps.DevCaps and D3DDEVCAPS_HWTRANSFORMANDLIGHT <> 0) then
+	BehaviorFlags := BehaviorFlags or D3DCREATE_HARDWARE_VERTEXPROCESSING
+else
+	BehaviorFlags := BehaviorFlags or D3DCREATE_SOFTWARE_VERTEXPROCESSING;
 for Index := High(D3DFMT_List) downto Low(D3DFMT_List) do
 	begin
 	FillPresendParameters(d3dpp);
 	d3dpp.AutoDepthStencilFormat := D3DFMT_List[Index];
 	
-	DirectXErrorCode :=  pD3DEx.CreateDeviceEx(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, TSMaxEnum(Context.Window),
-			D3DCREATE_HARDWARE_VERTEXPROCESSING, @d3dpp, nil, pDeviceEx);
+	DirectXErrorCode :=  pD3DEx.CreateDeviceEx(D3DADAPTER_DEFAULT, DeviceType, TSMaxEnum(Context.Window),
+			BehaviorFlags, @d3dpp, nil, pDeviceEx);
 	
 	if(DirectXErrorCode <> D3D_OK) then
 		begin
