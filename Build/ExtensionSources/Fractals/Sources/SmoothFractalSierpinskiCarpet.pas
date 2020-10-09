@@ -171,8 +171,8 @@ if FThreadsEnable then
 else
 	begin
 	PolygonsConstruction();
-	if FEnableVBO and (not F3dObject.LastObject().EnableVBO) then
-		F3dObject.LastObject().LoadToVBO();
+	if (FMemoryDataType = SVRAM) and (not F3dObject.LastObject().EnableVBO) then
+		F3dObject.LastObject().LoadToVBO(ClearRAMAfterLoadToVRAM);
 	end;
 end;
 

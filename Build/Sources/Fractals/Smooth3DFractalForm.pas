@@ -84,8 +84,8 @@ if FThreadsEnable then
 else
 	begin
 	PolygonsConstruction();
-	if FEnableVBO and (not F3dObject.LastObject().EnableVBO) then
-		F3dObject.LastObject().LoadToVBO();
+	if (FMemoryDataType = SVRAM) and (not F3dObject.LastObject().EnableVBO) then
+		F3dObject.LastObject().LoadToVBO(ClearRAMAfterLoadToVRAM);
 	end;
 end;
 
@@ -109,6 +109,7 @@ TempDepth := Depth;
 TempDepth += _IncrementOrDecrement;
 if TempDepth < 0 then
 	TempDepth := 0;
+FDepth := TempDepth;
 Construct();
 FLabelDepth.Caption := SStr(Depth);
 FButtonDecrementDepth.Active := Depth <> 0;

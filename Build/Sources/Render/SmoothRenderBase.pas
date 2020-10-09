@@ -24,7 +24,8 @@ type
 	TSMatrixMode   = TSUInt32;
 	TSPrimtiveType = TSUInt32;
 	
-	TSRenderType   = (SRenderNone, SRenderOpenGL, SRenderDirectX9, SRenderDirectX8, SRenderGLES);
+	TSRenderType   = (SRenderNull, SRenderOpenGL, SRenderDirectX9, SRenderDirectX8, SRenderGLES);
+	TSMemoryDataType = (SRAM, SVRAM);
 
 {$INCLUDE SmoothRenderConstants.inc}
 
@@ -43,7 +44,7 @@ case VertexFormat of
 SVertexFormat2f : Result := 'SVertexFormat2f';
 SVertexFormat3f : Result := 'SVertexFormat3f';
 SVertexFormat4f : Result := 'SVertexFormat4f';
-else               Result := 'INVALID(' + SStr(TSByte(VertexFormat)) + ')';
+else              Result := 'INVALID(' + SStr(TSByte(VertexFormat)) + ')';
 end;
 end;
 
@@ -56,7 +57,7 @@ SR_QUADS      : Result := 'SR_QUADS';
 SR_POINTS     : Result := 'SR_POINTS';
 SR_LINE_STRIP : Result := 'SR_LINE_STRIP';
 SR_LINE_LOOP  : Result := 'SR_LINE_LOOP';
-else             Result := 'INVALID(' + SStr(PrimetiveType) + ')';
+else            Result := 'INVALID(' + SStr(PrimetiveType) + ')';
 end;
 end;
 

@@ -293,7 +293,7 @@ constructor TSRender.Create();
 begin
 inherited Create();
 FContext := nil;
-FType    := SRenderNone;
+FType    := SRenderNull;
 {$IFDEF MSWINDOWS}
 if not VideoInfoLoged then
 	begin

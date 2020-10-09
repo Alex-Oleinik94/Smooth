@@ -37,8 +37,8 @@ type
 		FLightingEnable : TSBoolean;
 		FCamera         : TSCamera;
 		
-		FEnableVBO      : TSBoolean;
-		FClearVBOAfterLoad : TSBoolean;
+		FMemoryDataType : TSMemoryDataType;
+		FClearRAMAfterLoadToVRAM : TSBoolean;
 		FEnableColors   : TSBoolean;
 		FEnableNormals  : TSBoolean;
 		FHasIndexes     : TSBoolean;
@@ -48,6 +48,7 @@ type
 		procedure PaintObject();
 		procedure SaveObject(); // видимо, не всегда срабатывает из-за хранения данных в памяти видеокарты
 		function CalculatePolygonsLimit() : TSUInt64; virtual;
+		procedure SetMemoryDataType(const _MemoryDataType : TSMemoryDataType);
 			public
 		procedure DeleteRenderResources();override;
 		procedure LoadRenderResources();override;
@@ -62,11 +63,11 @@ type
 			public
 		property LightingEnable : TSBoolean read FLightingEnable write FLightingEnable;
 		property HasIndexes     : TSBoolean read FHasIndexes     write FHasIndexes;
-		property EnableVBO      : TSBoolean read FEnableVBO      write FEnableVBO;
+		property MemoryDataType : TSMemoryDataType read FMemoryDataType write SetMemoryDataType;
 		property EnableNormals  : TSBoolean read FEnableNormals  write FEnableNormals;
 		property EnableColors   : TSBoolean read FEnableColors   write FEnableColors;
-		property ClearVBOAfterLoad : TSBoolean read FClearVBOAfterLoad   write FClearVBOAfterLoad;
-			public
+		property ClearRAMAfterLoadToVRAM : TSBoolean read FClearRAMAfterLoadToVRAM   write FClearRAMAfterLoadToVRAM;
+			protected
 		FProjectionComboBox, FEffectsComboBox : TSScreenComboBox;
 		FSizeLabel : TSScreenLabel;
 		FSaveButton : TSScreenButton;
@@ -89,6 +90,15 @@ uses
 	,SmoothContextUtils
 	;
 
+procedure TS3DFractal.SetMemoryDataType(const _MemoryDataType : TSMemoryDataType);
+begin
+if (_MemoryDataType <> FMemoryDataType) then
+	begin
+	FMemoryDataType := _MemoryDataType;
+	Construct();
+	end;
+end;
+
 procedure TS3DFractal.DeleteRenderResources();
 begin
 Clear3dObject();
@@ -103,8 +113,8 @@ procedure TS3DFractal.Construct();
 begin
 FSizeLabelFlag:=False;
 inherited;
-if FEnableVBO then
-	F3dObjectsReady:=False;
+if FMemoryDataType = SVRAM then
+	F3dObjectsReady := False;
 end;
 
 class function TS3DFractal.ClassName:string;
@@ -151,7 +161,8 @@ var
 	ObjectFileName : TSString;
 begin
 ObjectFileName := 'Save object of 3D fractal ''' + ClassName() + ''', d=' + SStr(Depth) + '.s3dm';
-TS3dObjectS3DMLoader.SaveModelToFile(F3dObject, SFreeFileName(ObjectFileName, ''));
+if (FMemoryDataType = SRAM) then
+	TS3dObjectS3DMLoader.SaveModelToFile(F3dObject, SFreeFileName(ObjectFileName, ''));
 end;
 
 procedure S3DFractalSaveButtonProcedure(Button : TSScreenButton);
@@ -209,13 +220,13 @@ begin
 if ((HasIndexes) and ((_VertexIndex div F3dObject.Objects[_ObjectNumber].GetPolygonInt(F3dObject.Objects[_ObjectNumber].PolygonsType[0]))>=FPolygonsLimit))
    or ((not HasIndexes) and ((_VertexIndex div F3dObject.Objects[_ObjectNumber].GetPolygonInt(F3dObject.Objects[_ObjectNumber].ObjectPolygonsType))>=FPolygonsLimit)) then
 	begin
-	if (not _DoAtThreads) and FEnableVBO then
-		F3dObject.Objects[_ObjectNumber].LoadToVBO(FClearVBOAfterLoad);
+	if (not _DoAtThreads) and (FMemoryDataType = SVRAM) then
+		F3dObject.Objects[_ObjectNumber].LoadToVBO(FClearRAMAfterLoadToVRAM);
 	if FThreadsEnable and (_ObjectNumber>=0) and (_ObjectNumber<=F3dObject.QuantityObjects-1) and (F3dObjectsInfo[_ObjectNumber]=S_FALSE) then
 		F3dObjectsInfo[_ObjectNumber] := S_TRUE;
 	_ObjectNumber += 1;
 	_VertexIndex := 0;
-	if FEnableVBO and ((_ObjectNumber>=0) and (_ObjectNumber<=F3dObject.QuantityObjects-1)) and (F3dObjectsInfo[_ObjectNumber]=S_FALSE) and (F3dObject.Objects[_ObjectNumber].QuantityVertices=0) then
+	if (FMemoryDataType = SVRAM) and ((_ObjectNumber>=0) and (_ObjectNumber<=F3dObject.QuantityObjects-1)) and (F3dObjectsInfo[_ObjectNumber]=S_FALSE) and (F3dObject.Objects[_ObjectNumber].QuantityVertices=0) then
 		Set3dObjectBuffersSize(F3dObject.Objects[_ObjectNumber], FPolygonsLimit,F3dObject.Objects[_ObjectNumber].GetFaceLength(FPolygonsLimit));
 	end;
 end;
@@ -224,7 +235,7 @@ procedure TS3DFractal.AfterPushingPolygonData(var _ObjectNumber:TSFractalIndexIn
 begin
 if _FaceIndex>=FPolygonsLimit then
 	begin
-	if (not _DoAtThreads) and FEnableVBO then
+	if (not _DoAtThreads) and (FMemoryDataType = SVRAM) then
 		begin
 		F3dObject.Objects[_ObjectNumber].LoadToVBO();
 		end;
@@ -233,7 +244,7 @@ if _FaceIndex>=FPolygonsLimit then
 	_ObjectNumber+=1;
 	_VertexIndex:=0;
 	_FaceIndex:=0;
-	if FEnableVBO and ((_ObjectNumber>=0) and (_ObjectNumber<=F3dObject.QuantityObjects-1)) and (F3dObjectsInfo[_ObjectNumber]=S_FALSE) and (F3dObject.Objects[_ObjectNumber].QuantityVertices=0) then
+	if (FMemoryDataType = SVRAM) and ((_ObjectNumber>=0) and (_ObjectNumber<=F3dObject.QuantityObjects-1)) and (F3dObjectsInfo[_ObjectNumber]=S_FALSE) and (F3dObject.Objects[_ObjectNumber].QuantityVertices=0) then
 		Set3dObjectBuffersSize(F3dObject.Objects[_ObjectNumber], FPolygonsLimit,F3dObject.Objects[_ObjectNumber].GetFaceLength(FPolygonsLimit));
 	end;
 end;
@@ -312,8 +323,11 @@ FLightSource := TSVector3f.Create(0, 0, -FLightSourceAbs);
 FLightSourceTrigonometry := TSVector3d.Create(pi / 2, 0, pi + pi);
 FLightingEnable := True;
 F3dObject := nil;
-FEnableVBO := Render.SupportedGraphicalBuffers();
-FClearVBOAfterLoad := True;
+case Render.SupportedGraphicalBuffers() of
+False : FMemoryDataType := SRAM;
+True  : FMemoryDataType := SVRAM;
+end;
+FClearRAMAfterLoadToVRAM := True;
 FHasIndexes := True;
 FPolygonsLimit := CalculatePolygonsLimit();
 F3dObjectsInfo := nil;
@@ -344,13 +358,13 @@ procedure TS3DFractal.CkeckConstructedObjects();
 var
 	Index, Index2 : TSMaxEnum;
 begin
-if FEnableVBO then
+if (FMemoryDataType = SVRAM) then
 	begin
 	Index2 := 1;
 	for Index := 0 to High(F3dObjectsInfo) do
 		if F3dObjectsInfo[Index] = S_TRUE then
 			begin
-			if F3dObject.Objects[Index].LoadToVBO(FClearVBOAfterLoad) then
+			if F3dObject.Objects[Index].LoadToVBO(FClearRAMAfterLoadToVRAM) then
 				F3dObjectsInfo[Index] := S_UNKNOWN;
 			end
 		else if F3dObjectsInfo[Index] = S_FALSE then
@@ -358,7 +372,7 @@ if FEnableVBO then
 	if Index2 = 1 then
 		F3dObjectsReady := True;
 	end
-else if (not FEnableVBO) then
+else if (FMemoryDataType <> SVRAM) then
 	begin
 	Index2 := 1;
 	for Index := 0 to High(F3dObjectsInfo) do
@@ -391,13 +405,13 @@ else if Render.IsEnabled(SR_LIGHTING) then
 	Render.Disable(SR_LIGHTING);
 Render.Color4f(1,1,1,1);
 Render.LineWidth(1);
-if FEnableVBO and FThreadsEnable and (F3dObject.QuantityObjects > 0) then
+if (FMemoryDataType = SVRAM) and FThreadsEnable and (F3dObject.QuantityObjects > 0) then
 	begin
 	for Index := 0 to F3dObject.QuantityObjects - 1 do
 		if F3dObject.Objects[Index].EnableVBO then
 			F3dObject.Objects[Index].Paint();
 	end
-else if (not FEnableVBO) and FThreadsEnable and (F3dObject.QuantityObjects > 0) then
+else if (FMemoryDataType <> SVRAM) and FThreadsEnable and (F3dObject.QuantityObjects > 0) then
 	begin
 	for Index := 0 to F3dObject.QuantityObjects - 1 do
 		if F3dObjectsInfo[Index] = S_TRUE then
@@ -428,6 +442,11 @@ if (FSizeLabel <> nil) and (not FSizeLabelFlag)  and (F3dObject <> nil) then
 	if (not FThreadsEnable) or (FThreadsEnable and F3dObjectsReady) then
 		FSizeLabelFlag := True;
 	end;
+if (Context.KeyPressed and (Context.KeysPressed(Char(17))) and (Context.KeyPressedChar='V') and (Context.KeyPressedType=SUpKey)) then
+	case MemoryDataType of
+	SVRAM : MemoryDataType := SRAM;
+	SRAM : MemoryDataType := SVRAM;
+	end;
 if (Context.KeyPressed and (Context.KeysPressed(Char(17))) and (Context.KeyPressedChar='S') and (Context.KeyPressedType=SUpKey)) then
 	SaveObject();
 end;
@@ -439,13 +458,13 @@ var
 begin
 if (not FThreadsEnable) or (FThreadsEnable and F3dObjectsReady) then
 	if HasIndexes then
-		Result := Iff(FEnableVBO, 'V', '') + 'RAM' + // VRAM is Video RAM
+		Result := Iff(FMemoryDataType = SVRAM, 'V', '') + 'RAM' + // VRAM is Video RAM
 			' size: '+SMemorySizeToString(F3dObject.Size)+
 			'; Faces: '+SMemorySizeToString(F3dObject.FacesSize)+
 			', Vertices: '+SMemorySizeToString(F3dObject.VerticesSize)+
 			'. Objects: '+SStr(F3dObject.QuantityObjects)+'.'
 	else
-		Result := Iff(FEnableVBO, 'V', '') + 'RAM' +  // VRAM is Video RAM
+		Result := Iff(FMemoryDataType = SVRAM, 'V', '') + 'RAM' +  // VRAM is Video RAM
 			' size of vertices: '+SMemorySizeToString(F3dObject.VerticesSize)+
 			'; Objects: '+SStr(F3dObject.QuantityObjects)+'.'
 {else if (FThreadsEnable and (not F3dObjectsReady) and (F3dObject.QuantityObjects > 0)) then

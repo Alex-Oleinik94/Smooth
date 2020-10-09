@@ -462,8 +462,8 @@ else
 		SVertex3fImport(2.6,2.6,2.6),
 		-5.2,-5.2,
 		FDepth);
-	if FEnableVBO and (F3dObject<>nil) then
-		F3dObject.LastObject().LoadToVBO();
+	if (FMemoryDataType = SVRAM) and (F3dObject<>nil) then
+		F3dObject.LastObject().LoadToVBO(ClearRAMAfterLoadToVRAM);
 	end;
 end;
 

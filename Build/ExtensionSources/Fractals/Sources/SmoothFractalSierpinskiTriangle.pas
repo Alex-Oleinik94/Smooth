@@ -129,8 +129,8 @@ if FThreadsEnable then
 else
 	begin
 	PolygonsConstruction;
-	if FEnableVBO and (not F3dObject.LastObject().EnableVBO) then
-		F3dObject.LastObject().LoadToVBO(ClearVBOAfterLoad);
+	if (FMemoryDataType = SVRAM) and (not F3dObject.LastObject().EnableVBO) then
+		F3dObject.LastObject().LoadToVBO(ClearRAMAfterLoadToVRAM);
 	end;
 end;
 
@@ -183,7 +183,7 @@ FEnableNormals:=False;
 Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
 Depth:=3;
 FLightingEnable:=False;
-ClearVBOAfterLoad := False;
+ClearRAMAfterLoadToVRAM := False;
 
 InitProjectionComboBox(Render.Width-160,5,150,30,[SAnchRight]).BoundsMakeReal();
 InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]).BoundsMakeReal();
