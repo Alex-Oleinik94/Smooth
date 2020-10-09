@@ -29,13 +29,17 @@ type
 	TSCursorWheel = (SNullCursorWheel, SUpCursorWheel, SDownCursorWheel);
 	TSCursorPosition = (
 		SDeferenseCursorPosition, // - Это разница между SNowCursorPosition и SLastCursorPosition
-		SNowCursorPosition,       // - Координаты мыши в настоящий момент
-		SLastCursorPosition);     // - Координаты мыши, полученые при преведущей итерации цикла
+		SNowCursorPosition,       // - Текущие координаты курсора
+		SLastCursorPosition);     // - Координаты курсора, полученные в предыдущей итерации цикла
 type
 	TSContextOption = TSOption;
 	TSContextSettings = TSSettings;
 	TSPaintableSettings = TSSettings;
 	TSPaintableOption = TSOption;
+const
+	SCMaximizedWindow = 'MaximizedWindow';
+	SCMinimizedWindow = 'MinimizedWindow';
+	SCFullscreenWindow = 'FullscreenWindow';
 type
 	TSContextWindowPlacement = (SPlacementNormal, SPlacementMaximized, SPlacementMinimized);
 
@@ -82,12 +86,12 @@ end;
 
 function SContextOptionMax() : TSContextOption;
 begin
-Result.Import('MAX', nil);
+Result.Import(SCMaximizedWindow, nil);
 end;
 
 function SContextOptionMin() : TSContextOption;
 begin
-Result.Import('MIN', nil);
+Result.Import(SCMaximizedWindow, nil);
 end;
 
 function SContextOptionImport(const VName : TSString; const VOption : TSPointer) : TSContextOption;
@@ -122,7 +126,7 @@ end;
 
 function SContextOptionFullscreen(const VVariable : TSBoolean) : TSContextOption;
 begin
-Result.Import('FULLSCREEN', TSPointer(TSByte(VVariable)));
+Result.Import(SCFullscreenWindow, TSPointer(TSByte(VVariable)));
 end;
 
 {$IFDEF ANDROID}

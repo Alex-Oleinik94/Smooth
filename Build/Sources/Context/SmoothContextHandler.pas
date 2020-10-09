@@ -182,7 +182,7 @@ for O in FSettings do
 		TextStream.TextColor(PunctuationMarkColor);
 		TextStream.Write(', ');
 		end;
-	if (O.FName = 'FULLSCREEN') and (TSMaxEnum(O.FOption) = 0) then
+	if (O.FName = SCFullscreenWindow) and (TSMaxEnum(O.FOption) = 0) then
 		begin
 		TextStream.TextColor(PunctuationMarkColor);
 		TextStream.Write('!');
@@ -242,7 +242,7 @@ for O in FSettings do
 		TextStream.TextColor(PunctuationMarkColor);
 		TextStream.Write(']');
 		end
-	else if (O.FName = 'MIN') or (O.FName = 'MAX') or (O.FName = 'FULLSCREEN') then
+	else if (O.FName = SCMinimizedWindow) or (O.FName = SCMaximizedWindow) or (O.FName = SCFullscreenWindow) then
 		begin end
 	else
 		begin
@@ -435,7 +435,7 @@ for O in FSettings do
 		FContext.Left := TSMaxEnum(O.FOption)
 	else if O.FName  = 'TOP' then
 		FContext.Top := TSMaxEnum(O.FOption)
-	else if O.FName  = 'FULLSCREEN' then
+	else if O.FName  = SCFullscreenWindow then
 		FContext.Fullscreen := TSBool(TSMaxEnum(O.FOption))
 	else if O.FName  = 'CURSOR' then
 		FContext.Cursor := TSCursor(O.FOption)
@@ -457,7 +457,7 @@ if not ('WIDTH' in FSettings) then
 	FContext.Width  := FContext.GetScreenArea().x;
 if not ('HEIGHT' in FSettings) then
 	FContext.Height  := FContext.GetScreenArea().y;
-if not ('FULLSCREEN' in FSettings) then
+if not (SCFullscreenWindow in FSettings) then
 	FContext.Fullscreen := {$IFDEF ANDROID}True{$ELSE}False{$ENDIF};
 if not ('CURSOR' in FSettings) then
 	FContext.Cursor := TSCursor.Create(SC_NORMAL);
@@ -489,13 +489,13 @@ procedure TSContextHandler.CheckPlacement();
 var
 	MinExists, MaxExists : TSBool;
 begin
-MinExists := ('MIN' in FPaintableSettings);
-MaxExists := ('MAX' in FPaintableSettings);
+MinExists := (SCMinimizedWindow in FPaintableSettings);
+MaxExists := (SCMaximizedWindow in FPaintableSettings);
 if MaxExists or MinExists then
 	begin
 	if MinExists xor MaxExists then
 		begin
-		FPaintableSettings -= (Iff(MinExists, 'MIN','') + Iff(MaxExists, 'MAX',''));
+		FPaintableSettings -= (Iff(MinExists, SCMinimizedWindow,'') + Iff(MaxExists, SCMaximizedWindow,''));
 		if MaxExists then
 			FPlacement := SPlacementMaximized
 		else if MinExists then
@@ -503,8 +503,8 @@ if MaxExists or MinExists then
 		end
 	else
 		begin
-		FPaintableSettings -= 'MAX';
-		FPaintableSettings -= 'MIN';
+		FPaintableSettings -= SCMaximizedWindow;
+		FPaintableSettings -= SCMinimizedWindow;
 		SHint('Run : warning : maximization and minimization are not available at the same time!', SCasesOfPrintFull, True);
 		end;
 	end;

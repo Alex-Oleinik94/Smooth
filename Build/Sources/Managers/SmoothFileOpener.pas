@@ -152,7 +152,7 @@ begin
 EC := nil;
 SL1 := nil;
 for i := 0 to High(VFiles) do
-	SL1 *= SUpCaseString(SFileExtension(VFiles[i]));
+	SL1 *= SFileExtension(VFiles[i], True);
 for C in SFileOpeners do
 	if C.ExtensionsSupported(SL1) then
 		begin

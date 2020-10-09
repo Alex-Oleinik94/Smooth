@@ -79,7 +79,7 @@ end;
 
 begin
 SHint('Playing "' + FileName + '".');
-FileExtension := SFileExtension(FileName);
+FileExtension := SFileExtension(FileName, False);
 if TSCompatibleAudioRender = nil then
 	begin
 	SHint('Error! No audio renders suppored!');

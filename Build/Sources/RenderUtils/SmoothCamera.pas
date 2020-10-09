@@ -212,7 +212,7 @@ if FMotile then
 		FLocation*=1/0.9;
 	if (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedChar=char(189)) and (Context.KeyPressedType=SDownKey)) then
 		FLocation*=1/0.89;
-	if  (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedByte=187) and (Context.KeyPressedType=SDownKey))  then
+	if (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedByte=187) and (Context.KeyPressedType=SDownKey)) then
 		FLocation*=0.89;
 	if FMouseClick then
 		begin

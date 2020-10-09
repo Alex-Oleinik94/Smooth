@@ -84,7 +84,7 @@ procedure SExportStringToFile(const FileName, Data : TSString);{$IFDEF SUPPORTIN
 (** FILE **)
 (**********)
 
-function SFileExtension(const FileName : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SFileExtension(const FileName : TSString; const UpDownCase : TSBoolean = False {True is UpCase}) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SFileNameWithoutExtension(const FileName : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SFreeFileName(const Name : TSString; const Sl : TSString = 'Copy') : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SSetExtensionToFileName(const FileName, Extension : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -265,7 +265,7 @@ var
 	FileExtension : TSString = '';
 	FileName      : TSString = '';
 
-function FileNameFromNumber(const Number : TSInt32) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function FileNameFromNumber(const Number : TSMaxEnum) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := FileName;
 if Number > 0 then
@@ -280,11 +280,11 @@ if FileExtension <> '' then
 end;
 
 var
-	Number        : TSInt32 = 1;
+	Number : TSMaxEnum = 2;
 begin
 if SFileExists(Name) then
 	begin
-	FileExtension := SFileExtension(Name);
+	FileExtension := SFileExtension(Name, False);
 	FileName := SFileNameWithoutExtension(Name);
 	while SFileExists(FileNameFromNumber(Number)) do
 		Number += 1;
@@ -318,7 +318,7 @@ else
 Result := SCheckDirectorySeparators(Result);
 end;
 
-function SFileExtension(const FileName : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SFileExtension(const FileName : TSString; const UpDownCase : TSBoolean = False {True is UpCase}) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : TSInt32;
 	Extension : TSString = '';
@@ -343,7 +343,10 @@ else
 		i-=1;
 		end;
 	end;
-Result := SUpCaseString(Result);
+if UpDownCase then
+	Result := SUpCaseString(Result)
+else
+	Result := SDownCaseString(Result);
 end;
 
 (***************)

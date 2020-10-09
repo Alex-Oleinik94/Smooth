@@ -2871,7 +2871,7 @@ if (FileWay <> '') and (SFileExists(FileWay)) then
 	FRelefRedactor.SingleRelief^.Load(FileWay);
 	FRelefRedactor.SingleRelief^.FType := T;
 	FRelefRedactor.SingleRelief^.FEnabled := E;
-	FRelefOptionPanel.InternalComponents[1].Caption := 'Статус рельефа:Загружен('+SFileName(FileWay)+'.'+SDownCaseString(SFileExtension(FileWay))+')';
+	FRelefOptionPanel.InternalComponents[1].Caption := 'Статус рельефа:Загружен('+SFileName(FileWay)+'.'+SFileExtension(FileWay, False)+')';
 	(FRelefOptionPanel.InternalComponents[1] as TSScreenLabel).TextColor := SVertex4fImport(0,1,0,1);
 	end;
 if IsInFullscreen then

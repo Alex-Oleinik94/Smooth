@@ -211,7 +211,7 @@ procedure TSNTextInset.RealizeSystemSimbols();
 var
 	Extension : TSString;
 begin
-Extension := SFileExtension(FFileName);
+Extension := SFileExtension(FFileName, True);
 if (Extension = 'PAS') or (Extension = 'PP') or (Extension = 'INC') then
 	begin
 	FSystemWords := 'result exit absolute abstract add and true false array as asm assembler constref automated begin boolean break byte case cdecl char class const constructor contains default deprecated destructor dispid dispinterface div do downto dynamic else end except export exports external far file final finalization finally for forward function goto if implementation implements in index inherited initialization inline integer interface is label library message mod name near nil nodefault not object of on or out overload override package packed pascal platform private procedure program property protected public published raise read readonly real record register reintroduce remove repeat requires resourcestring safecall sealed set shl shr static stdcall stored strict string then threadvar to try type unit unsafe until uses var varargs virtual while with word write writeonly xor';

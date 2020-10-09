@@ -26,16 +26,17 @@ type
 		procedure SetDepth(const _Depth : LongInt); override;
 		procedure EndOfPolygonsConstruction(const ObjectId : TSUInt32); virtual;
 		class function CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum; virtual; abstract;
+		procedure ChangeDepth(const _IncrementOrDecrement : TSInt32);
 			protected
 		FLabelDepth, FLabelDepthCaption : TSScreenLabel; // Label depth and caption of depth label "Итерация"
-		FBPD, FBMD : TSScreenButton; // Buttons of change depth (plus and minus)
+		FButtonIncrementDepth, FButtonDecrementDepth : TSScreenButton; // Buttons of change depth (plus and minus)
 			protected
 		FIs2D : TSBoolean;
 		FPrimetiveType : TSUInt32; // SR_LINES, SR_QUADS ...
 		FPrimetiveParam : TSUInt32;
 		end;
 
-procedure S3DFractalThreadCallback(FractalThreadData:PSFractalThreadData);
+procedure S3DFractalFormThreadCallback(FractalThreadData:PSFractalThreadData);
 
 implementation
 
@@ -54,7 +55,7 @@ if FLabelDepth <> nil then
 	FLabelDepth.Caption := SStr(FDepth)
 end;
 
-procedure S3DFractalThreadCallback(FractalThreadData:PSFractalThreadData);
+procedure S3DFractalFormThreadCallback(FractalThreadData:PSFractalThreadData);
 begin
 (FractalThreadData^.Fractal as TS3DFractalForm).PolygonsConstruction();
 FractalThreadData^.Finished:=True;
@@ -77,7 +78,7 @@ if FThreadsEnable then
 	ThreadData[0]^.KillThread();
 	ThreadData[0]^.Finished := False;
 	ThreadData[0]^.FreeMemData();
-	ThreadData[0]^.Thread   := TSThread.Create(TSPointerProcedure(@S3DFractalThreadCallback), ThreadData[0]);
+	ThreadData[0]^.Thread   := TSThread.Create(TSPointerProcedure(@S3DFractalFormThreadCallback), ThreadData[0]);
 	//PolygonsConstruction();
 	end
 else
@@ -100,30 +101,27 @@ if FThreadsEnable then
 			F3dObjectsInfo[ObjectId]:=S_TRUE;
 end;
 
+procedure TS3DFractalForm.ChangeDepth(const _IncrementOrDecrement : TSInt32);
+var
+	TempDepth : TSInt64;
+begin
+TempDepth := Depth;
+TempDepth += _IncrementOrDecrement;
+if TempDepth < 0 then
+	TempDepth := 0;
+Construct();
+FLabelDepth.Caption := SStr(Depth);
+FButtonDecrementDepth.Active := Depth <> 0;
+end;
+
 procedure S3DFractalFormButtonDepthPlus(Button:TSScreenButton);
 begin
-with TS3DFractalForm(Button.FUserPointer1) do
-	begin
-	FDepth += 1;
-	Construct();
-	FLabelDepth.Caption := SStr(Depth);
-	FBMD.Active := True;
-	end;
+TS3DFractalForm(Button.FUserPointer1).ChangeDepth(1);
 end;
 
 procedure S3DFractalFormButtonDepthMinus(Button:TSScreenButton);
 begin
-with TS3DFractalForm(Button.FUserPointer1) do
-	begin
-	if Depth > 0 then
-		begin
-		FDepth -= 1;
-		Construct();
-		FLabelDepth.Caption := SStr(Depth);
-		if Depth = 0 then
-			FBMD.Active:=False;
-		end;
-	end;
+TS3DFractalForm(Button.FUserPointer1).ChangeDepth(-1);
 end;
 
 constructor TS3DFractalForm.Create(const VContext : ISContext);
@@ -131,32 +129,32 @@ begin
 inherited;
 FLabelDepth  := nil;
 FLabelDepthCaption := nil;
-FBMD := nil;
-FBPD := nil;
+FButtonDecrementDepth := nil;
+FButtonIncrementDepth := nil;
 
 InitProjectionComboBox(Render.Width-160,5,150,30,[SAnchRight]).BoundsMakeReal();
 InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]).BoundsMakeReal();
 
 FLabelDepthCaption := SCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SAnchRight], True, True, Self);
 
-FBPD:=TSScreenButton.Create;
-Screen.CreateInternalComponent(FBPD);
+FButtonIncrementDepth:=TSScreenButton.Create;
+Screen.CreateInternalComponent(FButtonIncrementDepth);
 Screen.LastInternalComponent.SetBounds(Render.Width-160-30,5,20,30);
 Screen.LastInternalComponent.Anchors:=[SAnchRight];
 Screen.LastInternalComponent.Caption:='+';
 Screen.LastInternalComponent.FUserPointer1:=Self;
-FBPD.OnChange:=TSScreenComponentProcedure(@S3DFractalFormButtonDepthPlus);
+FButtonIncrementDepth.OnChange:=TSScreenComponentProcedure(@S3DFractalFormButtonDepthPlus);
 Screen.LastInternalComponent.Visible:=True;
 Screen.LastInternalComponent.BoundsMakeReal();
 
 FLabelDepth := SCreateLabel(Screen, '0', Render.Width-160-60,5,20,30, [SAnchRight], True, True, Self);
 
-FBMD:=TSScreenButton.Create;
-Screen.CreateInternalComponent(FBMD);
+FButtonDecrementDepth:=TSScreenButton.Create;
+Screen.CreateInternalComponent(FButtonDecrementDepth);
 Screen.LastInternalComponent.SetBounds(Render.Width-160-90,5,20,30);
 Screen.LastInternalComponent.Anchors:=[SAnchRight];
 Screen.LastInternalComponent.Caption:='-';
-FBMD.OnChange:=TSScreenComponentProcedure(@S3DFractalFormButtonDepthMinus);
+FButtonDecrementDepth.OnChange:=TSScreenComponentProcedure(@S3DFractalFormButtonDepthMinus);
 Screen.LastInternalComponent.FUserPointer1:=Self;
 Screen.LastInternalComponent.Visible:=True;
 Screen.LastInternalComponent.BoundsMakeReal();
@@ -174,10 +172,10 @@ end;
 
 destructor TS3DFractalForm.Destroy();
 begin
-SKill(FBMD);
 SKill(FLabelDepth);
 SKill(FLabelDepthCaption);
-SKill(FBPD);
+SKill(FButtonIncrementDepth);
+SKill(FButtonDecrementDepth);
 inherited Destroy();
 end;
 

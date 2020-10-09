@@ -20,7 +20,7 @@ uses
 type
 	TSFractalIndexInt = TSUInt64;
 	
-	TS3DFractal=class (TSFractal)
+	TS3DFractal = class(TSFractal)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
@@ -46,7 +46,7 @@ type
 		function SizeLabelCaption() : TSString;
 		procedure CkeckConstructedObjects();
 		procedure PaintObject();
-		procedure SaveObject();
+		procedure SaveObject(); // видимо, не всегда срабатывает из-за хранения данных в памяти видеокарты
 		function CalculatePolygonsLimit() : TSUInt64; virtual;
 			public
 		procedure DeleteRenderResources();override;
@@ -77,7 +77,6 @@ type
 		function InitSizeLabel(const a,b,c,d:LongWord;const Anch:TSSetOfByte = []) : TSScreenLabel;
 		function InitSaveButton(const a,b,c,d:TSUInt32;const Anch:TSSetOfByte = []) : TSScreenButton;
 		end;
-	TSFractal3D = TS3DFractal;
 
 implementation
 
@@ -87,6 +86,7 @@ uses
 	,SmoothFileUtils
 	,SmoothLog
 	,SmoothBaseUtils
+	,SmoothContextUtils
 	;
 
 procedure TS3DFractal.DeleteRenderResources();
@@ -147,8 +147,11 @@ Result := FSizeLabel;
 end;
 
 procedure TS3DFractal.SaveObject();
+var
+	ObjectFileName : TSString;
 begin
-TS3dObjectS3DMLoader.SaveModelToFile(F3dObject, 'Save ' + SFreeFileName(ClassName(), ''))
+ObjectFileName := 'Save object of 3D fractal ''' + ClassName() + ''', d=' + SStr(Depth) + '.s3dm';
+TS3dObjectS3DMLoader.SaveModelToFile(F3dObject, SFreeFileName(ObjectFileName, ''));
 end;
 
 procedure S3DFractalSaveButtonProcedure(Button : TSScreenButton);
@@ -425,6 +428,8 @@ if (FSizeLabel <> nil) and (not FSizeLabelFlag)  and (F3dObject <> nil) then
 	if (not FThreadsEnable) or (FThreadsEnable and F3dObjectsReady) then
 		FSizeLabelFlag := True;
 	end;
+if (Context.KeyPressed and (Context.KeysPressed(Char(17))) and (Context.KeyPressedChar='S') and (Context.KeyPressedType=SUpKey)) then
+	SaveObject();
 end;
 
 function TS3DFractal.SizeLabelCaption() : TSString;
@@ -434,14 +439,14 @@ var
 begin
 if (not FThreadsEnable) or (FThreadsEnable and F3dObjectsReady) then
 	if HasIndexes then
-		Result := 
-			' Size: '+SMemorySizeToString(F3dObject.Size)+
+		Result := Iff(FEnableVBO, 'V', '') + 'RAM' + // VRAM is Video RAM
+			' size: '+SMemorySizeToString(F3dObject.Size)+
 			'; Faces: '+SMemorySizeToString(F3dObject.FacesSize)+
 			', Vertices: '+SMemorySizeToString(F3dObject.VerticesSize)+
 			'. Objects: '+SStr(F3dObject.QuantityObjects)+'.'
 	else
-		Result :=
-			'Size of vertices: '+SMemorySizeToString(F3dObject.VerticesSize)+
+		Result := Iff(FEnableVBO, 'V', '') + 'RAM' +  // VRAM is Video RAM
+			' size of vertices: '+SMemorySizeToString(F3dObject.VerticesSize)+
 			'; Objects: '+SStr(F3dObject.QuantityObjects)+'.'
 {else if (FThreadsEnable and (not F3dObjectsReady) and (F3dObject.QuantityObjects > 0)) then
 	begin

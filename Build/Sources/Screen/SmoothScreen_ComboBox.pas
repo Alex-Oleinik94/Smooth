@@ -15,7 +15,7 @@ uses
 
 type
 	TSComboBox = class;
-	TSComboBoxProcedure = procedure (_OldIndex, _NewIndex : TSInt32; _ComboBox : TSComboBox);
+	TSComboBoxProcedure = procedure (_PreviousItemIndex, _ItemIndex : TSInt32; _ComboBox : TSComboBox);
 	TSComboBox = class(TSOpenComponent, ISComboBox)
 			public
 		constructor Create();override;
@@ -23,7 +23,7 @@ type
 		class function ClassName() : TSString; override;
 			protected
 		FItems : TSComboBoxItemList;
-		FProcedure : TSComboBoxProcedure;
+		FCallBackProcedure : TSComboBoxProcedure;
 		FMaxLines : TSUInt32;
 		FSelectedItemIndex : TSInt32;
 		FFirstScrollItem : TSInt32;
@@ -59,7 +59,7 @@ type
 		property MaxLines          : LongWord read FMaxLines          write FMaxLines;
 
 		property LinesCount        : TSUInt32 read GetLinesCount;
-		property CallBackProcedure : TSComboBoxProcedure read FProcedure write FProcedure;
+		property CallBackProcedure : TSComboBoxProcedure read FCallBackProcedure write FCallBackProcedure;
 
 		property ItemsCount : TSUInt32 read GetItemsCount;
 		property Items : PSComboBoxItem read GetItems;
@@ -161,12 +161,12 @@ procedure TSComboBox.SelectingItem(const ItemIndex : TSInt32);
 begin
 ClearPriority();
 {$IFDEF SCREEN_DEBUG}
-	WriteLn('TSComboBox__SelectingItem() : Before calling "FProcedure(...)"');
+	WriteLn('TSComboBox__SelectingItem() : Before calling "FCallBackProcedure(...)"');
 	{$ENDIF}
-if (FProcedure <> nil) then
-	FProcedure(FSelectedItemIndex, ItemIndex, Self);
+if (FCallBackProcedure <> nil) and (FSelectedItemIndex <> ItemIndex) then
+	FCallBackProcedure(FSelectedItemIndex, ItemIndex, Self);
 {$IFDEF SCREEN_DEBUG}
-	WriteLn('TSComboBox__SelectingItem() : After calling "FProcedure(...)"');
+	WriteLn('TSComboBox__SelectingItem() : After calling "FCallBackProcedure(...)"');
 	{$ENDIF}
 SelectedItemIndex := ItemIndex;
 FTextColor:=SVertex4fImport();

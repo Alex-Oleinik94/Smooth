@@ -57,7 +57,7 @@ var
 begin
 _Stream.Position := 0;
 ImageFormat := TSImageFormatDeterminer.DetermineFormat(_Stream);
-if (ImageFormat = SImageFormatNull) and (_FileName <> '') and (SUpCaseString(SFileExtension(_FileName)) = 'TGA') then
+if (ImageFormat = SImageFormatNull) and (_FileName <> '') and (SFileExtension(_FileName, True) = 'TGA') then
 	ImageFormat := SImageFormatTga;
 SLog.Source(['SLoadBitMapFromStream: Determined format "', TSImageFormatDeterminer.DetermineFileExtensionFromFormat(ImageFormat), '" for "', _FileName, '".']);
 _Stream.Position := 0;

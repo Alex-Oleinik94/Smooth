@@ -128,7 +128,7 @@ while (inherited > Result + CountingTheNumberOfPolygons(Index) * 2) do
 	Result += CountingTheNumberOfPolygons(Index) * 2;
 	Index += 1;
 	end;
-SLog.Source(['dasdasd',Result]);
+//SLog.Source(['dasdasd',Result]);
 end;
 
 procedure TSFractalSierpinskiCarpetSixAngle.SetType(const _Type : TSUInt8);
@@ -165,9 +165,9 @@ else Result := TSVector4int8.Create(Random(6) - 2, Random(6) - 2, Random(6) - 2,
 end;
 end;
 
-procedure TSFractalSierpinskiCarpetSixAngle__SetType(a, b : TSUInt32; Component : TSScreenComboBox);
+procedure TSFractalSierpinskiCarpetSixAngle__SetType(_PreviousItemIndex, _ItemIndex : TSUInt32; _Component : TSScreenComboBox);
 begin
-TSFractalSierpinskiCarpetSixAngle(Component.FUserPointer1).SetType(b);
+TSFractalSierpinskiCarpetSixAngle(_Component.FUserPointer1).SetType(_ItemIndex);
 end;
 
 constructor TSFractalSierpinskiCarpetSixAngle.Create(const VContext : ISContext);
@@ -195,7 +195,7 @@ with FTypeComboBox do
 	CreateItem('Треугольник');
 	CreateItem('Ладья');
 	CreateItem('Тупой глиф');
-	CreateItem('Острый глиф');
+	CreateItem('Острый глиф');	
 	CreateItem('Красивый узор');
 	CreateItem('Лист');
 	CreateItem('Пушинки');
@@ -205,6 +205,7 @@ with FTypeComboBox do
 	CreateItem('Орнамент');
 	CreateItem('Случайный узор');
 	SelectItem := StartType;
+	CursorQuickSelect := True;
 	FUserPointer1 := Self;
 	CallBackProcedure := TSScreenComboBoxProcedure(@TSFractalSierpinskiCarpetSixAngle__SetType);
 	Visible := True;
@@ -222,7 +223,7 @@ end;
 
 class function TSFractalSierpinskiCarpetSixAngle.ClassName():TSString;
 begin
-Result := 'Шестиугольники Серпинского';
+Result := 'Шестиугольник Серпинского';
 end;
 
 class function TSFractalSierpinskiCarpetSixAngle.CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum;
@@ -287,7 +288,7 @@ for Index := 0 to 5 do
 		_PointCenter.y + Cos(Index/6*2*PI) * _Radius);
 Rec(PointList, FDepth);
 //SLog.Source(['End1(',FDepth,')']);
-Freemem(PointList);
+FreeMem(PointList);
 //SLog.Source(['End2(',FDepth,')']);
 EndOfPolygonsConstruction(ObjectNumber);
 //SLog.Source(['End3(',FDepth,')']);

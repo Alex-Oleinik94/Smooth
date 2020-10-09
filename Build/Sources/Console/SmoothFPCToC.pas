@@ -1388,7 +1388,7 @@ if AnyError then
 	SHint(['  Use -pl(%object_path) for set object path to translate.']);
 	Halt(0);
 	end;
-if (SFileExtension(SUpCaseString(FObject))='PAS') or (SFileExtension(SUpCaseString(FObject))='PP') then
+if (SFileExtension(FObject, True)='PAS') or (SFileExtension(SUpCaseString(FObject))='PP') then
 	begin
 	SLog.Source(['TSTranslater.GoRead : Start Reading (Not Makefile Type)']);
 	FT:=FileType(FObject);

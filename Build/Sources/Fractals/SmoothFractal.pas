@@ -11,6 +11,7 @@ uses
 	;
 type
 	TSFractal = class;
+	PSCustomFractalThreadData = ^ TSCustomFractalThreadData;
 	
 	TSFractalThreadData = object
 			public
@@ -20,14 +21,14 @@ type
 		FFractal:TSFractal;
 		FThread:TSThread;
 		FFinished:Boolean;
-		FData : TSPointer;
+		FData : PSCustomFractalThreadData;
 			public
 		procedure FreeMemData();
 		procedure KillThread();
 			public
 		property Fractal : TSFractal read FFractal write FFractal;
 		property Finished : TSBoolean read FFinished write FFinished;
-		property Data : TSPointer read FData write FData;
+		property Data : PSCustomFractalThreadData read FData write FData;
 		property Thread : TSThread read FThread write FThread;
 		end;
 	PSFractalThreadData = ^ TSFractalThreadData;
@@ -70,8 +71,40 @@ type
 		property ThreadData[Index : TSMaxEnum] : PSFractalThreadData read GetThreadData;
 		end;
 
+procedure SKill(var _Object : PSCustomFractalThreadData); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure SKill(var _Object : PSFractalThreadData); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure SKill(var _Object : TSFractal); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+
 implementation
 
+procedure SKill(var _Object : TSFractal); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if _Object <> nil then
+	begin
+	_Object.Destroy();
+	_Object := nil;
+	end;
+end;
+
+procedure SKill(var _Object : PSCustomFractalThreadData); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if _Object <> nil then
+	begin
+	FreeMem(_Object);
+	_Object := nil;
+	end;
+end;
+
+procedure SKill(var _Object : PSFractalThreadData); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if _Object <> nil then
+	begin
+	FreeMem(_Object);
+	_Object := nil;
+	end;
+end;
+
+// TSFractalThreadData
 
 procedure TSFractalThreadData.FreeMemData();
 begin
@@ -90,6 +123,8 @@ FFractal := _Fractal;
 FThread := nil;
 FFinished := False;
 end;
+
+// TSFractal
 
 function TSFractal.GetThreadData(Index : TSMaxEnum) : PSFractalThreadData;
 begin
@@ -186,7 +221,7 @@ FThreadsEnable:=False;
 FThreadsData:=nil;
 end;
 
-destructor TSFractal.Destroy;
+destructor TSFractal.Destroy();
 begin
 DestroyThreads;
 inherited;

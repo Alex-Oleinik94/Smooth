@@ -197,7 +197,7 @@ end;
 function TSConvertedFileInfo.GetString() : TSString;
 begin
 Result += 
-	'Converted' + '"' + SFileName(FName) + '.' + SDownCaseString(SFileExtension(FName)) + '"' +
+	'Converted' + '"' + SFileName(FName) + '.' + SFileExtension(FName, False) + '"' +
 	':in ' + SMemorySizeToString(FSize, 'EN') + ';out ' + SMemorySizeToString(FOutSize, 'EN') + ';time ' +
 	StringTrimAll(SMillisecondsToStringTime(FPastMilliseconds, 'ENG'), ' ') + ';cache ' + 
 	Iff(FConvertationNotNeed, 'True', 'False') + '.';
@@ -209,7 +209,7 @@ with TSTextMultiStream.Create([SCaseLog, SCasePrint]) do
 	begin
 	Write('Converted');
 	TextColor(14);
-	Write(['"',SFileName(FName) + '.' + SDownCaseString(SFileExtension(FName)), '"']);
+	Write(['"',SFileName(FName) + '.' + SFileExtension(FName, False), '"']);
 	TextColor(7);
 	Write(':in ');
 	TextColor(10);

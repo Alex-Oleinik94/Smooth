@@ -95,7 +95,7 @@ var
 function ProccessFullscreen(const Comand : TSString):TSBool;
 begin
 Result := True;
-if ('FULLSCREEN' in ContextSettings) then
+if (SCFullscreenWindow in ContextSettings) then
 	begin
 	if SContextOptionFullscreen(False) in ContextSettings then
 		begin
@@ -371,16 +371,16 @@ end;
 function ProccessMax(const Comand : TSString):TSBool;
 begin
 Result := True;
-ContextSettings -= 'MAX';
-ContextSettings -= 'MIN';
+ContextSettings -= SCMaximizedWindow;
+ContextSettings -= SCMinimizedWindow;
 ContextSettings += SContextOptionMax();
 end;
 
 function ProccessMin(const Comand : TSString):TSBool;
 begin
 Result := True;
-ContextSettings -= 'MAX';
-ContextSettings -= 'MIN';
+ContextSettings -= SCMaximizedWindow;
+ContextSettings -= SCMinimizedWindow;
 ContextSettings += SContextOptionMin();
 end;
 

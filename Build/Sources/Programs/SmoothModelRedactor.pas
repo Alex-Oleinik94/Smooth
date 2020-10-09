@@ -103,7 +103,7 @@ var
 	OldObjectsCount : TSUInt64 = 0;
 begin
 Result := False;
-Extension := SUpCaseString(SFileExtension(FileName));
+Extension := SFileExtension(FileName, True);
 try
 	if Extension = '3DS' then
 		Result := SLoad3dObject3DS(FCustomModel, Stream, FileName)

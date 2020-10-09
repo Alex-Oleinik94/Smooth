@@ -36,7 +36,7 @@ type
 		FTextureParams : TStringParams;
 		FFontLoaded  : TSBoolean;
 		FFontHeight : TSUInt8;
-		procedure LoadFont(const FontWay : TSString);
+		function LoadFont(const _FontFileName : TSString) : TSBoolean;
 		class function GetLongInt(var Params:TStringParams;const Param:TSString):TSInt32;
 		function GetSymbolWidth(const Index:char):LongInt;inline;
 		function LoadSF():TSBoolean;
@@ -265,16 +265,16 @@ for i:=Low(Params) to High(Params) do
 	end;
 end;
 
-procedure TSFont.LoadFont(const FontWay:string);
+function TSFont.LoadFont(const _FontFileName : TSString) : TSBoolean;
 var
-	Fail:TextFile;
+	f:TextFile;
 	Identificator:string = '';
 	C:Char = ' ';
 	C2:char = ' ';
 
 procedure LoadParams(var Params:TStringParams);
 begin
-while not eoln(Fail) do
+while not eoln(f) do
 	begin
 	SetLength(Params,Length(Params)+1);
 	Params[High(Params)][0]:='';
@@ -282,13 +282,13 @@ while not eoln(Fail) do
 	C:=' ';
 	while C<>'=' do
 		begin
-		Read(Fail,C);
+		Read(f,C);
 		if C<>'=' then
 			begin
 			Params[High(Params)][0]+=C;
 			end;
 		end;
-	ReadLn(Fail,Params[High(Params)][1]);
+	ReadLn(f,Params[High(Params)][1]);
 	end;
 end;
 
@@ -327,73 +327,61 @@ while (S[Position]<>',')and(Position<Length(s)) do
 	Position+=1;
 Val(GetString(S,LastPosition,Position),I);
 Obj.Width:=i;
-
 end;
 
 begin
-Assign(Fail,FontWay);
-Reset(Fail);
-while not eof(Fail) do
+Result := False;
+Assign(f, _FontFileName);
+Reset(f);
+while not eof(f) do
 	begin
-	Read(Fail,C);
+	Read(f,C);
 	Identificator:='';
 	repeat
 	if (c<>' ') and (c<>';') then
 		begin
 		Identificator+=UpCase(c);
 		end;
-	Read(Fail,C);
+	Read(f,C);
 	until (c='(') or (c=':');
-	ReadLn(Fail);
+	ReadLn(f);
 	if (Identificator='FONTPARAMS') then
 		LoadParams(FFontParams);
 	if (Identificator='TEXTUREPARAMS') then
 		LoadParams(FTextureParams);
 	if Identificator='SIMBOLPARAMS' then
 		begin
-		while not eoln(Fail) do
+		while not eoln(f) do
 			begin
 			Identificator:='';
-			Read(Fail,C2);
-			Read(Fail,C);
-			ReadLn(Fail,Identificator);
+			Read(f,C2);
+			Read(f,C);
+			ReadLn(f,Identificator);
 			LoadSymbol(Identificator,FSymbolParams[C2]);
 			end;
 		Identificator:='';
 		end;
-	ReadLn(Fail);
+	ReadLn(f);
 	end;
-Close(Fail);
+Close(f);
 FFontHeight := GetLongInt(FFontParams, 'Height');
 FFontLoaded := True;
+Result := True;
 end;
 
 function TSFont.Load():TSBoolean;
 var
-	FontWay:string = '';
-	i:LongInt = 0;
-	ii:LongInt = 0;
+	FontTxt : TSString;
+	Index, Index2 : TSMaxEnum;
 begin
-if SFileExtension(FFileName)='SF' then
+Result := False;
+if SFileExtension(FFileName, True) = 'SF' then
+	Result := LoadSF()
+else if inherited Load() then
 	begin
-	Result := LoadSF();
-	Exit;
-	end;
-Result:=inherited Load();
-if not Result then
-	Exit;
-i:=Length(FFileName);
-while (FFileName[i]<>'.')and(FFileName[i]<>'/')and(i>0)do
-	i-=1;
-if (i>0)and (FFileName[i]='.') then
-	begin
-	for ii:=1 to i do
-		FontWay+=FFileName[ii];
-	FontWay+='txt';
-	if SFileExists(FontWay) then
-		begin
-		LoadFont(FontWay);
-		end;
+	FontTxt := SFileNameWithoutExtension(FFileName) + '.txt';
+	if SFileExists(FontTxt) then
+		Result := LoadFont(FontTxt);
 	end;
 end;
 
