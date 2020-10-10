@@ -71,7 +71,7 @@ implementation
 
 uses
 	 SmoothContextUtils
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	;
 
 class function TSComboBox.ClassName() : TSString;

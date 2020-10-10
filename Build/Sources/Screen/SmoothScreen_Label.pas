@@ -40,7 +40,7 @@ type
 implementation
 
 uses
-	 SmoothMathUtils
+	 SmoothArithmeticUtils
 	;
 
 class function TSLabel.ClassName() : TSString; 

@@ -8,7 +8,7 @@ uses
 	 SmoothBase
 	,SmoothContextInterface
 	,Smooth3DFractal
-	,SmoothMath
+	,SmoothComputableExpression
 	,SmoothRenderBase
 	;
 

@@ -25,7 +25,7 @@ uses
 	,SmoothFractalTerrain
 	,SmoothStringUtils
 	,SmoothFileUtils
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothCamera
 	,SmoothContextUtils
 	{$IF not defined(ENGINE)}

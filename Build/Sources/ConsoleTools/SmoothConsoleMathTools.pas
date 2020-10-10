@@ -18,7 +18,7 @@ uses
 	Crt
 	,StrMan
 	
-	,SmoothMath
+	,SmoothComputableExpression
 	,SmoothStringUtils
 	;
 

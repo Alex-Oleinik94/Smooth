@@ -6,7 +6,7 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothMath
+	,SmoothComputableExpression
 	;
 
 type

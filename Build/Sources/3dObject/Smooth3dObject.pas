@@ -94,7 +94,7 @@ uses
 	 SmoothStringUtils
 	,SmoothLog
 	,SmoothFileUtils
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothSysUtils
 	,SmoothBaseUtils
 	,Smooth3dObjectLoader

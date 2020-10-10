@@ -11,7 +11,7 @@ uses
 	,SmoothContextInterface
 	,SmoothCommon
 	,SmoothCommonStructs
-	,SmoothMath
+	,SmoothMathGraphic
 	,SmoothFont
 	,SmoothImage
 	,SmoothRenderBase
@@ -76,9 +76,10 @@ implementation
 uses
 	 SmoothStringUtils
 	,SmoothFileUtils
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothBaseUtils
 	,SmoothContextUtils
+	,SmoothComputableExpression
 	;
 
 function VertexFunction(Vertex:TSVisibleVector;const p:Pointer):TSVisibleVector;

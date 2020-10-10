@@ -37,7 +37,7 @@ implementation
 
 uses
 	 SmoothRenderBase
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothVertexObject
 	,SmoothScreenBase
 	,SmoothStringUtils

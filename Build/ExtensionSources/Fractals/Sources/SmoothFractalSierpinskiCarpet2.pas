@@ -50,7 +50,7 @@ type
 implementation
 
 uses
-	 SmoothMathUtils
+	 SmoothArithmeticUtils
 	,SmoothRenderBase
 	,SmoothScreenBase
 	;

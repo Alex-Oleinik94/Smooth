@@ -13,14 +13,16 @@ uses
 	,SmoothContextClasses
 	,SmoothBase
 	,SmoothFont
-	,SmoothMath
+	,SmoothMathGraphic
+	,SmoothLineSystem
+	,SmoothComputableExpression
 	,SmoothGraphicViewer
 	,SmoothCommonStructs
 	,SmoothRenderBase
 	,SmoothScreenBase
 	,SmoothStringUtils
 	,SmoothFileUtils
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothScreenClasses
 	,SmoothScreen_Edit
 	{$IF not defined(ENGINE)}

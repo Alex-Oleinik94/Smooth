@@ -66,7 +66,7 @@ implementation
 uses
 	 SmoothStringUtils
 	,SmoothFileUtils
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothScreenBase
 	;
 

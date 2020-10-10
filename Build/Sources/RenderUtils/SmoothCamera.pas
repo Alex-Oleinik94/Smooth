@@ -9,7 +9,6 @@ uses
 	,SmoothCommonStructs
 	,SmoothContextClasses
 	,SmoothMatrix
-	,SmoothMath
 	,SmoothCasesOfPrint
 	,SmoothContextInterface
 	,SmoothCursor

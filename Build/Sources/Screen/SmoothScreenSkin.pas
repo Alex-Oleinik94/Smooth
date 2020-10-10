@@ -98,7 +98,7 @@ implementation
 
 uses
 	 SmoothStringUtils
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothRenderInterface
 	,SmoothCommon
 	,SmoothTextVertexObject

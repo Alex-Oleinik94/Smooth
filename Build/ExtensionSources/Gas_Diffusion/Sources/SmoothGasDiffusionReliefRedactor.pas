@@ -128,7 +128,7 @@ implementation
 
 uses
 	 SmoothFileUtils
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothCommon
 	,SmoothBaseUtils
 	,SmoothContextUtils

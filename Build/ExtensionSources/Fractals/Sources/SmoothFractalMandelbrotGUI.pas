@@ -124,7 +124,7 @@ uses
 	 SmoothStringUtils
 	,SmoothFileUtils
 	,SmoothScreenBase
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	//,SmoothBitMap
 	,SmoothSysUtils
 	,SmoothBaseUtils

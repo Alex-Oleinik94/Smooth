@@ -27,7 +27,7 @@ type
 implementation
 
 uses
-	 SmoothMathUtils
+	 SmoothArithmeticUtils
 	,SmoothCursor
 	,SmoothContextUtils
 	;

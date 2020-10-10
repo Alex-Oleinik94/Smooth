@@ -7,7 +7,6 @@ interface
 uses
 	 SmoothBase
 	,SmoothLists
-	,SmoothMath
 	,SmoothBaseClasses
 	;
 

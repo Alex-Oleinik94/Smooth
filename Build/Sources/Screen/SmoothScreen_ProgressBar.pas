@@ -51,7 +51,7 @@ type
 implementation
 
 uses
-	 SmoothMathUtils
+	 SmoothArithmeticUtils
 	;
 
 class function TSProgressBar.ClassName() : TSString; 

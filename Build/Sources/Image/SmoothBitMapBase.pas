@@ -47,8 +47,7 @@ function SPixelRGBA32FromMemory(const _Memory : TSBitMapData; const _Index : TSM
 implementation
 
 uses
-	 SmoothMathUtils
-	//,SmoothBaseUtils
+	 SmoothArithmeticUtils
 	;
 
 function SPixelRGB24FromMemory(const _Memory : TSBitMapData; const _Index : TSMaxEnum) : TSPixel3b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}

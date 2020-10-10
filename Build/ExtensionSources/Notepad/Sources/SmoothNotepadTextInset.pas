@@ -77,7 +77,7 @@ uses
 	,SmoothStringUtils
 	,SmoothEncodingUtils
 	,SmoothFileUtils
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothCommon
 	,SmoothContextUtils
 	

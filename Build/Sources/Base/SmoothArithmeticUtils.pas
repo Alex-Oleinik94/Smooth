@@ -1,6 +1,6 @@
 {$INCLUDE Smooth.inc}
 
-unit SmoothMathUtils;
+unit SmoothArithmeticUtils;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 	;
 
 const
-	//Используется для вычисления с Эпсилон
+	//Используется для вычисления с допустимой погрешностью
 	SZero = 0.0001;
 var
 	//Несуществующее значение
@@ -75,27 +75,6 @@ function STruncUp(const T : TSFloat32) : TSInt32;{$IFDEF SUPPORTINLINE} inline; 
 function STruncUp(const T : TSFloat80) : TSInt64;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
 {$ENDIF WITHOUT_EXTENDED}
 
-type
-	TSMathFloat = TSFloat64;
-
-function SComputeDeterminantMatrix2x2(const m00, m01, m10, m11 : TSMathFloat) : TSMathFloat;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-function SComputeDeterminantMatrix3x3(const m1, m2, m3, m4, m5, m6, m7, m8, m9 : TSMathFloat) : TSMathFloat;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-
-type
-	PSPlane3D = ^ TSPlane3D;
-	TSPlane3D  = object
-			public
-		a, b, c, d : TSMathFloat;
-			public
-		procedure Import(const a1 : TSMathFloat = 0; const b1 : TSMathFloat = 0; const c1 : TSMathFloat = 0; const d1 : TSMathFloat = 0);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-		procedure Write();{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-		end;
-
-function SPlane3DFrom3Points(const x1, y1, z1, x2, y2, z2, x0, y0, z0 : TSMathFloat) : TSPlane3D;{$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
-function SPlane3DFrom2VectorsAndPoint(const x1, y1, z1, x2, y2, z2, x0, y0, z0 : TSMathFloat) : TSPlane3D;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-
-function SCosSinAngle(const Cosinus, Sinus : TSMathFloat) : TSMathFloat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
 implementation
 
 uses
@@ -104,61 +83,12 @@ uses
 	,SmoothBaseUtils
 	;
 
-function SCosSinAngle(const Cosinus, Sinus : TSMathFloat) : TSMathFloat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Cosinus = -1 then
-	Result := PI
-else if Cosinus = 1 then
-	Result := 0
-else if Sinus = -1 then
-	Result := 3 * PI / 2
-else if Sinus = 1 then
-	Result := PI / 2
-else if Sinus > SZero then
-	Result := ArcCos(Cosinus)
-else
-	Result := ArcCos(- Cosinus) + PI;
-end;
-
-function SPlane3DFrom2VectorsAndPoint(const x1, y1, z1, x2, y2, z2, x0, y0, z0 : TSMathFloat) : TSPlane3D;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-begin
-Result := SPlane3DFrom3Points(
-	x0,      y0,      z0,
-	x0 + x1, y0 + y1, z0 + z1,
-	x0 + x2, y0 + y2, z0 + z2);
-end;
-
-function SPlane3DFrom3Points(const x1, y1, z1, x2, y2, z2, x0, y0, z0 : TSMathFloat) : TSPlane3D;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-begin
-Result.Import(
-	+ SComputeDeterminantMatrix2x2(y1 - y0, z1 - z0, y2 - y0, z2 - z0),
-	- SComputeDeterminantMatrix2x2(x1 - x0, z1 - z0, x2 - x0, z2 - z0),
-	+ SComputeDeterminantMatrix2x2(x1 - x0, y1 - y0, x2 - x0, y2 - y0),
-	- x0 * SComputeDeterminantMatrix2x2(y1 - y0, z1 - z0, y2 - y0, z2 - z0)
-	+ y0 * SComputeDeterminantMatrix2x2(x1 - x0, z1 - z0, x2 - x0, z2 - z0)
-	- z0 * SComputeDeterminantMatrix2x2(x1 - x0, y1 - y0, x2 - x0, y2 - y0))
-	;
-end;
-
 function SRandomOne() : TSInt8;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if Random(2) = 0 then
 	Result := -1
 else
 	Result := 1;
-end;
-
-procedure TSPlane3D.Import(const a1 : TSMathFloat = 0; const b1 : TSMathFloat = 0; const c1 : TSMathFloat = 0; const d1 : TSMathFloat = 0);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-begin
-a := a1;
-b := b1;
-c := c1;
-d := d1;
-end;
-
-procedure TSPlane3D.Write();{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-begin
-System.Write(a:0:10, ' ', b:0:10, ' ', c:0:10, ' ', d:0:10);
 end;
 
 function SCountSimbolsInNumber(L : TSInt32) : TSInt32;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
@@ -169,20 +99,6 @@ while L <> 0 do
 	Result += 1;
 	L := L div 10;
 	end;
-end;
-
-function SComputeDeterminantMatrix3x3(const m1, m2, m3, m4, m5, m6, m7, m8, m9 : TSMathFloat) : TSMathFloat;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-begin
-Result := 
-	  m1 * SComputeDeterminantMatrix2x2(m5, m6, m8, m9)
-	- m2 * SComputeDeterminantMatrix2x2(m4, m6, m7, m9)
-	+ m3 * SComputeDeterminantMatrix2x2(m4, m5, m7, m8)
-	;
-end;
-
-function SComputeDeterminantMatrix2x2(const m00, m01, m10, m11 : TSMathFloat) : TSMathFloat;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-begin
-Result := m00 * m11 - m01 * m10;
 end;
 
 function SFloatExists(const F : TSFloat64) : TSBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

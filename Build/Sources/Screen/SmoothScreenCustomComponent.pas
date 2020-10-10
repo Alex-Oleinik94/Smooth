@@ -211,7 +211,7 @@ implementation
 
 uses
 	 SmoothCommon
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothContextUtils
 	;
 

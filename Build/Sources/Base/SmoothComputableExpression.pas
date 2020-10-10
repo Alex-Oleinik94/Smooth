@@ -1,21 +1,13 @@
 {$INCLUDE Smooth.inc}
 
-unit SmoothMath;
+unit SmoothComputableExpression;
 
 interface
 
 uses 
-	 Crt
-	,Math
-	,Classes
-	
-	,SmoothCommonStructs
-	,SmoothBase
-	,SmoothRender
-	,SmoothContext
+
+	SmoothBase
 	,SmoothBaseClasses
-	,SmoothContextClasses
-	,SmoothRenderBase
 	;
 
 const
@@ -168,95 +160,62 @@ type
 		function Errors(Index : LongInt):PChar;
 		property QuickCalculation:Boolean read FCalculateForGraph write FCalculateForGraph;
 		end;
-	
-	TSMathGraphicThread=class(TThread)
-		constructor Create(const VClass:Pointer;const VBegin,VEnd:real;const VPosBegin,VPosEnd:LongWord);
-		destructor Destroy;override;
-		procedure Execute;override;
-			private
-		FEnd,FBegin:real;
-		FClass:pointer;
-		FPEnd,FPBegin:LongWord;
-		end;
-type
-	TSVisibleVector = object(TSVector3f)
-			public
-		Visible : TSBoolean;
-		end;
-	TSVisibleVectorList = packed array of TSVisibleVector;
-	TSVisibleVectorFunction = function (Vector : TSVisibleVector; const Void : TSPointer) : TSVisibleVector;
-type
-	TSMathGraphic=class(TSPaintableObject)
-			public
-		constructor Create();override;
-		destructor Destroy;override;
-		class function ClassName:string;override;
-			protected
-		FComplexity:LongInt;
-		FExpression:TSExpression;
-		FVertexLength:LongInt;
-		FThread:TSMathGraphicThread;
-		FVariable:PChar;
-		FYShift:real;
-		FArVertexes:TSVisibleVectorList;
-		FVertexFunction:TSVisibleVectorFunction;
-		FUseThread:boolean;
-		FVertexFunctionPointer:Pointer;
-		FAss:Boolean;
-		FLastVBegin,FLastVEnd:Real;
-		function GetExpression:PChar;
-		procedure SetExpression(VPChar:PChar);
-		procedure SetComplexity(VComplexity:LongInt);
-		procedure SetArraysLength;
-		function MathExists(const I:LongInt):Boolean;
-		procedure RealConstruct(const VBegin,VEnd:real;const VPosBegin,VPosEnd:LongWord);
-			public
-		procedure Construct(const VBegin,VEnd:real);
-		procedure Paint();override;
-		procedure ChangeConstruct(const VBegin,VEnd:real);
-			public
-		property VertexFunctionPointer:Pointer read FVertexFunctionPointer write FVertexFunctionPointer;
-		property Expression:PChar read GetExpression write SetExpression;
-		property Complexity:LongInt read FComplexity write SetComplexity;
-		property YShift:Real read FYShift write FYShift;
-		property VertexFunction:TSVisibleVectorFunction read FVertexFunction write FVertexFunction;
-		property UseThread:boolean read FUseThread write FUseThread;
-		function Assigned:Boolean;inline;
-		end;
 
 function TSExpressionChunkCreateBoolean(const VBoolean:Boolean):TSExpressionChunk;
 function TSExpressionChunkCreateNumeric(const VNumeric:LongInt):TSExpressionChunk;
 function TSExpressionChunkCreateReal(const VReal:Real):TSExpressionChunk;
-function TSExpressionChunkCreateNone:TSExpressionChunk;
-
-{$DEFINE SMATHREADINTERFACE}
-{$INCLUDE SmoothMathOperators.inc}
-{$UNDEF SMATHREADINTERFACE}
-
-type 
-	TSLineSystemFloat = TSMathFloat;
-	TSLineSystem = class
-			public
-		constructor Create(const nn : LongWord);
-		destructor Destroy();override;
-		procedure CalculateGauss();
-		procedure CalculateRotate();
-		procedure View();
-			public
-		a : array of array of TSLineSystemFloat;
-		b : array of TSLineSystemFloat;
-		n : LongWord;
-		x : array of TSLineSystemFloat;
-		end;
+function TSExpressionChunkCreateNull:TSExpressionChunk;
 
 function SCalculateExpression(const VExpression : TSString):TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SStrMathFloat(const Value : TSMathFloat; const SimbolsAfterPoint : TSUInt8 = 3) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+//operators
+function OperatorAnd(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+function OperatorOr(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+function OperatorSfr(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+function OperatorUmnozhit(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+function OperatorPlus(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+function OperatorMinus(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+function OperatorDelenie(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+function OperatorEqual(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+function OperatorNotEqual(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+function OperatorMod(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+function OperatorDiv(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+
+function OperatorStepen(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+function OperatorImp(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+
+function FunctionNot(Chunk:TSExpressionChunk):TSExpressionChunk;
+function FunctionCtg(Chunk:TSExpressionChunk):TSExpressionChunk;
+function FunctionCos(Chunk:TSExpressionChunk):TSExpressionChunk;
+function FunctionSin(Chunk:TSExpressionChunk):TSExpressionChunk;
+function FunctionSign(Chunk:TSExpressionChunk):TSExpressionChunk;
+function FunctionTg(Chunk:TSExpressionChunk):TSExpressionChunk;
+function FunctionSqrt(Chunk:TSExpressionChunk):TSExpressionChunk;
+function FunctionMinus(Chunk:TSExpressionChunk):TSExpressionChunk;
+function FunctionSqr(Chunk:TSExpressionChunk):TSExpressionChunk;
+function FunctionArcTg(Chunk:TSExpressionChunk):TSExpressionChunk;
+function FunctionArcSin(Chunk:TSExpressionChunk):TSExpressionChunk;
+function FunctionArcCos(Chunk:TSExpressionChunk):TSExpressionChunk;
+function FunctionArcCtg(Chunk:TSExpressionChunk):TSExpressionChunk;
+function FunctionAbs(Chunk:TSExpressionChunk):TSExpressionChunk;
+function FunctionExp1(Chunk:TSExpressionChunk):TSExpressionChunk;
+function FunctionLn(Chunk:TSExpressionChunk):TSExpressionChunk;
+function FunctionLg(Chunk:TSExpressionChunk):TSExpressionChunk;
+
+function FunctionPi:TSExpressionChunk;
+function FunctionExp0:TSExpressionChunk;
+
+function FunctionLog(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+
 implementation
 
 uses
-	 SmoothStringUtils
-	,SmoothMathUtils
+	Crt //console runtime tools
+	,Math
+	
+	,SmoothStringUtils
+	,SmoothArithmeticUtils
 	;
 
 function SStrMathFloat(const Value : TSMathFloat; const SimbolsAfterPoint : TSUInt8 = 3) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -298,310 +257,534 @@ if Ex.ErrorsQuantity=0 then
 Ex.Destroy();
 end;
 
-procedure TSLineSystem.View();
-var
-	i,ii : LongWord;
+//operators
+
+function FunctionSign(Chunk:TSExpressionChunk):TSExpressionChunk;
 begin
-for i:=0 to n-1 do
+if Chunk.FConst>0 then
+Result:=TSExpressionChunkCreateNumeric(1)
+else
+if Chunk.FConst<0 then
+Result:=TSExpressionChunkCreateNumeric(-1)
+else
+Result:=TSExpressionChunkCreateNumeric(0);
+end;
+
+function FunctionLog(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+begin
+if  (Chunk1.FType in [S_NUMERIC,S_REAL]) and (Chunk2.FType in [S_NUMERIC,S_REAL]) then  
 	begin
-	for ii:=0 to n-1 do
-		Write(a[i,ii]:0:4,' ');
-	WriteLn('| ',b[i]:0:4);
+	Result:=TSExpressionChunkCreateReal(Log(Chunk1.FConst,Chunk2.FConst));
+	end
+else
+	Result:=TSExpressionChunkCreateNull;
+end;
+
+function FunctionPi:TSExpressionChunk;
+begin
+Result:=TSExpressionChunkCreateReal(Pi);
+end;
+
+function FunctionExp0:TSExpressionChunk;
+begin
+Result:=TSExpressionChunkCreateReal(exp(1));
+end;
+
+function FunctionLn(Chunk:TSExpressionChunk):TSExpressionChunk;
+begin
+case Chunk.FType of
+S_NUMERIC,S_REAL:
+	begin
+	Result:=TSExpressionChunkCreateReal(Ln(Chunk.FConst));
+	end;
+else
+	Result:=Chunk;
+end;
+end;
+
+function FunctionLg(Chunk:TSExpressionChunk):TSExpressionChunk;
+begin
+case Chunk.FType of
+S_NUMERIC,S_REAL:
+	begin
+	Result:=TSExpressionChunkCreateReal(Log(10,Chunk.FConst));
+	end;
+else
+	Result:=Chunk;
+end;
+end;
+
+function FunctionExp1(Chunk:TSExpressionChunk):TSExpressionChunk;
+begin
+case Chunk.FType of
+S_NUMERIC,S_REAL:
+	begin
+	Result:=TSExpressionChunkCreateReal(Exp(Chunk.FConst));
+	end;
+else
+	Result:=Chunk;
+end;
+end;
+
+function OperatorXor(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+begin
+Result:=TSExpressionChunkCreateNull;
+if (Chunk1.FType=S_BOOLEAN) and (Chunk2.FType=S_BOOLEAN) then
+	begin
+	Result.Create;  
+	Result.Quantity:=1;
+	Result.FType:=S_BOOLEAN;
+	Result.FConst:= byte((boolean(trunc(Chunk1.FConst))) xor boolean(trunc(Chunk2.FConst)));
 	end;
 end;
 
-procedure TSLineSystem.CalculateRotate();
-var
-	i, ii, iii : LongWord;
-	C, S, r, ai, aii : TSLineSystemFloat;
+function OperatorSfr(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
 begin
-for i:=0 to n-2 do
-	for ii:=i+1 to n-1 do
+Result:=TSExpressionChunkCreateNull;
+if (Chunk1.FType=S_BOOLEAN) and (Chunk2.FType=S_BOOLEAN) then
+	begin
+	Result.Create;  
+	Result.Quantity:=1;
+	Result.FType:=S_BOOLEAN;
+	Result.FConst:= byte(not ((boolean(trunc(Chunk1.FConst))) and boolean(trunc(Chunk2.FConst))));
+	end;
+
+end;
+
+function OperatorImp(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+begin
+Result:=TSExpressionChunkCreateNull;
+if (Chunk1.FType=S_BOOLEAN) and (Chunk2.FType=S_BOOLEAN) then
+	begin
+	Result.Create;  
+	Result.Quantity:=1;
+	Result.FType:=S_BOOLEAN;
+	Result.FConst:= byte((not boolean(trunc(Chunk1.FConst))) or boolean(trunc(Chunk2.FConst)));
+	end;
+end;
+
+function FunctionAbs(Chunk:TSExpressionChunk):TSExpressionChunk;
+begin
+case Chunk.FType of
+S_NUMERIC,S_REAL:
+	begin
+	Result:=TSExpressionChunkCreateReal(abs(Chunk.FConst));
+	end;
+else
+	Result:=Chunk;
+end;
+end;
+
+function FunctionArcCtg(Chunk:TSExpressionChunk):TSExpressionChunk;
+begin
+case Chunk.FType of
+S_NUMERIC,S_REAL:
+	begin
+	Result:=TSExpressionChunkCreateReal(pi/2+arctan(-Chunk.FConst));
+	end;
+else
+	Result:=TSExpressionChunkCreateNull;
+end;
+end;
+
+
+function OperatorMod(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+begin
+Result:=TSExpressionChunkCreateNull;
+if (Chunk1.FType=S_NUMERIC) and (Chunk2.FType=S_NUMERIC) then
+	begin
+	Result:=TSExpressionChunkCreateNumeric(trunc(Chunk1.FConst) mod trunc(Chunk2.FConst));
+	end
+else
+	if(Chunk1.FType in [S_REAL,S_NUMERIC]) and (Chunk1.FType in [S_REAL,S_NUMERIC])then
 		begin
-		C := a[i,i]/sqrt(sqr(a[ii,i])+sqr(a[i,i]));
-		S := a[ii,i] /sqrt(sqr(a[ii,i])+sqr(a[i,i]));
-		for iii := i to n - 1 do
-			begin
-			ai  := a[ i,iii];
-			aii := a[ii,iii];
-			a[i,iii]  := C*ai+S*aii;
-			a[ii,iii] := -S*ai+C*aii;
-			end;
-		ai := b[i];
-		aii := b[ii];
-		b[i] := C*ai+S*aii;
-		b[ii]:= -S*ai+C*aii;
+		Result.Create;  Result.Quantity:=1;
+		Result.FType:=S_REAL;
+		Result.FConst:=((Chunk1.FConst/Chunk2.FConst)-trunc(Chunk1.FConst/Chunk2.FConst))*Chunk2.FConst;
 		end;
-for i:=n-1 downto 0 do
+end;
+
+function OperatorDiv(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+begin
+Result:=TSExpressionChunkCreateNull;
+if (Chunk1.FType=S_NUMERIC) and (Chunk2.FType=S_NUMERIC) then
 	begin
-	r:=b[i];
-	for ii:=n-1 downto i do
-		r-=x[ii]*a[i,ii];
-	x[i]:=r/a[i,i];
-	end;
-end;
-
-constructor TSLineSystem.Create(const nn : LongWord);
-var
-	i : LongWord;
-begin
-n := nn;
-SetLength(b,n);
-SetLength(x,n);
-SetLength(a,n);
-for i:=0 to n-1 do
-	SetLength(a[i],n);
-end;
-
-destructor TSLineSystem.Destroy();
-var
-	i : TSUInt32;
-begin
-SetLength(b,0);
-SetLength(x,0);
-for i:=0 to n-1 do
-	SetLength(a[i],0);
-SetLength(a,0);
-inherited;
-end;
-
-procedure TSLineSystem.CalculateGauss();
-var
-	r : TSLineSystemFloat;
-	i, ii,iii:LongWord;
-begin
-for i:=1 to n-1 do
-	begin
-	for ii:=i to n-1 do
+	Result.Create;  Result.Quantity:=1;
+	Result.FType:=S_NUMERIC;
+	Result.FConst:=trunc(Chunk1.FConst) div trunc(Chunk2.FConst);
+	end
+else
+	if(Chunk1.FType in [S_REAL,S_NUMERIC]) and (Chunk1.FType in [S_REAL,S_NUMERIC])then
 		begin
-		r := -a[ii,i-1]/a[i-1,i-1];
-		for iii:=0 to n-1 do
-			a[ii,iii]+=r*a[i-1,iii];
-		b[ii]+=r*b[i-1];
+		Result.Create;  Result.Quantity:=1;
+		Result.FType:=S_REAL;
+		Result.FConst:=trunc(Chunk1.FConst/Chunk2.FConst);
 		end;
-	end;
-for i:=n-1 downto 0 do
+end;
+
+function FunctionSqr(Chunk:TSExpressionChunk):TSExpressionChunk;
+begin
+Result:=TSExpressionChunkCreateNull;
+case Chunk.FType of
+S_NUMERIC:
 	begin
-	r:=b[i];
-	for ii:=n-1 downto i do
-		begin
-		r-=x[ii]*a[i,ii];
-		end;
-	x[i]:=r/a[i,i];
+	Result:=TSExpressionChunkCreateReal(sqr(trunc(Chunk.FConst)));
+	end;
+S_REAL:
+	begin
+	Result:=TSExpressionChunkCreateReal(sqr(Chunk.FConst));
 	end;
 end;
-
-{$DEFINE SMATHREADIMPLEMENTATION}
-{$INCLUDE SmoothMathOperators.inc}
-{$UNDEF SMATHREADIMPLEMENTATION}
-
-constructor TSMathGraphicThread.Create(const VClass:Pointer;const VBegin,VEnd:real;const VPosBegin,VPosEnd:LongWord);
-begin
-FClass:=VClass;
-FEnd:=VEnd;
-FBegin:=VBegin;
-FPBegin:=VPosBegin;
-FPEnd:=VPosEnd;
-inherited Create(False);
 end;
 
-destructor TSMathGraphicThread.Destroy;
+function FunctionMinus(Chunk:TSExpressionChunk):TSExpressionChunk;
 begin
-inherited;
-end;
-
-procedure TSMathGraphicThread.Execute;
-begin
-TSMathGraphic(FClass).RealConstruct(FBegin,FEnd,FPBegin,FPEnd);
-end;
-
-class function TSMathGraphic.ClassName:string;
-begin
-Result:='TSMathGraphic';
-end;
-
-function TSMathGraphic.Assigned:Boolean;inline;
-begin
-Result:=FAss;
-end;
-
-procedure TSMathGraphic.ChangeConstruct(const VBegin,VEnd:real);
-begin
-if FLastVBegin>VBegin then
+Result:=TSExpressionChunkCreateNull;
+case Chunk.FType of
+S_NUMERIC:
 	begin
-	RealConstruct(VBegin,FLastVBegin,0,Trunc(FComplexity*Abs(FLastVBegin-VBegin)/Abs(VEnd-VBegin))+1);
+	Result:=TSExpressionChunkCreateNumeric(-trunc(Chunk.FConst));
+	end;
+S_REAL:
+	begin
+	Result:=TSExpressionChunkCreateReal(-Chunk.FConst);
+	end;
+end;
+end;
+
+function FunctionSqrt(Chunk:TSExpressionChunk):TSExpressionChunk;
+begin
+Result:=TSExpressionChunkCreateNull;
+case Chunk.FType of
+S_NUMERIC,S_REAL:
+	begin
+	Result:=TSExpressionChunkCreateReal(sqrt(Chunk.FConst));
+	end;
+end;
+end;
+
+function OperatorStepen(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+begin
+Result:=TSExpressionChunkCreateNull;
+if (Chunk1.FType=S_NUMERIC) and (Chunk2.FType=S_NUMERIC) then
+	begin
+	Result.Create;
+	Result.Quantity:=1;
+	Result.FType:=S_NUMERIC;
+	Result.FConst:=trunc(Chunk1.FConst)**trunc(Chunk2.FConst);
 	end
 else
 	begin
-	//RealConstruct(VBegin,FLastVBegin,0,Trunc(FComplexity*Abs(FLastVBegin-VBegin)/Abs(VEnd-VBegin))+1);
+	if(Chunk1.FType=S_BOOLEAN) and (Chunk2.FType=S_NUMERIC)then
+		begin
+		Result.Create;  
+		Result.Quantity:=1;
+		Result.FType:=S_BOOLEAN;
+		Result.FConst:=Chunk1.FConst;
+		end
+	else
+		if(Chunk1.FType in [S_REAL,S_NUMERIC]) and (Chunk2.FType in [S_NUMERIC]) then
+			begin
+			Result.Create;  Result.Quantity:=1;
+			Result.FType:=S_REAL;
+			Result.FConst:=Chunk1.FConst**Trunc(Chunk2.FConst);
+			end
+		else
+			if(Chunk1.FType in [S_REAL,S_NUMERIC]) and (Chunk2.FType in [S_REAL,S_NUMERIC]) then
+				begin
+				Result.Create;  Result.Quantity:=1;
+				Result.FType:=S_REAL;
+				Result.FConst:=Chunk1.FConst**Chunk2.FConst;
+				end;
 	end;
-FLastVBegin:=VBegin;
-FLastVEnd:=VEnd;
 end;
 
-procedure TSMathGraphic.Construct(const VBegin,VEnd:real);
+
+function FunctionNot(Chunk:TSExpressionChunk):TSExpressionChunk;
 begin
-if FUseThread then
+Result:=TSExpressionChunkCreateNull;
+case Chunk.FType of
+S_BOOLEAN:
 	begin
-	if FThread<>nil then
-		FThread.Destroy;
-	FThread:=TSMathGraphicThread.Create(Self,VBegin,VEnd,0,FComplexity-1);
+	Result:=TSExpressionChunkCreateBoolean(not boolean(trunc(Chunk.FConst)));
+	end;
+S_NUMERIC:
+	begin
+	Result:=TSExpressionChunkCreateNumeric(not trunc(Chunk.FConst));
+	end;
+end;
+end;
+
+function FunctionTg(Chunk:TSExpressionChunk):TSExpressionChunk;
+begin
+case Chunk.FType of
+S_NUMERIC,S_REAL:
+	begin
+	Result:=TSExpressionChunkCreateReal(sin(Chunk.FConst)/cos(Chunk.FConst));
+	end;
+else
+	Result:=TSExpressionChunkCreateNull;
+end;
+end;
+
+function FunctionSin(Chunk:TSExpressionChunk):TSExpressionChunk;
+begin
+case Chunk.FType of
+S_NUMERIC,S_REAL:
+	begin
+	Result:=TSExpressionChunkCreateReal(sin(Chunk.FConst));
+	end;
+else
+	Result:=TSExpressionChunkCreateNull;
+end;
+end;
+
+function FunctionCos(Chunk:TSExpressionChunk):TSExpressionChunk;
+begin
+case Chunk.FType of
+S_NUMERIC,S_REAL:
+	begin
+	Result:=TSExpressionChunkCreateReal(cos(Chunk.FConst));
+	end;
+else
+	Result:=TSExpressionChunkCreateNull;
+end;
+end;
+
+function FunctionCtg(Chunk:TSExpressionChunk):TSExpressionChunk;
+begin
+case Chunk.FType of
+S_NUMERIC,S_REAL:
+	begin
+	try
+	Result:=TSExpressionChunkCreateReal(cos(Chunk.FConst)/sin(Chunk.FConst));
+	except
+	Result:=TSExpressionChunkCreateNull;
+	end;
+	end;
+else
+	Result:=TSExpressionChunkCreateNull;
+end;
+end;
+
+function FunctionArcTg(Chunk:TSExpressionChunk):TSExpressionChunk;
+begin
+case Chunk.FType of
+S_NUMERIC,S_REAL:
+	begin
+	try
+	Result:=TSExpressionChunkCreateReal(arctan(Chunk.FConst));
+	except
+	Result:=TSExpressionChunkCreateNull;
+	end;
+	end;
+else
+	Result:=TSExpressionChunkCreateNull;
+end;
+end;
+
+function FunctionArcSin(Chunk:TSExpressionChunk):TSExpressionChunk;
+begin
+case Chunk.FType of
+S_NUMERIC,S_REAL:
+	begin
+	try
+	Result:=TSExpressionChunkCreateReal(arcsin(Chunk.FConst));
+	except
+	Result:=TSExpressionChunkCreateNull;
+	end;
+	end;
+else
+	Result:=TSExpressionChunkCreateNull;
+end;
+end;
+
+function FunctionArcCos(Chunk:TSExpressionChunk):TSExpressionChunk;
+begin
+case Chunk.FType of
+S_NUMERIC,S_REAL:
+	begin
+	try
+	Result:=TSExpressionChunkCreateReal(arccos(Chunk.FConst));
+	except
+	Result:=TSExpressionChunkCreateNull;
+	end;
+	end;
+else
+	Result:=TSExpressionChunkCreateNull;
+end;
+end;
+
+function OperatorAnd(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+begin
+Result:=TSExpressionChunkCreateNull;
+if (Chunk1.FType=S_NUMERIC) and (Chunk2.FType=S_NUMERIC) then
+	begin
+	Result.Create;  Result.Quantity:=1;
+	Result.FType:=S_NUMERIC;
+	Result.FConst:=trunc(Chunk1.FConst) and trunc(Chunk2.FConst);
 	end
 else
-	RealConstruct(VBegin,VEnd,0,FComplexity-1);
-end;
-
-function TSExpressionChunkCreateNone:TSExpressionChunk;
-begin
-Result.Create;
-Result.Quantity:=0;
-end;
-
-function TSMathGraphic.MathExists(const I:LongInt):Boolean;
-begin
-Result:=True;
-if  (i>=3)
-	and
-	FArVertexes[i].Visible and FArVertexes[i-1].Visible and FArVertexes[i-2].Visible and FArVertexes[i-3].Visible
-	and
-	(
-	(abs(FArVertexes[i-1].y-FArVertexes[i].y)+abs(FArVertexes[i-3].y-FArVertexes[i-2].y)<(abs(FArVertexes[i-2].y-FArVertexes[i-1].y)))
-	)
-		then
-			begin
-			FArVertexes[i-1].Visible:=False;
-			end;
-end;
-
-procedure TSMathGraphic.Paint();
-var
-	I:LongInt;
-	Quantity:LongInt = 0;
-	LastVertex:LongInt = -1;
-begin
-for i:=0 to FComplexity-1 do
 	begin
-	if FArVertexes[i].Visible then
+	if(Chunk1.FType=S_BOOLEAN) and (Chunk2.FType=S_BOOLEAN)then
 		begin
-		if Quantity=0 then
-			Render.BeginScene(SR_LINE_STRIP);
-		Quantity+=1;
-		Render.Vertex(FArVertexes[i]);
-		LastVertex:=i;
-		end
-	else
-		begin
-		if Quantity>0 then
-			begin
-			if (Quantity=1) and (LastVertex>=0) and (LastVertex<FComplexity) then
-				Render.Vertex(FArVertexes[LastVertex]);
-			Render.EndScene();
-			Quantity:=0;
-			end;
+		Result.Create;  Result.Quantity:=1;
+		Result.FType:=S_BOOLEAN;
+		Result.FConst:=Byte(Boolean(trunc(Chunk1.FConst)) and Boolean(trunc(Chunk2.FConst)));
 		end;
 	end;
-if Quantity>0 then
+end;
+
+function OperatorOr(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+begin
+Result:=TSExpressionChunkCreateNull;
+if (Chunk1.FType=S_NUMERIC) and (Chunk2.FType=S_NUMERIC) then
 	begin
-	if (Quantity=1) and (LastVertex>=0) and (LastVertex<FComplexity) then
-		Render.Vertex(FArVertexes[LastVertex]);
-	Render.EndScene();
-	Quantity:=0;
-	end;
-end;
-
-procedure TSMathGraphic.RealConstruct(const VBegin,VEnd:real;const VPosBegin,VPosEnd:LongWord);
-var
-	Step:real;
-	I:LongInt;
-	Position:real;
-begin
-FAss:=True;
-Step:=(VEnd-VBegin)/(VPosEnd-VPosBegin+1);
-Position:=VBegin-Step;
-//FVertexLength:=0;
-for i:=VPosBegin to VPosEnd do
-	begin
-	Position+=Step;
-	FExpression.BeginCalculate;
-	if not SPCharsEqual(FVariable,'') then
-		FExpression.ChangeVariables(FVariable,TSExpressionChunkCreateReal(Position));
-	FExpression.Calculate;
-	if (FExpression.Resultat.Quantity<>0) and (SFloatExists(FExpression.Resultat.FConst))  then
-		begin
-		FArVertexes[i].Visible:=True;
-		FArVertexes[i].Import(Position,FExpression.Resultat.FConst+FYShift);
-		if FVertexFunction<>nil then
-			begin
-			FArVertexes[i]:=FVertexFunction(FArVertexes[i],FVertexFunctionPointer);
-			end;
-		MathExists(i);
-		end
-	else
-		begin
-		FArVertexes[i].Visible:=False;
-		end;
-	//FVertexLength:=i+1;
-	end;
-if not ((VPosBegin=0) and (VPosEnd=FComplexity-1)) then
-	begin
-	FLastVBegin:=VPosBegin;
-	FLastVEnd:=VPosEnd;
-	end;
-end;
-
-procedure TSMathGraphic.SetComplexity(VComplexity:LongInt);
-begin
-FComplexity:=VComplexity;
-SetArraysLength;
-end;
-
-procedure TSMathGraphic.SetArraysLength;
-begin
-SetLength(FArVertexes,FComplexity);
-end;
-
-function TSMathGraphic.GetExpression:PChar;
-begin
-if FExpression=nil then
-	Result:=''
+	Result.Create;  Result.Quantity:=1;
+	Result.FType:=S_NUMERIC;
+	Result.FConst:=trunc(Chunk1.FConst) or trunc(Chunk2.FConst);
+	end
 else
-	Result:=FExpression.Expression;
+	begin
+	if(Chunk1.FType=S_BOOLEAN) and (Chunk2.FType=S_BOOLEAN)then
+		begin
+		Result.Create;  Result.Quantity:=1;
+		Result.FType:=S_BOOLEAN;
+		Result.FConst:=Byte(Boolean(trunc(Chunk1.FConst)) or Boolean(trunc(Chunk2.FConst)));
+		end;
+	end;
 end;
 
-procedure TSMathGraphic.SetExpression(VPChar:PChar);
+function OperatorPlus(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
 begin
-if FExpression=nil then
-	FExpression:=TSExpression.Create;
-FExpression.Expression:=VPChar;
-FExpression.QuickCalculation:=True;
-FExpression.CanculateExpression;
-FVariable:=FExpression.Variable;
+Result:=TSExpressionChunkCreateNull;
+if (Chunk1.FType=S_NUMERIC) and (Chunk2.FType=S_NUMERIC) then
+	begin
+	Result.Create;  Result.Quantity:=1;
+	Result.FType:=S_NUMERIC;
+	Result.FConst:=trunc(Chunk1.FConst)+trunc(Chunk2.FConst);
+	end
+else
+	begin
+	if(Chunk1.FType=S_BOOLEAN) and (Chunk2.FType=S_BOOLEAN)then
+		begin
+		Result.Create;  Result.Quantity:=1;
+		Result.FType:=S_BOOLEAN;
+		Result.FConst:=Byte(Boolean(trunc(Chunk1.FConst)) Xor Boolean(trunc(Chunk2.FConst)));
+		end
+	else
+		if(Chunk1.FType in [S_REAL,S_NUMERIC]) and (Chunk2.FType in [S_REAL,S_NUMERIC])then
+			begin
+			Result.Create;  Result.Quantity:=1;
+			Result.FType:=S_REAL;
+			Result.FConst:=Chunk1.FConst+Chunk2.FConst;
+			end;
+	end;
 end;
 
-constructor TSMathGraphic.Create;
+function OperatorMinus(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
 begin
-inherited Create;
-FArVertexes:=nil;
-//FVertexLength:=0;
-FThread:=nil;
-FExpression:=nil;
-FComplexity:=2000;
-FYShift:=0;
-SetArraysLength;
-FVertexFunction:=nil;
-FUseThread:=False;
-FAss:=False;
-FLastVBegin:=0;
-FLastVEnd:=0;
+Result:=TSExpressionChunkCreateNull;
+if (Chunk1.FType=S_NUMERIC) and (Chunk2.FType=S_NUMERIC) then
+	begin
+	Result.Create;  Result.Quantity:=1;
+	Result.FType:=S_NUMERIC;
+	Result.FConst:=trunc(Chunk1.FConst)-trunc(Chunk2.FConst);
+	end
+else
+	if(Chunk1.FType in [S_REAL,S_NUMERIC]) and (Chunk2.FType in [S_REAL,S_NUMERIC])then
+		begin
+		Result.Create;  Result.Quantity:=1;
+		Result.FType:=S_REAL;
+		Result.FConst:=Chunk1.FConst-Chunk2.FConst;
+		end;
 end;
 
-destructor TSMathGraphic.Destroy;
+function OperatorNotEqual(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
 begin
-FExpression.Destroy;
-SetLength(FArVertexes,0);
-if (FThread<>nil) then 
-	FThread.Destroy;
-inherited;
+Result:=OperatorEqual(Chunk1,Chunk2);
+if Result.Quantity<>0 then
+	Result.FConst:=byte(not boolean(trunc(Result.FConst)));
+end;
+
+function OperatorEqual(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+begin
+Result:=TSExpressionChunkCreateNull;
+if (Chunk1.FType=S_NUMERIC) and (Chunk2.FType=S_NUMERIC) and (trunc(Chunk2.FConst)<>0) then
+	begin
+	Result.Create;  Result.Quantity:=1;
+	Result.FType:=S_BOOLEAN;
+	Result.FConst:=byte(trunc(Chunk1.FConst)=trunc(Chunk2.FConst));
+	end
+else
+	begin
+	if(Chunk1.FType=S_BOOLEAN) and (Chunk2.FType=S_BOOLEAN)then
+		begin
+		Result.Create;  Result.Quantity:=1;
+		Result.FType:=S_BOOLEAN;
+		Result.FConst:=Byte(Boolean(trunc(Chunk1.FConst)) = ( Boolean(trunc(Chunk2.FConst))));
+		end
+	else
+		if(Chunk1.FType in [S_REAL,S_NUMERIC]) and (Chunk2.FType in [S_REAL,S_NUMERIC])  and (Chunk2.FConst<>0)then
+			begin
+			Result.Create;  Result.Quantity:=1;
+			Result.FType:=S_BOOLEAN;
+			Result.FConst:=byte(Chunk1.FConst=Chunk2.FConst);
+			end
+		else
+			if(Chunk1.FType=S_VARIABLE) and (Chunk2.FType=S_VARIABLE)then
+				begin
+				Result.Create;  Result.Quantity:=1;
+				Result.FType:=S_BOOLEAN;
+				Result.FConst:=byte(SPCharsEqual(Chunk1.FVariable,Chunk2.FVariable));
+				end;
+	end;
+end;
+
+
+function OperatorDelenie(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+begin
+Result:=TSExpressionChunkCreateNull;
+if (Chunk1.FType=S_NUMERIC) and (Chunk2.FType=S_NUMERIC) then
+	begin
+	Result.Create;  Result.Quantity:=1;
+	Result.FType:=S_REAL;
+	Result.FConst:=trunc(Chunk1.FConst)/trunc(Chunk2.FConst);
+	end
+else
+	if (Chunk1.FType in [S_REAL,S_NUMERIC]) and (Chunk2.FType in [S_REAL,S_NUMERIC])then
+		begin
+		Result.Create;  Result.Quantity:=1;
+		Result.FType:=S_REAL;
+		Result.FConst:=Chunk1.FConst/Chunk2.FConst;
+		end;
+end;
+
+function OperatorUmnozhit(Chunk1,Chunk2:TSExpressionChunk):TSExpressionChunk;
+begin
+Result:=TSExpressionChunkCreateNull;
+if (Chunk1.FType=S_NUMERIC) and (Chunk2.FType=S_NUMERIC) then
+	begin
+	Result.Create;  Result.Quantity:=1;
+	Result.FType:=S_NUMERIC;
+	Result.FConst:=trunc(Chunk1.FConst)*trunc(Chunk2.FConst);
+	end
+else
+	begin
+	if(Chunk1.FType=S_BOOLEAN) and (Chunk2.FType=S_BOOLEAN)then
+		begin
+		Result.Create;  Result.Quantity:=1;
+		Result.FType:=S_BOOLEAN;
+		Result.FConst:=Byte(Boolean(trunc(Chunk1.FConst)) and Boolean(trunc(Chunk2.FConst)));
+		end
+	else
+		if(Chunk1.FType in [S_REAL,S_NUMERIC]) and (Chunk2.FType in [S_REAL,S_NUMERIC])then
+			begin
+			Result.Create;  Result.Quantity:=1;
+			Result.FType:=S_REAL;
+			Result.FConst:=Chunk1.FConst*Chunk2.FConst;
+			end;
+	end;
 end;
 
 (*
@@ -609,6 +792,12 @@ end;
 ====*){$NOTE Expression}(*====
 ==============================
 *)
+
+function TSExpressionChunkCreateNull:TSExpressionChunk;
+begin
+Result.Create;
+Result.Quantity:=0;
+end;
 
 constructor TSCalculateAlgoritmChunk.Create;
 begin
@@ -715,7 +904,7 @@ case FOperators[VFunction].FParametrs of
 3:
 	Result:=TSExpressionFunc3f(FOperators[VFunction].FFunction)(ArEC[VParams[3]],ArEC[VParams[2]],ArEC[VParams[1]]);
 else
-	Result:=TSExpressionChunkCreateNone;
+	Result:=TSExpressionChunkCreateNull;
 end;
 end;
 
@@ -794,7 +983,7 @@ var
 	FunctionResult:TSExpressionChunk;
 	FResult2:TArTSExpressionChunk = nil;
 begin
-FunctionResult:=TSExpressionChunkCreateNone;
+FunctionResult:=TSExpressionChunkCreateNull;
 if FResultat=nil then
 	BeginCalculate;
 while (Length(FResultat[Number])>1) or ((Length(FResultat[Number])=1) and (FResultat[Number][0].FType in [S_FUNCTION,S_OPERATOR])) do
@@ -832,7 +1021,7 @@ while (Length(FResultat[Number])>1) or ((Length(FResultat[Number])=1) and (FResu
 				FResultat[Number]:=FResult2;
 				FResult2:=nil;
 				Position-=2;
-				FunctionResult:=TSExpressionChunkCreateNone;
+				FunctionResult:=TSExpressionChunkCreateNull;
 				end
 			else
 				begin 
@@ -891,7 +1080,7 @@ while (Length(FResultat[Number])>1) or ((Length(FResultat[Number])=1) and (FResu
 				FResultat[Number]:=FResult2;
 				FResult2:=nil;
 				Position-=II;
-				FunctionResult:=TSExpressionChunkCreateNone;
+				FunctionResult:=TSExpressionChunkCreateNull;
 				end
 			else
 				begin 
@@ -1051,7 +1240,7 @@ else
 		Result:=FResultat[Number-1][0]
 	else
 		begin
-		Result:=TSExpressionChunkCreateNone;
+		Result:=TSExpressionChunkCreateNull;
 		end;
 end;
 
@@ -1257,7 +1446,7 @@ begin
 Result:=False;
 if (VPChar=nil) or (VPChar[0]=#0) then
 	Exit;
-Chunk:=TSExpressionChunkCreateNone;
+Chunk:=TSExpressionChunkCreateNull;
 if (State=1) or VWasObject or (SPCharsEqual(VPChar,')') or SPCharsEqual(VPChar,'('))then
 	begin
 	Chunk .Create; Chunk.Quantity:=1;
@@ -1502,8 +1691,8 @@ if not ProvSk then
 	AddError('Неправильно расставлены скобки');
 	Exit;
 	end;
-NewChunk:=TSExpressionChunkCreateNone;
-OldChunk:=TSExpressionChunkCreateNone;
+NewChunk:=TSExpressionChunkCreateNull;
+OldChunk:=TSExpressionChunkCreateNull;
 OperatorsSteak:=nil;
 FCanculatedExpression:=nil;
 while FExpression[Position]<>#0 do
@@ -1548,7 +1737,7 @@ while FExpression[Position]<>#0 do
 	//write(NewChunkString,' ');
 	if SPCharLength(NewChunkString)>0 then
 		begin
-		NewChunk:=TSExpressionChunkCreateNone;
+		NewChunk:=TSExpressionChunkCreateNull;
 		IdentityChunk(NewChunkString,NewChunk,ChunkState,IfStringWasObj.Was and (IfStringWasObj.Length=SPCharLength(NewChunkString)));
 		if NewChunk.Quantity<>0 then
 			begin
@@ -1593,7 +1782,7 @@ while FExpression[Position]<>#0 do
 			end;
 		end;
 	end;
-CanculateSteak(OperatorsSteak,TSExpressionChunkCreateNone);
+CanculateSteak(OperatorsSteak,TSExpressionChunkCreateNull);
 if DeBug then
 	DebugSteak(FCanculatedExpression);
 if FCalculateForGraph then
@@ -1613,7 +1802,7 @@ if SPCharsEqual(OperatorsSteak[High(OperatorsSteak)].FVariable,')') and SPCharsE
 end;
 
 begin
-HighOperator:=TSExpressionChunkCreateNone;
+HighOperator:=TSExpressionChunkCreateNull;
 if Chunk.Quantity=0 then
 	begin
 	for i:=High(OperatorsSteak) DOWNto 0  do
@@ -1763,6 +1952,5 @@ SetLength(FOperators,0);
 SetLength(FErrors,0);
 inherited;
 end;
-
 
 end.

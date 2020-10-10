@@ -40,7 +40,7 @@ procedure SKill(var Waiting : TSLoadingFrame); {$IFDEF SUPPORTINLINE}inline;{$EN
 implementation
 
 uses
-	 SmoothMathUtils
+	 SmoothArithmeticUtils
 	;
 
 procedure SKill(var Waiting : TSLoadingFrame); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;

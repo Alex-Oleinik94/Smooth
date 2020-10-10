@@ -11,7 +11,7 @@ uses
 	,SmoothContextClasses
 	,SmoothContextInterface
 	,SmoothGraphicViewer
-	,SmoothMath
+	,SmoothComputableExpression
 	,SmoothExtensionManager
 	,SmoothRenderBase
 	,SmoothCommonStructs
@@ -45,7 +45,7 @@ implementation
 
 uses
 	 SmoothStringUtils
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	;
 
 procedure TSGenAlg_GenerateComponentActives(const Self : TSScreenComponent);

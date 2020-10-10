@@ -13,7 +13,7 @@ interface
 uses
 	 SmoothBase
 	,SmoothLists
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothCommonStructs
 	;
 
@@ -37,29 +37,31 @@ type
 {$ENDIF COMMON_FLOAT64}
 {$ENDIF COMMON_FLOAT80}
 type
+	TSScreenVerticesFloat = TSFloat64;
+	TSScreenVerticesVector2 = TSVector2d;
 	TSScreenVertices = object
 			public
-		function Create (const x1 : TSCommonFloat = 0; const y1 : TSCommonFloat = 0; const x2 : TSCommonFloat = 0; const y2 : TSCommonFloat = 0) : TSScreenVertices; static;
+		function Create (const x1 : TSScreenVerticesFloat = 0; const y1 : TSScreenVerticesFloat = 0; const x2 : TSScreenVerticesFloat = 0; const y2 : TSScreenVerticesFloat = 0) : TSScreenVertices; static;
 			private
-		Vertices : array[0..1] of TSCommonVector2;
+		Vertices : array[0..1] of TSScreenVerticesVector2;
 			public
-		procedure Import(const x1 : TSCommonFloat = 0; const y1 : TSCommonFloat = 0; const x2 : TSCommonFloat = 0; const y2 : TSCommonFloat = 0);
+		procedure Import(const x1 : TSScreenVerticesFloat = 0; const y1 : TSScreenVerticesFloat = 0; const x2 : TSScreenVerticesFloat = 0; const y2 : TSScreenVerticesFloat = 0);
 		procedure Write();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure ProcSumX(r : TSCommonFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure ProcSumY(r : TSCommonFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function VectorInView(const Vector : TSCommonVector2) : TSBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AbsX() : TSCommonFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AbsY() : TSCommonFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure ProcSumX(r : TSScreenVerticesFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure ProcSumY(r : TSScreenVerticesFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function VectorInView(const Vector : TSScreenVerticesVector2) : TSBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AbsX() : TSScreenVerticesFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AbsY() : TSScreenVerticesFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
-		property SumX : TSCommonFloat write ProcSumX;
-		property SumY : TSCommonFloat write ProcSumY;
-		property X1   : TSCommonFloat read  Vertices[0].x write Vertices[0].x;
-		property Y1   : TSCommonFloat read  Vertices[0].y write Vertices[0].y;
-		property X2   : TSCommonFloat read  Vertices[1].x write Vertices[1].x;
-		property Y2   : TSCommonFloat read  Vertices[1].y write Vertices[1].y;
+		property SumX : TSScreenVerticesFloat write ProcSumX;
+		property SumY : TSScreenVerticesFloat write ProcSumY;
+		property X1   : TSScreenVerticesFloat read  Vertices[0].x write Vertices[0].x;
+		property Y1   : TSScreenVerticesFloat read  Vertices[0].y write Vertices[0].y;
+		property X2   : TSScreenVerticesFloat read  Vertices[1].x write Vertices[1].x;
+		property Y2   : TSScreenVerticesFloat read  Vertices[1].y write Vertices[1].y;
 		end;
 
-operator * (const a : TSScreenVertices; const b : TSCommonFloat) : TSScreenVertices;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const a : TSScreenVertices; const b : TSScreenVerticesFloat) : TSScreenVertices;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 type
 	TSCustomPosition = record
@@ -87,9 +89,31 @@ type
 operator + (const a, b : TSPosition) : TSPosition;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator + (const a, b : TSCustomPosition) : TSCustomPosition;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+type
+	TSMathFloat = TSFloat64;
+
+function SComputeDeterminantMatrix2x2(const m00, m01, m10, m11 : TSMathFloat) : TSMathFloat;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SComputeDeterminantMatrix3x3(const m1, m2, m3, m4, m5, m6, m7, m8, m9 : TSMathFloat) : TSMathFloat;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+
+type
+	PSPlane3D = ^ TSPlane3D;
+	TSPlane3D  = object
+			public
+		a, b, c, d : TSMathFloat;
+			public
+		procedure Import(const a1 : TSMathFloat = 0; const b1 : TSMathFloat = 0; const c1 : TSMathFloat = 0; const d1 : TSMathFloat = 0);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		procedure Write();{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		end;
+
+function SPlane3DFrom3Points(const x1, y1, z1, x2, y2, z2, x0, y0, z0 : TSMathFloat) : TSPlane3D;{$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
+function SPlane3DFrom2VectorsAndPoint(const x1, y1, z1, x2, y2, z2, x0, y0, z0 : TSMathFloat) : TSPlane3D;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+
+function SCosSinAngle(const Cosinus, Sinus : TSMathFloat) : TSMathFloat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 function SGetPointsCirclePoints(const FPoints:TSVertex2fList):TSUInt32List;
 
-function SRotatePoint(const Point : TSVertex3f; const Os : TSVertex3f; const Angle : TSSingle):TSVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+Procedure SRotatePoint(Var Xp, Yp, Zp: TSSingle;const Xv, Yv, Zv, Angle: TSSingle); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SRotatePoint(const Point : TSVertex3f; const Os : TSVertex3f; const Angle : TSSingle):TSVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 function SColor4fFromUInt32(const Number : TSUInt32; const WithAlpha : TSBool = False): TSColor4f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SPlane3DFrom3Points(const Point1, Point2, Point3 : TSCommonVector3) : TSPlane3D;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
@@ -135,6 +159,69 @@ uses
 	,SmoothRenderBase
 	,SmoothStringUtils
 	;
+
+function SCosSinAngle(const Cosinus, Sinus : TSMathFloat) : TSMathFloat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if Cosinus = -1 then
+	Result := PI
+else if Cosinus = 1 then
+	Result := 0
+else if Sinus = -1 then
+	Result := 3 * PI / 2
+else if Sinus = 1 then
+	Result := PI / 2
+else if Sinus > SZero then
+	Result := ArcCos(Cosinus)
+else
+	Result := ArcCos(- Cosinus) + PI;
+end;
+
+function SPlane3DFrom2VectorsAndPoint(const x1, y1, z1, x2, y2, z2, x0, y0, z0 : TSMathFloat) : TSPlane3D;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Result := SPlane3DFrom3Points(
+	x0,      y0,      z0,
+	x0 + x1, y0 + y1, z0 + z1,
+	x0 + x2, y0 + y2, z0 + z2);
+end;
+
+function SPlane3DFrom3Points(const x1, y1, z1, x2, y2, z2, x0, y0, z0 : TSMathFloat) : TSPlane3D;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Result.Import(
+	+ SComputeDeterminantMatrix2x2(y1 - y0, z1 - z0, y2 - y0, z2 - z0),
+	- SComputeDeterminantMatrix2x2(x1 - x0, z1 - z0, x2 - x0, z2 - z0),
+	+ SComputeDeterminantMatrix2x2(x1 - x0, y1 - y0, x2 - x0, y2 - y0),
+	- x0 * SComputeDeterminantMatrix2x2(y1 - y0, z1 - z0, y2 - y0, z2 - z0)
+	+ y0 * SComputeDeterminantMatrix2x2(x1 - x0, z1 - z0, x2 - x0, z2 - z0)
+	- z0 * SComputeDeterminantMatrix2x2(x1 - x0, y1 - y0, x2 - x0, y2 - y0))
+	;
+end;
+
+procedure TSPlane3D.Import(const a1 : TSMathFloat = 0; const b1 : TSMathFloat = 0; const c1 : TSMathFloat = 0; const d1 : TSMathFloat = 0);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+a := a1;
+b := b1;
+c := c1;
+d := d1;
+end;
+
+procedure TSPlane3D.Write();{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+System.Write(a:0:10, ' ', b:0:10, ' ', c:0:10, ' ', d:0:10);
+end;
+
+function SComputeDeterminantMatrix3x3(const m1, m2, m3, m4, m5, m6, m7, m8, m9 : TSMathFloat) : TSMathFloat;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Result := 
+	  m1 * SComputeDeterminantMatrix2x2(m5, m6, m8, m9)
+	- m2 * SComputeDeterminantMatrix2x2(m4, m6, m7, m9)
+	+ m3 * SComputeDeterminantMatrix2x2(m4, m5, m7, m8)
+	;
+end;
+
+function SComputeDeterminantMatrix2x2(const m00, m01, m10, m11 : TSMathFloat) : TSMathFloat;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Result := m00 * m11 - m01 * m10;
+end;
 
 operator + (const a : TSVertex2f; const b : TSVertex2int32) : TSVertex2f; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -287,9 +374,7 @@ begin
 Result := STriangleSize(Abs(a - c), Abs(c - b), Abs(b - a));
 end;
 
-function SRotatePoint(const Point : TSVertex3f; const Os : TSVertex3f; const Angle : TSSingle):TSVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
-Procedure RotatePoint(Var Xp, Yp, Zp: TSSingle;const Xv, Yv, Zv, Angle: TSSingle); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+Procedure SRotatePoint(Var Xp, Yp, Zp: TSSingle;const Xv, Yv, Zv, Angle: TSSingle); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 var
 	Temp, TempV, Nx, Ny, Nz: TSSingle;
 	C, S : TSSingle;
@@ -317,9 +402,11 @@ Xp:=Nx;
 Yp:=Ny;
 Zp:=Nz;
 End;
+
+function SRotatePoint(const Point : TSVertex3f; const Os : TSVertex3f; const Angle : TSSingle):TSVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
 Result := Point;
-RotatePoint (Result.x, Result.y, Result.z, Os.x, Os.y, Os.z, Angle);
+SRotatePoint (Result.x, Result.y, Result.z, Os.x, Os.y, Os.z, Angle);
 end;
 
 operator + (const a, b : TSPosition) : TSPosition; overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -333,13 +420,13 @@ Result.FLocation := a.FLocation + b.FLocation;
 Result.FTurn     := a.FTurn     + b.FTurn;
 end;
 
-procedure TSScreenVertices.ProcSumX(r : TSCommonFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSScreenVertices.ProcSumX(r : TSScreenVerticesFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Vertices[0].x += r;
 Vertices[1].x += r;
 end;
 
-procedure TSScreenVertices.ProcSumY(r : TSCommonFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSScreenVertices.ProcSumY(r : TSScreenVerticesFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Vertices[0].y += r;
 Vertices[1].y += r;
@@ -352,7 +439,7 @@ System.Write(' ');
 Vertices[1].WriteLn();
 end;
 
-operator * (const a:TSScreenVertices; const b : TSCommonFloat):TSScreenVertices;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const a:TSScreenVertices; const b : TSScreenVerticesFloat):TSScreenVertices;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	x,y,x1,y1:real;
 begin
@@ -369,12 +456,12 @@ Result.Import(
 	y+y1);
 end;
 
-function TSScreenVertices.Create (const x1 : TSCommonFloat = 0; const y1 : TSCommonFloat = 0; const x2 : TSCommonFloat = 0; const y2 : TSCommonFloat = 0) : TSScreenVertices;
+function TSScreenVertices.Create (const x1 : TSScreenVerticesFloat = 0; const y1 : TSScreenVerticesFloat = 0; const x2 : TSScreenVerticesFloat = 0; const y2 : TSScreenVerticesFloat = 0) : TSScreenVertices;
 begin
 Result.Import(x1, y1, x2, y2);
 end;
 
-procedure TSScreenVertices.Import(const x1 : TSCommonFloat = 0; const y1 : TSCommonFloat = 0; const x2 : TSCommonFloat = 0; const y2 : TSCommonFloat = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSScreenVertices.Import(const x1 : TSScreenVerticesFloat = 0; const y1 : TSScreenVerticesFloat = 0; const x2 : TSScreenVerticesFloat = 0; const y2 : TSScreenVerticesFloat = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Vertices[0].x := x1;
 Vertices[0].y := y1;
@@ -382,22 +469,17 @@ Vertices[1].x := x2;
 Vertices[1].y := y2;
 end;
 
-function SVertex2fImport(const x:real = 0;const y:real = 0):TSVertex2f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-Result.Import(x,y);
-end;
-
-function TSScreenVertices.AbsX() : TSCommonFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSScreenVertices.AbsX() : TSScreenVerticesFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := Abs(X1 - X2);
 end;
 
-function TSScreenVertices.AbsY() : TSCommonFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSScreenVertices.AbsY() : TSScreenVerticesFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := Abs(Y1 - Y2);
 end;
 
-function TSScreenVertices.VectorInView(const Vector : TSCommonVector2) : TSBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSScreenVertices.VectorInView(const Vector : TSScreenVerticesVector2) : TSBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=
 	(Vector.x < Max(X1, X2)) and

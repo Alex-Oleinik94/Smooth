@@ -125,7 +125,7 @@ uses
 	
 	,Variants
 	
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothBaseUtils
 	;
 

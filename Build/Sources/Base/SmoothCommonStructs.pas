@@ -6,7 +6,7 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	;
 
 {$DEFINE INC_PLACE_INTERFACE}

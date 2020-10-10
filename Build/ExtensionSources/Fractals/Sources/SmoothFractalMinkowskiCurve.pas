@@ -37,7 +37,7 @@ uses
 	,SmoothRenderBase
 	,SmoothVertexObject
 	,SmoothScreenBase
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	;
 
 class function TSFractalMinkowskiCurve.ClassName():TSString;

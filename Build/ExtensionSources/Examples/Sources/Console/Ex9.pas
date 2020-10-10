@@ -18,13 +18,15 @@ uses
 		,SmoothConsoleTools
 		{$ENDIF}
 	,SmoothConsolePaintableTools
-	,SmoothMath
+	,SmoothMathGraphic
+	,SmoothLineSystem
+	,SmoothComputableExpression
 	,SmoothStringUtils
 	,SmoothContextInterface
 	,SmoothContextClasses
 	,SmoothGraphicViewer
 	,SmoothEncodingUtils
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	
 	,Crt
 	;

@@ -65,7 +65,7 @@ uses
 	,SmoothStringUtils
 	,SmoothLog
 	,SmoothFileUtils
-	,SmoothMath
+	,SmoothComputableExpression
 	
 	,StrMan
 	;

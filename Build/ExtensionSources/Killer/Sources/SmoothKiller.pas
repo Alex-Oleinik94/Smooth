@@ -116,7 +116,7 @@ implementation
 uses
 	 SmoothStringUtils
 	,SmoothFileUtils
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothCommon
 	,SmoothBaseUtils
 	,SmoothContextUtils

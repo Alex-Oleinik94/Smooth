@@ -68,7 +68,7 @@ type
 implementation
 
 uses
-	 SmoothMathUtils
+	 SmoothArithmeticUtils
 	,SmoothContextUtils
 	,SmoothCursor
 	,SmoothStringUtils

@@ -13,7 +13,7 @@ uses
 		{$ENDIF}
 	 SmoothContext
 	,SmoothBase
-	,SmoothMath
+	,SmoothComputableExpression
 	,SmoothAdamsSystemExample
 	{$IF defined(ENGINE)}
 		,SmoothConsoleHandler

@@ -14,7 +14,7 @@ uses
 	 SmoothContext
 	,SmoothBase
 	,Smooth3dObject
-	,SmoothMath
+	,SmoothComputableExpression
 	,SmoothVertexObject
 	,SmoothRender
 	,SmoothStringUtils

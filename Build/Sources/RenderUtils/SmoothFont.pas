@@ -72,7 +72,7 @@ implementation
 uses
 	 Classes
 	
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothResourceManager
 	,SmoothStringUtils
 	,SmoothStreamUtils

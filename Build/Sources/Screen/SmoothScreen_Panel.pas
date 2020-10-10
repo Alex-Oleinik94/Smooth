@@ -33,7 +33,7 @@ type
 implementation
 
 uses
-	 SmoothMathUtils
+	 SmoothArithmeticUtils
 	;
 
 class function TSPanel.ClassName() : TSString; 

@@ -199,7 +199,7 @@ uses
 	,SmoothResourceManager // PNG and "others"
 	,SmoothCommonStructs
 	,SmoothLog
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothBitMapUtils
 	,SmoothTextMultiStream
 	,SmoothTextStream

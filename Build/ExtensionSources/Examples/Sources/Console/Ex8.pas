@@ -14,7 +14,7 @@ uses
 		{$ENDIF}
 	 SmoothBase
 	,SmoothContext
-	,SmoothMath
+	,SmoothComputableExpression
 	,SmoothStringUtils
 	,SmoothDateTime
 	,SmoothEncodingUtils

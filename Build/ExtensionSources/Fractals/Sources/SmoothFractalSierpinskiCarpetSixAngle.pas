@@ -45,7 +45,7 @@ procedure SVector2fList6Write(const _List : PSVector2fList6);
 implementation
 
 uses
-	 SmoothMathUtils
+	 SmoothArithmeticUtils
 	,SmoothRenderBase
 	,SmoothScreenBase
 	,SmoothLog

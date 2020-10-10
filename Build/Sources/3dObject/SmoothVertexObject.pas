@@ -429,7 +429,7 @@ implementation
 uses
 	 SmoothStringUtils
 	,SmoothLog
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothCommon
 	,SmoothBaseUtils
 	

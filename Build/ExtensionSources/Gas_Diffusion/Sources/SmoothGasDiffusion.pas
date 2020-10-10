@@ -218,7 +218,7 @@ implementation
 uses
 	 SmoothStringUtils
 	,SmoothLists
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothRenderInterface
 	,SmoothMatrix
 	,SmoothCommon

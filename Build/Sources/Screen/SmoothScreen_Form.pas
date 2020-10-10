@@ -35,7 +35,7 @@ implementation
 
 uses
 	 SmoothContextUtils
-	,SmoothMathUtils
+	,SmoothArithmeticUtils
 	,SmoothCommonStructs
 	,SmoothCommon
 	,SmoothRectangleWithRoundedCorners

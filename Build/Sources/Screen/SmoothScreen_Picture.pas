@@ -37,7 +37,7 @@ type
 implementation
 
 uses
-	 SmoothMathUtils
+	 SmoothArithmeticUtils
 	,SmoothRenderBase
 	,SmoothCommon
 	;
