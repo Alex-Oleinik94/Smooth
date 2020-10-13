@@ -47,6 +47,8 @@ procedure SViewVideoDevices(const CasesOfPrint : TSCasesOfPrint = [SCaseLog, SCa
 function SLogInternetAdaptersInfo() : TSMaxEnum;
 function SInternetAdapterNames() : TSStringList;
 function SInternetAdapterDescriptionFromName(const AdapterName : TSString) : TSString;
+function SWinAPICoreCount(): TSUInt16;
+function SWinAPICoreCountFromRegistry(): TSUInt16;
 
 implementation
 
@@ -59,10 +61,48 @@ uses
 	,JwaIpHlpApi
 	,JwaIpTypes
 	
+	,jwawinuser
+	,jwawindows
+	
 	,SmoothBaseUtils
 	,SmoothStringUtils
 	,SmoothLog
 	;
+
+function SWinAPICoreCountFromRegistry(): TSUInt16;
+var
+	r : TRegistry;
+	d : TRegKeyInfo;
+begin
+Result := 0;
+r := TRegistry.Create();
+r.RootKey := HKEY_LOCAL_MACHINE;
+if r.OpenKey('HKEY_LOCAL_MACHINE\HARDWARE\DESCRIPTION\System\CentralProcessor', True) then
+	begin
+	if r.GetKeyInfo(d) then
+		Result := d.NumValues;//NumSubKeys
+	r.CloseKey();
+	end;
+r.Free;
+end;
+
+function SWinAPICoreCount(): TSUInt16;
+var
+	//Relationship : LOGICAL_PROCESSOR_RELATIONSHIP;
+	//buffer_ex : SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX;
+	buffer : PSYSTEM_LOGICAL_PROCESSOR_INFORMATION = nil;
+	returnLength : TSUInt32 = 0;
+	i : TSMaxEnum;
+begin
+Result := 0;
+//GetLogicalProcessorInformationEx(Relationship, buffer_ex, returnLength);
+if GetLogicalProcessorInformation(buffer, @returnLength) then
+	for i := 0 to (returnLength div SizeOf(SYSTEM_LOGICAL_PROCESSOR_INFORMATION))-1 do
+		if buffer[i].Relationship = RelationProcessorCore then
+			Result += 1;
+if Result = 0 then
+	Result := SWinAPICoreCountFromRegistry();
+end;
 
 function SInternetAdapterDescriptionFromName(const AdapterName : TSString) : TSString;
 var
@@ -235,7 +275,7 @@ begin
 lpDisplayDevice.cb := sizeof(lpDisplayDevice);
 dwFlags := 0;
 cc := 0;
-while (EnumDisplayDevices(nil, cc, @lpDisplayDevice, dwFlags)) do
+while (EnumDisplayDevices(nil, cc, lpDisplayDevice, dwFlags)) do
 	begin
 	Devices += lpDisplayDevice.DeviceString;
 	Names += lpDisplayDevice.DeviceName;
@@ -299,7 +339,7 @@ end;
 
 function SWinAPIQueschion(const VQuestion, VCaption : TSString):TSBoolean;
 var
-	PQuestion, PCaption : PSChar;
+	PQuestion, PCaption : SmoothBase.PSChar;
 begin
 PQuestion := SStringToPChar(VQuestion);
 PCaption := SStringToPChar(VCaption);

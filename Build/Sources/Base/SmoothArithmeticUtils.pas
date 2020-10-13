@@ -59,6 +59,7 @@ function Min(const a, b : TSUInt64) : TSUInt64; {$IFDEF SUPPORTINLINE}inline;{$E
 
 function Log(const a, b : TSFloat64) : TSFloat64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+function SShortIntToInt(Value : TSShortInt) : TSInteger; {$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
 function SCountSimbolsInNumber(L : TSInt32) : TSInt32;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SRandomOne() : TSInt8;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
@@ -303,6 +304,19 @@ function STruncUp(const T : TSFloat64) : TSInt32;{$IFDEF SUPPORTINLINE} inline; 
 begin
 Result := Trunc(T) + 1;
 end;
+
+function SShortIntToInt(Value : TSShortInt) : TSInteger; 
+{$IFDEF WITHASMINC} assembler; register; {$ENDIF}  overload;
+{$IFDEF WITHASMINC}
+	asm
+		cbw
+		cwde
+	end;
+{$ELSE}
+	begin
+	Result := Value;
+	end;
+	{$ENDIF}
 
 initialization
 begin

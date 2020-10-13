@@ -6,18 +6,19 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothFractalMandelbrot
-	,SmoothContextInterface
-	,SmoothScreenClasses
-	,SmoothBezierCurve
-	,SmoothContextClasses
+	,SmoothLists
+	,SmoothDateTime
 	,SmoothCommon
 	,SmoothCommonStructs
+	,SmoothComplex
 	,SmoothImage
 	,SmoothFont
-	,SmoothComplex
-	,SmoothDateTime
-	,SmoothLists
+	,SmoothContextInterface
+	,SmoothContextClasses
+	,SmoothScreenClasses
+	,SmoothBezierCurve
+	,SmoothFractal
+	,SmoothFractalMandelbrot
 	;
 
 type
@@ -65,8 +66,6 @@ type
 		FStartPanel : TSScreenPanel;
 		VectorBySingularPoint : TSVertex2f;
 		
-		Procent : TSFloat64;
-		iiiC : TSUInt32;
 		ComplexNumber : TSComplexNumber;
 		FArProgressBar:packed array of
 			TSScreenProgressBar;
@@ -105,17 +104,21 @@ type
 		FCurveInfoLbl : TSScreenLabel;
 		FCurveBeginDateTime : TSDateTime;
 		
-		FTNRF:TSFont;
+		FTimesNewRomanFont:TSFont;
 		
 		FOldView:TSScreenVertices;
-			public
+			protected
 		procedure UnDatePointCurvePanel();inline;
 		procedure DrawBezierPoints();inline;
 		procedure OffComponents();inline;
 		procedure OnComponents();inline;
 		procedure InitMandelbrot();inline;
 		function PointOfASetByCoordinates(const Point:TSPoint2int32):TSComplexNumber;inline;
+			protected
 		procedure UpDateLabelCoordCaption();inline;
+		procedure UpDateLabelProcent();
+		procedure UpDateThreads();
+		procedure DischargeThread(const ChargedThread, FreeThread : TSFractalThreadData);
 		end;
 
 implementation
@@ -136,6 +139,143 @@ uses
 	,SysUtils
 	,SmoothThreads
 	;
+
+procedure TSFractalMandelbrotGUI.DischargeThread(const ChargedThread, FreeThread : TSFractalThreadData);
+begin
+
+end;
+
+procedure TSFractalMandelbrotGUI.UpDateThreads();
+var
+	i, ii : TSMaxEnum;
+	iiiC : TSUInt32;
+begin
+if (not LabelProcent.Visible) or Mandelbrot.ThreadsReady then
+	exit;
+
+
+FNewPotokInit:=False;
+for i:=0 to Mandelbrot.Threads-1 do
+	begin
+	if Mandelbrot.ThreadData[i]^.Finished and (FArProgressBar[i].Visible) then
+		begin
+		//FArProgressBar[i].Visible:=False;
+		for ii:=0 to Mandelbrot.Threads-1 do
+			begin
+			{if ii>=i+1 then
+				FArProgressBar[ii].FNeedTop-=25;}
+			FDateTime.Get;
+			if (not FNewPotokInit) then
+			if 
+				(Mandelbrot.ThreadData[ii]^.Data<>nil) and 
+				(Mandelbrot.ThreadData[ii]^.Finished=False) and 
+				(ii<>i) and 
+				(PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.NewPos=0) and 
+				(
+				(PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.FHeightPositionEnd-
+				PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.NowPos)
+				*Mandelbrot.Width>50000
+				) and
+				(
+				(
+				(FDateTime-
+				PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.FBeginDate).GetPastMilliseconds
+				)/FArProgressBar[ii].Progress*(1 - FArProgressBar[ii].Progress)
+				>150
+				) then
+				// i - Только что Завершивший свою работу поток
+				//ii - Свободный для вычислительной деятельности поток
+				begin
+				PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.FWait:=True;
+				
+				if (Mandelbrot.ThreadData[ii]^.Finished=False) then
+	begin
+				
+				FArProgressBar[ii].Color2:=(FArProgressBar[ii].Color2+SVertex4fImport(0.9,0.45,0,0.8))/2;
+				FArProgressBar[ii].Color1:=(FArProgressBar[ii].Color1+SVertex4fImport(1,0.5,0,1))/2;
+				FArProgressBar[i].Color2:=(FArProgressBar[i].Color2+SVertex4fImport(0.1,1,0.1,0.7))/2;
+				FArProgressBar[i].Color1:=(FArProgressBar[i].Color1+SVertex4fImport(0,1,0,1))/2;
+				
+				//DischargeThread(Mandelbrot.ThreadData[ii]^, Mandelbrot.ThreadData[i]^);
+				iiiC:=0;
+				if Mandelbrot.ThreadData[i]^.Data<>nil then
+					begin
+					iiiC:=PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FHeightPositionEnd-
+							PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FHeightPositionBegin+
+							PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FHeightProgressMade;
+					Mandelbrot.ThreadData[i]^.FreeMemData();
+					end;
+				Mandelbrot.ThreadData[i]^.KillThread();
+				
+				Mandelbrot.ThreadData[i]^.Data:=TSFractalMandelbrotThreadData.Create(
+					Mandelbrot.ThreadData[i],
+					PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.NowPos+
+					(
+					(
+					PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.FHeightPositionEnd-
+					PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.NowPos
+					) div 2
+					),
+						
+					PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.FHeightPositionEnd,
+					FArProgressBar[i].GetProgressPointer(),i);
+
+				PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.NewPos:=0;
+				PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.NowPos:=0;
+				PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FWait:=False;
+				Mandelbrot.ThreadData[i]^.Finished:=False;
+				PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FBeginDate.Get;
+				PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FHeightProgressMade:=iiiC;
+				FArProgressBar[i].Progress:=0;
+				FArProgressBar[i].ProgressTimer:=0;
+				
+				Mandelbrot.ThreadData[i]^.Thread:=
+					TSThread.Create(
+						TSPointerProcedure(@TSFractalMandelbrotThreadProcedure),
+						Mandelbrot.ThreadData[i]^.Data);
+				
+				PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.NewPos:=
+					PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.NowPos+
+					(
+					(
+					PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.FHeightPositionEnd-
+					PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.NowPos
+					) div 2
+					);
+				FNewPotokInit:=True;
+	end;
+				end;
+			end;
+		//LabelProcent.FNeedTop-=25;
+		end;
+	end;
+end;
+
+procedure TSFractalMandelbrotGUI.UpDateLabelProcent();
+var
+	i : TSMaxEnum;
+	Procent : TSFloat64;
+begin
+if (not LabelProcent.Visible) or Mandelbrot.ThreadsReady then
+	exit;
+Procent:=0;
+for i:=0 to Mandelbrot.Threads-1 do
+	Procent+=
+		FArProgressBar[i].Progress*(
+		PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FHeightPositionEnd-
+		PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FHeightPositionBegin)+
+		PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FHeightProgressMade;
+Procent/=Mandelbrot.Height;
+LabelProcent.Progress:=Procent;
+FDateTime.Get;
+///FDateTime.ImportFromSeconds((FDateTime-FBeginCalc).GetPastSeconds);
+LblProcent.Caption:=SStringToPChar(SFloatToString(Procent*100,2)+'%,Прошло '+
+	SSecondsToStringTime((FDateTime-FBeginCalc).GetPastSeconds)
+	+','+'Осталось '+
+	SSecondsToStringTime(Round((FDateTime-FBeginCalc).GetPastSeconds/Procent*(1-Procent)))
+	+'.');
+LabelCoord.Caption:=SPCharNil;
+end;
 
 procedure TSFractalMandelbrotGUI.UnDatePointCurvePanel();inline;
 begin
@@ -686,7 +826,7 @@ var
 	i : TSByte;
 begin
 inherited;
-FTNRF := nil;
+FTimesNewRomanFont := nil;
 FCurvePointPanel := nil;
 FCurveSelectPoint := -1;
 FCurveArPoints := nil;
@@ -737,13 +877,27 @@ Screen.LastInternalComponent.LastInternalComponent.FUserPointer1:=Self;
 Screen.LastInternalComponent.CreateInternalComponent(TSScreenComboBox.Create);
 Screen.LastInternalComponent.LastInternalComponent.Visible:=True;
 Screen.LastInternalComponent.LastInternalComponent.SetBounds(5,80,Screen.LastInternalComponent.Width-10,20);
-(Screen.LastInternalComponent.LastInternalComponent as TSScreenComboBox).SelectItem:=4;
 (Screen.LastInternalComponent.LastInternalComponent as TSScreenComboBox).CreateItem('64');
 (Screen.LastInternalComponent.LastInternalComponent as TSScreenComboBox).CreateItem('128');
 (Screen.LastInternalComponent.LastInternalComponent as TSScreenComboBox).CreateItem('256');
 (Screen.LastInternalComponent.LastInternalComponent as TSScreenComboBox).CreateItem('512');
 (Screen.LastInternalComponent.LastInternalComponent as TSScreenComboBox).CreateItem('1024');
 (Screen.LastInternalComponent.LastInternalComponent as TSScreenComboBox).CreateItem('2048');
+(Screen.LastInternalComponent.LastInternalComponent as TSScreenComboBox).CreateItem('4096');
+if (Context.Width > 2048) then
+	(Screen.LastInternalComponent.LastInternalComponent as TSScreenComboBox).SelectItem := 6
+else if (Context.Width > 1024) then
+	(Screen.LastInternalComponent.LastInternalComponent as TSScreenComboBox).SelectItem := 5
+else if (Context.Width > 512) then
+	(Screen.LastInternalComponent.LastInternalComponent as TSScreenComboBox).SelectItem := 4
+else if (Context.Width > 256) then
+	(Screen.LastInternalComponent.LastInternalComponent as TSScreenComboBox).SelectItem := 3
+else if (Context.Width > 128) then
+	(Screen.LastInternalComponent.LastInternalComponent as TSScreenComboBox).SelectItem := 2
+else if (Context.Width > 64) then
+	(Screen.LastInternalComponent.LastInternalComponent as TSScreenComboBox).SelectItem := 1
+else if (Context.Width > 32) then
+	(Screen.LastInternalComponent.LastInternalComponent as TSScreenComboBox).SelectItem := 0;
 Screen.LastInternalComponent.LastInternalComponent.BoundsMakeReal;
 Screen.LastInternalComponent.LastInternalComponent.FUserPointer1:=Self;
 
@@ -773,7 +927,7 @@ case SCoreCount() of
 else (Screen.LastInternalComponent.LastInternalComponent as TSScreenComboBox).SelectItem:=3;
 end;
 
-FTNRF := SCreateFontFromFile(Context, SFontDirectory+DirectorySeparator+'Times New Roman.sf');
+FTimesNewRomanFont := SCreateFontFromFile(Context, SFontDirectory+DirectorySeparator+'Times New Roman.sf');
 end;
 
 destructor TSFractalMandelbrotGUI.Destroy();
@@ -781,7 +935,7 @@ var
 	Index : TSMaxEnum;
 begin
 SKill(FCurveInfoLbl);
-SKill(FTNRF);
+SKill(FTimesNewRomanFont);
 SKill(FCurvePointPanel);
 if FCurveArPoints<>nil then
 	SetLength(FCurveArPoints,0);
@@ -986,7 +1140,7 @@ if MandelbrotInitialized then
 						//GetZeros(QuantityNumbers(FAllKadrs)-QuantityNumbers(FNowKadr))+
 						SStr(FNowKadr)+'.' + TSImageFormatDeterminer.DetermineFileExtensionFromFormat(SDefaultSaveImageFormat(3));
 					end;
-				FTNRF.AddWaterString('made by Smooth', Mandelbrot.Image,0);
+				FTimesNewRomanFont.AddWaterString('made by Smooth', Mandelbrot.Image,0);
 				Mandelbrot.Image.Save(SDefaultSaveImageFormat(Mandelbrot.Image.BitMap.Channels));
 				if not FRenderVideo then
 					begin
@@ -1007,122 +1161,9 @@ if MandelbrotInitialized then
 	
 	UpDateLabelCoordCaption();
 	
-	if LabelProcent.Visible and ( not Mandelbrot.ThreadsReady) then
-		begin
-		Sleep(5);
-		FNewPotokInit:=False;
-		Procent:=0;
-		for i:=0 to QuantityThreads-1 do
-			begin
-			Procent+=
-				FArProgressBar[i].Progress*(
-				PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.h2-
-				PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.h1)+
-				PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FHePr;
-			if Mandelbrot.ThreadData[i]^.Finished and (FArProgressBar[i].Visible) then
-				begin
-				//FArProgressBar[i].Visible:=False;
-				for ii:=0 to Mandelbrot.Threads-1 do
-					begin
-					{if ii>=i+1 then
-						FArProgressBar[ii].FNeedTop-=25;}
-					FDateTime.Get;
-					if (not FNewPotokInit) then
-					if 
-						(Mandelbrot.ThreadData[ii]^.Data<>nil) and 
-						(Mandelbrot.ThreadData[ii]^.Finished=False) and 
-						(ii<>i) and 
-						(PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.NewPos=0) and 
-						(
-						(PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.h2-
-						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.NowPos)
-						*Mandelbrot.Width>50000
-						) and
-						(
-						(
-						(FDateTime-
-						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.FBeginDate).GetPastMilliseconds
-						)/FArProgressBar[ii].Progress*(1 - FArProgressBar[ii].Progress)
-						>150
-						) then
-						// i - Только что Завершивший свою работу поток
-						//ii - Свободный для вычислительной деятельности поток
-						begin
-						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.FWait:=True;
-						
-						if (Mandelbrot.ThreadData[ii]^.Finished=False) then
-			begin
-						
-						FArProgressBar[ii].Color2:=(FArProgressBar[ii].Color2+SVertex4fImport(0.9,0.45,0,0.8))/2;
-						FArProgressBar[ii].Color1:=(FArProgressBar[ii].Color1+SVertex4fImport(1,0.5,0,1))/2;
-						FArProgressBar[i].Color2:=(FArProgressBar[i].Color2+SVertex4fImport(0.1,1,0.1,0.7))/2;
-						FArProgressBar[i].Color1:=(FArProgressBar[i].Color1+SVertex4fImport(0,1,0,1))/2;
-						
-						iiiC:=0;
-						if Mandelbrot.ThreadData[i]^.Data<>nil then
-							begin
-							iiiC:=PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.h2-
-									PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.h1+
-									PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FHePr;
-							Mandelbrot.ThreadData[i]^.FreeMemData();
-							end;
-						Mandelbrot.ThreadData[i]^.KillThread();
-						
-						Mandelbrot.ThreadData[i]^.Data:=TSFractalMandelbrotThreadData.Create(
-							Mandelbrot.ThreadData[i],
-							PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.NowPos+
-							(
-							(
-							PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.h2-
-							PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.NowPos
-							) div 2
-							),
-								
-							PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.h2,
-							FArProgressBar[i].GetProgressPointer(),i);
-
-						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.NewPos:=0;
-						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.NowPos:=0;
-						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FWait:=False;
-						Mandelbrot.ThreadData[i]^.Finished:=False;
-						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FBeginDate.Get;
-						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[i]^.Data)^.FHePr:=iiiC;
-						FArProgressBar[i].Progress:=0;
-						FArProgressBar[i].ProgressTimer:=0;
-						
-						Mandelbrot.ThreadData[i]^.Thread:=
-							TSThread.Create(
-								TSPointerProcedure(@TSFractalMandelbrotThreadProcedure),
-								Mandelbrot.ThreadData[i]^.Data);
-						
-						PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.NewPos:=
-							PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.NowPos+
-							(
-							(
-							PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.h2-
-							PSFractalMandelbrotThreadData(Mandelbrot.ThreadData[ii]^.Data)^.NowPos
-							) div 2
-							);
-						FNewPotokInit:=True;
-			end;
-						end;
-					end;
-				//LabelProcent.FNeedTop-=25;
-				end;
-			end;
-		Procent/=Mandelbrot.Height;
-		LabelProcent.Progress:=Procent;
-		FDateTime.Get;
-		///FDateTime.ImportFromSeconds((FDateTime-FBeginCalc).GetPastSeconds);
-		LblProcent.Caption:=SStringToPChar(SFloatToString(Procent*100,2)+'%,Прошло '+
-			SSecondsToStringTime((FDateTime-FBeginCalc).GetPastSeconds)
-			+','+'Осталось '+
-			SSecondsToStringTime(Round((FDateTime-FBeginCalc).GetPastSeconds/Procent*(1-Procent)))
-			+'.');
-		LabelCoord.Caption:=SPCharNil;
-		end;
-
-
+	//UpDateThreads();
+	UpDateLabelProcent();
+	
 	if (Mandelbrot.Image<>nil) and Mandelbrot.Image.Loaded then
 		begin
 		Render.Color3f(1,1,1);

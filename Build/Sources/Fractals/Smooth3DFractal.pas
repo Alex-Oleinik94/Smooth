@@ -245,7 +245,7 @@ if _FaceIndex>=FPolygonsLimit then
 	_VertexIndex:=0;
 	_FaceIndex:=0;
 	if (FMemoryDataType = SVRAM) and ((_ObjectNumber>=0) and (_ObjectNumber<=F3dObject.QuantityObjects-1)) and (F3dObjectsInfo[_ObjectNumber]=S_FALSE) and (F3dObject.Objects[_ObjectNumber].QuantityVertices=0) then
-		Set3dObjectBuffersSize(F3dObject.Objects[_ObjectNumber], FPolygonsLimit,F3dObject.Objects[_ObjectNumber].GetFaceLength(FPolygonsLimit));
+		Set3dObjectBuffersSize(F3dObject.Objects[_ObjectNumber], FPolygonsLimit, F3dObject.Objects[_ObjectNumber].GetFaceLength(FPolygonsLimit));
 	end;
 end;
 
@@ -262,7 +262,7 @@ while NumberOfPolygons<>0 do
 	AddedObject := F3dObject.AddObject();
 	AddedObject.ObjectColor := SColor4fFromUInt32($FFFFFF);
 	AddedObject.EnableCullFace := False;
-	if (PolygonType=SR_QUADS) and (Render.RenderType<>SRenderOpenGL) then
+	if (PolygonType=SR_QUADS) and (Render.RenderType <> SRenderOpenGL) then
 		AddedObject.ObjectPolygonsType:=SR_TRIANGLES
 	else
 		AddedObject.ObjectPolygonsType:=PolygonType;

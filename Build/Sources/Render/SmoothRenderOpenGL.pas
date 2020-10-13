@@ -1803,9 +1803,9 @@ Result := dglOpenGL.wglChoosePixelFormatARB(
 	end;}
 
 if (not Result) then
-	SLog.Source([ClassName() + '__SetRenderPixelFormatWinAPI: Choosing formats failed!'])
+	SLog.Source([ClassName() + '__SetRenderPixelFormatWinAPI: Choosing of formats failed!'])
 else
-	SLog.Source([ClassName() + '__SetRenderPixelFormatWinAPI: Choosing formats finded ', numFormats, ' formats.']);
+	SLog.Source([ClassName() + '__SetRenderPixelFormatWinAPI: Choosing finded ', numFormats, ' formats.']);
 end;
 {$ENDIF}
 

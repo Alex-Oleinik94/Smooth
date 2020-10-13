@@ -20,10 +20,10 @@ type
 			public
 		constructor Create(const _FractalThreadData : PSFractalThreadData); overload;
 		destructor Destroy;
-		function Create(const _FractalThreadData : PSFractalThreadData; const _h1,_h2:LongInt;const Point:Pointer;const Number:LongInt = -1) : PSFractalMandelbrotThreadData; static; overload;
-		procedure Import(const _FractalThreadData : PSFractalThreadData; const _h1,_h2:LongInt;const Point:Pointer;const Number:LongInt = -1);
+		function Create(const _FractalThreadData : PSFractalThreadData; const _HeightPositionBegin,_HeightPositionEnd:LongInt;const Point:Pointer;const Number:LongInt = -1) : PSFractalMandelbrotThreadData; static; overload;
+		procedure Import(const _FractalThreadData : PSFractalThreadData; const _HeightPositionBegin,_HeightPositionEnd:LongInt;const Point:Pointer;const Number:LongInt = -1);
 			public
-		H1,H2:LongInt;
+		FHeightPositionBegin,FHeightPositionEnd:LongInt;
 		
 		FWait:Boolean;
 		NowPos:LongWord;
@@ -35,7 +35,7 @@ type
 		
 		FBeginDate:TSDateTime;//время начала потока
 		
-		FHePr:LongWord;//Уже сделаный прогресс потока по Height
+		FHeightProgressMade:LongWord;//Уже сделаный прогресс потока по Height
 		end;
 		
 	TSFractalType = (SMandelbrotSet, SJuliaSet);
@@ -146,31 +146,31 @@ begin
 inherited;
 end;
 
-procedure TSFractalMandelbrotThreadData.Import(const _FractalThreadData : PSFractalThreadData; const _h1,_h2:LongInt;const Point:Pointer;const Number:LongInt = -1);
+procedure TSFractalMandelbrotThreadData.Import(const _FractalThreadData : PSFractalThreadData; const _HeightPositionBegin,_HeightPositionEnd:LongInt;const Point:Pointer;const Number:LongInt = -1);
 begin
 FractalThreadData := _FractalThreadData;
-h1:=_h1;
-h2:=_h2;
+FHeightPositionBegin:=_HeightPositionBegin;
+FHeightPositionEnd:=_HeightPositionEnd;
 FPoint:=Point;
 FNumber:=Number;
 end;
 
-function TSFractalMandelbrotThreadData.Create(const _FractalThreadData : PSFractalThreadData; const _h1,_h2:LongInt;const Point:Pointer;const Number:LongInt = -1) : PSFractalMandelbrotThreadData; overload;
+function TSFractalMandelbrotThreadData.Create(const _FractalThreadData : PSFractalThreadData; const _HeightPositionBegin,_HeightPositionEnd:LongInt;const Point:Pointer;const Number:LongInt = -1) : PSFractalMandelbrotThreadData; overload;
 begin
 Result := GetMem(SizeOf(TSFractalMandelbrotThreadData));
 Result^.Create(_FractalThreadData);
-Result^.Import(_FractalThreadData, _h1, _h2, Point, Number)
+Result^.Import(_FractalThreadData, _HeightPositionBegin, _HeightPositionEnd, Point, Number)
 end;
 
 constructor TSFractalMandelbrotThreadData.Create(const _FractalThreadData : PSFractalThreadData); overload;
 begin
-h1:=0;
-h2:=0;
+FHeightPositionBegin:=0;
+FHeightPositionEnd:=0;
 FPoint:=nil;
 FNumber:=-1;
 VBuffer[True] := GetMem(trunc(_FractalThreadData^.Fractal.Depth/2)+1);
 VBuffer[False] := GetMem(trunc(_FractalThreadData^.Fractal.Depth/2)+1);
-FHePr:=0;
+FHeightProgressMade:=0;
 end;
 
 procedure TSFractalMandelbrot.Paint();
@@ -417,10 +417,10 @@ rY:=abs(FView.y1-FView.y2);
 rX:=abs(FView.x1-FView.x2);
 dX:=rX/Width;
 dY:=rY/Height;
-//i:=_ThreadData^.h1;
-//От h1 горизонтальной линии пикселей до h2 делаем
-for i:=_ThreadData^.h1 to _ThreadData^.h2 do
-//while i<=_ThreadData^.h2 do
+//i:=_ThreadData^.FHeightPositionBegin;
+//От FHeightPositionBegin горизонтальной линии пикселей до FHeightPositionEnd делаем
+for i:=_ThreadData^.FHeightPositionBegin to _ThreadData^.FHeightPositionEnd do
+//while i<=_ThreadData^.FHeightPositionEnd do
 //repeat
 	begin
 	_ThreadData^.NowPos:=i;
@@ -450,25 +450,25 @@ for i:=_ThreadData^.h1 to _ThreadData^.h2 do
 	
 	if PSDouble(_ThreadData^.FPoint)<>nil then
 		if IsComponent then
-			TSScreenProgressBar(_ThreadData^.FPoint).Progress:=(i-_ThreadData^.h1)/(_ThreadData^.h2-_ThreadData^.h1)
+			TSScreenProgressBar(_ThreadData^.FPoint).Progress:=(i-_ThreadData^.FHeightPositionBegin)/(_ThreadData^.FHeightPositionEnd-_ThreadData^.FHeightPositionBegin)
 		else
-			PSDouble(_ThreadData^.FPoint)^:=(i-_ThreadData^.h1)/(_ThreadData^.h2-_ThreadData^.h1);
+			PSDouble(_ThreadData^.FPoint)^:=(i-_ThreadData^.FHeightPositionBegin)/(_ThreadData^.FHeightPositionEnd-_ThreadData^.FHeightPositionBegin);
 	
 	while _ThreadData^.FWait do
 		begin
 		if _ThreadData^.NewPos<>0 then
 			begin
-			_ThreadData^.h2:=_ThreadData^.NewPos-1;
+			_ThreadData^.FHeightPositionEnd:=_ThreadData^.NewPos-1;
 			_ThreadData^.FWait:=False;
 			_ThreadData^.NewPos:=0;
 			end;
 		Sleep(5);
 		end;
-	if i+1>_ThreadData^.h2 then
+	if i+1>_ThreadData^.FHeightPositionEnd then
 		Break;
 	//Inc(i);
 	end;
-//until hh2<i;
+//until hFHeightPositionEnd<i;
 ii:=Byte(VBufferNow);
 while ii<Width do
 	begin

@@ -208,9 +208,7 @@ c3:=SColor4fFromUInt32($0080FF);
 
 InitProjectionComboBox(Render.Width-160,5,150,30,[SAnchRight]).BoundsMakeReal();
 InitEffectsComboBox(Render.Width-160,40,150,30,[SAnchRight]).BoundsMakeReal();
-
-InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]);
-Screen.LastInternalComponent.BoundsMakeReal();
+InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SAnchBottom]).BoundsMakeReal();
 
 FLDC := SCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SAnchRight], True, True, Self);
 

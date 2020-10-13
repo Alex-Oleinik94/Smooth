@@ -260,7 +260,7 @@ var
 	Matrix : TSMatrix4x4;
 begin
 FUp := FUp.Normalized();
-Render.InitMatrixMode(S_3D);
+Render.InitMatrixMode(FMatrixMode);
 Matrix := SGetLookAtMatrix(FLocation, FView + FLocation, FUp);
 Render.MultMatrixf(@Matrix);
 end;

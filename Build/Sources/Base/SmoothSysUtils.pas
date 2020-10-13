@@ -15,9 +15,6 @@ uses
 	,SmoothCasesOfPrint
 	;
 
-// Core
-function SCoreCount() : TSByte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
 // Libraries
 const
 	SLibraryNameBegin = 
@@ -68,8 +65,10 @@ procedure SPrintStackTrace();
 procedure SPrintExceptionStackTrace(const e : TSException; const CasesOfPrint : TSCasesOfPrint = [SCasePrint, SCaseLog];const ViewTime : TSBoolean = False);
 procedure SLogException(const Title : TSString; const e : Exception);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+// Core
+function SCoreCount() : TSByte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 // Other
-function SShortIntToInt(Value : TSShortInt) : TSInteger; {$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
 procedure SRunComand(const Comand : TSString; const CasesOfPrint : TSCasesOfPrint = [SCasePrint, SCaseLog]);
 function SOperatingSystemVersion(): TSString;
 
@@ -355,15 +354,12 @@ Result:=
 		{$endif}
 end;
 
-function SCoreCount() : TSByte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 {$IFDEF USE_uSMBIOS}
+function SCoreCountuSMBIOS() : TSByte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 Var
   SMBios             : TSMBios;
   LProcessorInfo     : TProcessorInformation;
-{$ENDIF}
 begin
-Result:=0;
-{$IFDEF USE_uSMBIOS}
 try
 	SMBios:=TSMBios.Create();
 	if SMBios.HasProcessorInfo then
@@ -373,20 +369,15 @@ try
 finally
 	SMBios.Free;
 	end;
-{$ENDIF}
 end;
+{$ENDIF}
 
-function SShortIntToInt(Value : TSShortInt) : TSInteger; 
-{$IFDEF WITHASMINC} assembler; register; {$ENDIF}  overload;
-{$IFDEF WITHASMINC}
-	asm
-		cbw
-		cwde
-	end;
-{$ELSE}
-	begin
-	Result := Value;
-	end;
-	{$ENDIF}
+function SCoreCount() : TSByte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result:=0;
+{$IFDEF MSWINDOWS}
+Result := SWinAPICoreCount();
+{$endif}
+end;
 
 end.
