@@ -1,3 +1,5 @@
+//DEPRECATED
+
 {$INCLUDE Smooth.inc}
 
 //{$DEFINE REDACTORDEBUG}
