@@ -17,7 +17,7 @@ uses
 	;
 type
 	TSMengerSpongeBoolAr6=array[0..5] of TSBool;
-	TSMengerType = (SMengerCube,SMengerStar,SMengerSnowflake);
+	TSMengerType = (SMengerCube, SMengerStar, SMengerSnowflake);
 const
 	SDefaultMengerType = SMengerCube;
 	TSMengerSpongeBoolAr6Null:TSMengerSpongeBoolAr6=(False,False,False,False,False,False);
@@ -120,9 +120,9 @@ with TSFractalMengerSpongeRelease(VComboBox.FUserPointer1) do
 		begin
 		if a<>b then
 			begin
-			case b of //because strange bug
-			1:FFractalType:=SMengerCube;
-			0:FFractalType:=SMengerStar;
+			case b of
+			0:FFractalType:=SMengerCube;
+			1:FFractalType:=SMengerStar;
 			2:FFractalType:=SMengerSnowflake;
 			end;
 			Construct;
@@ -188,7 +188,7 @@ Screen.LastInternalComponent.Anchors:=[SAnchRight];
 (Screen.LastInternalComponent as TSScreenComboBox).CreateItem('Звездочка');
 (Screen.LastInternalComponent as TSScreenComboBox).CreateItem('Снежинка (beta)');
 (Screen.LastInternalComponent as TSScreenComboBox).CallBackProcedure:=TSScreenComboBoxProcedure(@FractalMengerSpongeReleaseComboBoxProcedure);
-(Screen.LastInternalComponent as TSScreenComboBox).SelectItem:=1; //because strange bug
+(Screen.LastInternalComponent as TSScreenComboBox).SelectItem:=0;
 Screen.LastInternalComponent.FUserPointer1:=Self;
 Screen.LastInternalComponent.Visible:=True;
 Screen.LastInternalComponent.BoundsMakeReal();
@@ -410,8 +410,8 @@ else
 	for i:=0 to 2 do
 		for ii:=0 to 2 do
 			for iii:=0 to 2 do
-				if ((FFractalType = SMengerCube)      and (DoOrNotDo(i,ii,iii))) or
-				   ((FFractalType = SMengerStar)      and (not DoOrNotDo(i,ii,iii))) or
+				if ((FFractalType = SMengerCube)      and (not DoOrNotDo(i,ii,iii))) or
+				   ((FFractalType = SMengerStar)      and (DoOrNotDo(i,ii,iii))) or
 				   ((FFractalType = SMengerSnowflake) and (DoOrNotDoPlus(i,ii,iii))) then
 					begin
 					Rec( 
@@ -487,9 +487,9 @@ else
 	for i:=0 to 2 do
 		for j:=0 to 2 do
 			for k:=0 to 2 do
-				if ((_FractalType = SMengerCube) and (DoOrNotDo(i,j,k))) or
-				((_FractalType = SMengerStar) and (not DoOrNotDo(i,j,k))) or
-				((_FractalType = SMengerSnowflake) and (DoOrNotDoPlus(i,j,k))) then
+				if  ((_FractalType = SMengerCube) and (not DoOrNotDo(i,j,k))) or
+					((_FractalType = SMengerStar) and (DoOrNotDo(i,j,k))) or
+					((_FractalType = SMengerSnowflake) and (DoOrNotDoPlus(i,j,k))) then
 					begin
 					Result+=CountingTheNumberOfPolygons(_FractalType,
 						(ConstructBoolArray(_FractalType,_BoolArray,i,j,k,_Depth-1)),
@@ -507,8 +507,8 @@ i4:=0;
 for i:=0 to 2 do
 	for ii:=0 to 2 do
 		for iii:=0 to 2 do
-			if ((FFractalType = SMengerCube) and (DoOrNotDo(i,ii,iii))) or
-				((FFractalType = SMengerStar) and (not DoOrNotDo(i,ii,iii))) or
+			if ((FFractalType = SMengerCube) and (not DoOrNotDo(i,ii,iii))) or
+				((FFractalType = SMengerStar) and (DoOrNotDo(i,ii,iii))) or
 				((FFractalType = SMengerSnowflake) and (DoOrNotDoPlus(i,ii,iii))) then
 				begin
 				FThreadsArray[i4].Arr6:=ConstructBoolArray(FFractalType,TSMengerSpongeBoolAr6True,i,ii,iii);
@@ -528,7 +528,7 @@ class function TSFractalMengerSponge.ConstructBoolArray(const _FractalType : TSM
 begin
 Result:=_PreviousBoolArray;
 
-if _FractalType = SMengerStar then
+if _FractalType = SMengerCube then
 	begin
 	if (i=1) or (j=1) or (k=1) then
 		begin
@@ -576,7 +576,7 @@ if _FractalType = SMengerStar then
 			Result[1]:=False;
 		end;
 	end;
-if _FractalType = SMengerCube then
+if _FractalType = SMengerStar then
 	begin
 	if (j=1) and (k=1) and (i=1) then
 		Result:=TSMengerSpongeBoolAr6Null
