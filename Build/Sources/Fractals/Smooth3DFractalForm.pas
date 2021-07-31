@@ -55,7 +55,10 @@ procedure TS3DFractalForm.SetIs2D(const _Is2D : TSBoolean);
 begin
 FIs2D := _Is2D;
 if (not FIs2D) then
-	InitEffectsComboBox(Render.Width - 160, 40, 150, 30, [SAnchRight]).BoundsMakeReal()
+	begin
+	InitEffectsComboBox(Render.Width - 160, 40, 150, 30, [SAnchRight]).BoundsMakeReal();
+	FLightingEnable := True;
+	end
 else
 	SKill(FEffectsComboBox);
 end;

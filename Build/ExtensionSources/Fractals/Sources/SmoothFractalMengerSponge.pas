@@ -547,16 +547,16 @@ if _FractalType = SMengerCube then
 			Result[1]:=False;
 			Result[3]:=False;
 			end;
+		if i=0 then
+			Result[2]:=True;
 		if j=0 then
 			Result[5]:=True;
-		if i=0 then
-			Result[2]:=true;
 		if k=0 then
 			Result[3]:=True;
-		if j=2 then
-			Result[0]:=True;
 		if i=2 then
 			Result[4]:=True;
+		if j=2 then
+			Result[0]:=True;
 		if k=2 then
 			Result[1]:=True;
 		end

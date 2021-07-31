@@ -241,6 +241,7 @@ type
 		
 		procedure SetVertex(const VVertexIndex : TSUInt32; const x, y : TSFloat32; const z : TSFloat32 = 0; const w : TSFloat32 = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		procedure SetVertex(const VVertexIndex : TSUInt32; const v2 : TSVector2f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		procedure SetVertex(const VVertexIndex : TSUInt32; const v3 : TSVector3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		
 		// Добавляет еще элемент(ы) в массив индексов
 		procedure AddFace(const ArIndex:TSLongWord;const FQuantityNewFaces:LongWord = 1);
@@ -918,6 +919,16 @@ else if (FColorType=S3dObjectColorType4b) then
 		Result.Import(ArColor4b[Index]^.b / 255, ArColor4b[Index]^.g / 255, ArColor4b[Index]^.r / 255, ArColor4b[Index]^.a / 255);
 		end;
 	end;
+end;
+
+procedure TS3DObject.SetVertex(const VVertexIndex : TSUInt32; const v3 : TSVector3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+if FVertexType = S3dObjectVertexType2f then
+	ArVertex2f[VVertexIndex]^ := v3
+else if FVertexType = S3dObjectVertexType3f then
+	ArVertex3f[VVertexIndex]^ := v3
+else if FVertexType = S3dObjectVertexType4f then
+	ArVertex4f[VVertexIndex]^.Import(v3.x, v3.y, v3.y);
 end;
 
 procedure TS3DObject.SetVertex(const VVertexIndex : TSUInt32; const v2 : TSVector2f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;

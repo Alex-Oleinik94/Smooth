@@ -40,6 +40,7 @@ type
 	procedure PushPolygonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt; const v1, v2, v3, v4 : TSVector3f; const _NormalIndex : TSMaxEnum);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		protected
 	FNormals : packed array [0..5] of TSVector3f;
+	FObjectSize : TSFloat32;
 		public
 	procedure PolygonsConstruction(); override; // fractal construction
 	end;
@@ -56,8 +57,18 @@ uses
 	;
 
 class function TSFractalMengerSponge2.ConstructCube(const _Cube : TSMengerSpongeVectors; const _Index1, _Index2, _Index3 : TSMaxEnum) : TSMengerSpongeVectors;
+var
+	CubeSize : TSFloat32;
 begin
-Result := _Cube;
+CubeSize := Abs(_Cube[1] - _Cube[0]) / 3;
+Result[0] := _Cube[0] + TSVector3f.Create(_Index1 * CubeSize, _Index2 * CubeSize, _Index3 * CubeSize);
+Result[1] := Result[0] + TSVector3f.Create(CubeSize, 0, 0);
+Result[2] := Result[0] + TSVector3f.Create(CubeSize, 0, CubeSize);
+Result[3] := Result[0] + TSVector3f.Create(0, 0, CubeSize);
+Result[4] := Result[0] + TSVector3f.Create(0, CubeSize, 0);
+Result[5] := Result[0] + TSVector3f.Create(CubeSize, CubeSize, 0);
+Result[6] := Result[0] + TSVector3f.Create(CubeSize, CubeSize, CubeSize);
+Result[7] := Result[0] + TSVector3f.Create(0, CubeSize, CubeSize);
 end;
 
 procedure TSFractalMengerSponge2.ConstructMengerSponge(const _Depth : TSMaxEnum; _Cube : TSMengerSpongeVectors; const _PolygonsSigns : TSMengerSpongePolygonsSigns; var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt);
@@ -65,17 +76,17 @@ var
 	Index, Index2, Index3 : TSMaxEnum;
 begin
 if _PolygonsSigns[0] then
-	Generate4(_Depth, _Cube[1], _Cube[2], _Cube[3], _Cube[4], 0, _ObjectNumber, _VertexIndex, _FaceIndex);
+	Generate4(_Depth, _Cube[0], _Cube[1], _Cube[2], _Cube[3], 0, _ObjectNumber, _VertexIndex, _FaceIndex);
 if _PolygonsSigns[1] then
-	Generate4(_Depth, _Cube[1], _Cube[2], _Cube[6], _Cube[5], 1, _ObjectNumber, _VertexIndex, _FaceIndex);
+	Generate4(_Depth, _Cube[0], _Cube[1], _Cube[5], _Cube[4], 1, _ObjectNumber, _VertexIndex, _FaceIndex);
 if _PolygonsSigns[2] then
-	Generate4(_Depth, _Cube[2], _Cube[3], _Cube[7], _Cube[6], 2, _ObjectNumber, _VertexIndex, _FaceIndex);
+	Generate4(_Depth, _Cube[1], _Cube[2], _Cube[6], _Cube[5], 2, _ObjectNumber, _VertexIndex, _FaceIndex);
 if _PolygonsSigns[3] then
-	Generate4(_Depth, _Cube[3], _Cube[4], _Cube[8], _Cube[7], 3, _ObjectNumber, _VertexIndex, _FaceIndex);
+	Generate4(_Depth, _Cube[2], _Cube[3], _Cube[7], _Cube[6], 3, _ObjectNumber, _VertexIndex, _FaceIndex);
 if _PolygonsSigns[4] then
-	Generate4(_Depth, _Cube[4], _Cube[1], _Cube[5], _Cube[8], 4, _ObjectNumber, _VertexIndex, _FaceIndex);
+	Generate4(_Depth, _Cube[3], _Cube[0], _Cube[4], _Cube[7], 4, _ObjectNumber, _VertexIndex, _FaceIndex);
 if _PolygonsSigns[5] then
-	Generate4(_Depth, _Cube[7], _Cube[8], _Cube[5], _Cube[6], 5, _ObjectNumber, _VertexIndex, _FaceIndex);
+	Generate4(_Depth, _Cube[6], _Cube[7], _Cube[4], _Cube[5], 5, _ObjectNumber, _VertexIndex, _FaceIndex);
 if (_Depth > 0) then
 	for Index := 0 to 2 do
 		for Index2 := 0 to 2 do
@@ -89,22 +100,23 @@ end;
 
 procedure TSFractalMengerSponge2.PolygonsConstruction();
 var
-	ObjectNumber, VertexIndex, FaceIndex, ObjectSize : TSFractalIndexInt;
+	ObjectNumber, VertexIndex, FaceIndex : TSFractalIndexInt;
 	Cube : TSMengerSpongeVectors;
 	Index : TSMaxEnum;
+	VectorScale :TSFloat32;
 begin
 ObjectNumber := 0;
 VertexIndex := 0;
 FaceIndex := 0;
-ObjectSize := 4;
-Cube[0] := TSVector3f.Create(-1, -1, -1);
-Cube[1] := TSVector3f.Create(1, -1, -1);
-Cube[2] := TSVector3f.Create(1, -1, 1);
-Cube[3] := TSVector3f.Create(-1, -1, 1);
-Cube[4] := TSVector3f.Create(-1, 1, -1);
-Cube[5] := TSVector3f.Create(1, 1, -1);
-Cube[6] := TSVector3f.Create(1, 1, 1);
-Cube[7] := TSVector3f.Create(-1, 1, 1);
+VectorScale := FObjectSize / 2;
+Cube[0] := TSVector3f.Create(-VectorScale, -VectorScale, -VectorScale);
+Cube[1] := TSVector3f.Create(VectorScale, -VectorScale, -VectorScale);
+Cube[2] := TSVector3f.Create(VectorScale, -VectorScale, VectorScale);
+Cube[3] := TSVector3f.Create(-VectorScale, -VectorScale, VectorScale);
+Cube[4] := TSVector3f.Create(-VectorScale, VectorScale, -VectorScale);
+Cube[5] := TSVector3f.Create(VectorScale, VectorScale, -VectorScale);
+Cube[6] := TSVector3f.Create(VectorScale, VectorScale, VectorScale);
+Cube[7] := TSVector3f.Create(-VectorScale, VectorScale, VectorScale);
 ConstructMengerSponge(Depth, Cube, MengerSpongePolygonsSignsTrue, ObjectNumber, VertexIndex, FaceIndex);
 EndOfPolygonsConstruction(ObjectNumber);
 end;
@@ -179,6 +191,8 @@ else
 end;
 
 procedure TSFractalMengerSponge2.PushPolygonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt; const v1, v2, v3, v4 : TSVector3f; const _NormalIndex : TSMaxEnum);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	VectorScale : TSFloat32;
 begin
 _VertexIndex+=4;
 F3dObject.Objects[_ObjectNumber].SetVertex(_VertexIndex - 4, v1);
@@ -188,10 +202,11 @@ F3dObject.Objects[_ObjectNumber].SetVertex(_VertexIndex - 1, v4);
 
 if FEnableColors then
 	begin
-	F3dObject.Objects[_ObjectNumber].SetColor(_VertexIndex - 4, (v1 + TSVector3f.Create(1, 1, 1)) / 2);
-	F3dObject.Objects[_ObjectNumber].SetColor(_VertexIndex - 3, (v2 + TSVector3f.Create(1, 1, 1)) / 2);
-	F3dObject.Objects[_ObjectNumber].SetColor(_VertexIndex - 2, (v3 + TSVector3f.Create(1, 1, 1)) / 2);
-	F3dObject.Objects[_ObjectNumber].SetColor(_VertexIndex - 1, (v4 + TSVector3f.Create(1, 1, 1)) / 2);
+	VectorScale := FObjectSize / 2;
+	F3dObject.Objects[_ObjectNumber].SetColor(_VertexIndex - 4, (v1 + TSVector3f.Create(VectorScale, VectorScale, VectorScale)) / FObjectSize);
+	F3dObject.Objects[_ObjectNumber].SetColor(_VertexIndex - 3, (v2 + TSVector3f.Create(VectorScale, VectorScale, VectorScale)) / FObjectSize);
+	F3dObject.Objects[_ObjectNumber].SetColor(_VertexIndex - 2, (v3 + TSVector3f.Create(VectorScale, VectorScale, VectorScale)) / FObjectSize);
+	F3dObject.Objects[_ObjectNumber].SetColor(_VertexIndex - 1, (v4 + TSVector3f.Create(VectorScale, VectorScale, VectorScale)) / FObjectSize);
 	end;
 
 if FEnableNormals then
@@ -211,41 +226,50 @@ end;
 class function TSFractalMengerSponge2.ConstructPolygonsSigns(const _PolygonsSigns : TSMengerSpongePolygonsSigns; const _Index1, _Index2, _Index3 : TSMaxEnum) : TSMengerSpongePolygonsSigns;
 begin
 Result := _PolygonsSigns;
-if (_Index1 = 1) and (_Index2 = 1) and (_Index3 = 1) then
-	Result := MengerSpongePolygonsSignsFalse
-else
+if (_Index1 = 1) or (_Index2 = 1) or (_Index3 = 1) then
 	begin
-	Result := MengerSpongePolygonsSignsTrue;
-	if _Index3 = 0 then
+	if _Index1 = 1 then
 		begin
-		Result[1] := False;
-		Result[3] := False;
+		Result[2] := False;
+		Result[4] := False;
 		end;
-	if _Index3 = 2 then
-		begin
-		Result[3] := False;
-		Result[1] := False;
-		end;
-	if _Index2 = 0 then
+	if _Index2 =1 then
 		begin
 		Result[0] := False;
 		Result[5] := False;
 		end;
-	if _Index2 = 2 then
+	if _Index3 = 1 then
 		begin
-		Result[5] := False;
-		Result[0] := False;
+		Result[1] := False;
+		Result[3] := False;
 		end;
 	if _Index1 = 0 then
-		begin
-		Result[4] := False;
-		Result[2] := False;
-		end;
+		Result[2] := True;
+	if _Index2 = 0 then
+		Result[5] := True;
+	if _Index3 = 0 then
+		Result[3] := True;
 	if _Index1 = 2 then
-		begin
+		Result[4] := True;
+	if _Index2 = 2 then
+		Result[0] := True;
+	if _Index3 = 2 then
+		Result[1] := True;
+	end
+else
+	begin
+	if _Index1 = 0 then
 		Result[2] := False;
+	if _Index2 = 0 then
+		Result[5] := False;
+	if _Index3 = 0 then
+		Result[3] := False;
+	if _Index1 = 2 then
 		Result[4] := False;
-		end;
+	if _Index2 = 2 then
+		Result[0] := False;
+	if _Index3 = 2 then
+		Result[1] := False;
 	end;
 end;
 
@@ -336,7 +360,8 @@ Is2D := False;
 FPrimetiveType := SR_QUADS;
 FPrimetiveParam := 0;
 Threads := {$IFDEF ANDROID} 0 {$ELSE} 1 {$ENDIF};
-Depth := 4;
+Depth := 3;
+FObjectSize := 5;
 
 if FEnableNormals then
 	begin
