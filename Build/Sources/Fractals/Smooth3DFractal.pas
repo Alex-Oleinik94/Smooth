@@ -358,31 +358,34 @@ procedure TS3DFractal.CkeckConstructedObjects();
 var
 	Index, Index2 : TSMaxEnum;
 begin
-if (FMemoryDataType = SVRAM) then
+if Length(F3dObjectsInfo) <> 0 then
 	begin
-	Index2 := 1;
-	for Index := 0 to High(F3dObjectsInfo) do
-		if F3dObjectsInfo[Index] = S_TRUE then
-			begin
-			if F3dObject.Objects[Index].LoadToVBO(FClearRAMAfterLoadToVRAM) then
-				F3dObjectsInfo[Index] := S_UNKNOWN;
-			end
-		else if F3dObjectsInfo[Index] = S_FALSE then
-			Index2 := 0;
-	if Index2 = 1 then
-		F3dObjectsReady := True;
-	end
-else if (FMemoryDataType <> SVRAM) then
-	begin
-	Index2 := 1;
-	for Index := 0 to High(F3dObjectsInfo) do
-		if F3dObjectsInfo[Index] <> S_TRUE then
-			begin
-			Index2 := 0;
-			Break;
-			end;
-	if Index2 = 1 then
-		F3dObjectsReady := True;
+	if (FMemoryDataType = SVRAM) then
+		begin
+		Index2 := 1;
+		for Index := 0 to High(F3dObjectsInfo) do
+			if F3dObjectsInfo[Index] = S_TRUE then
+				begin
+				if F3dObject.Objects[Index].LoadToVBO(FClearRAMAfterLoadToVRAM) then
+					F3dObjectsInfo[Index] := S_UNKNOWN;
+				end
+			else if F3dObjectsInfo[Index] = S_FALSE then
+				Index2 := 0;
+		if Index2 = 1 then
+			F3dObjectsReady := True;
+		end
+	else if (FMemoryDataType <> SVRAM) then
+		begin
+		Index2 := 1;
+		for Index := 0 to High(F3dObjectsInfo) do
+			if F3dObjectsInfo[Index] <> S_TRUE then
+				begin
+				Index2 := 0;
+				Break;
+				end;
+		if Index2 = 1 then
+			F3dObjectsReady := True;
+		end;
 	end;
 end;
 

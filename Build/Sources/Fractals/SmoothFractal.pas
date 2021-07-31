@@ -14,8 +14,6 @@ type
 	PSCustomFractalThreadData = ^ TSCustomFractalThreadData;
 	
 	TSFractalThreadData = object
-			public
-		procedure Clear(const _Fractal : TSFractal);
 			private
 		FThreadID:LongWord;
 		FFractal:TSFractal;
@@ -30,6 +28,9 @@ type
 		property Finished : TSBoolean read FFinished write FFinished;
 		property Data : PSCustomFractalThreadData read FData write FData;
 		property Thread : TSThread read FThread write FThread;
+			public
+		procedure Clear(const _Fractal : TSFractal);
+		procedure StartThread(const Proc : TSThreadProcedure; const Para : TSPointer = nil);
 		end;
 	PSFractalThreadData = ^ TSFractalThreadData;
 	TSFractalThreadDataList = packed array of TSFractalThreadData;
@@ -122,6 +123,17 @@ FThreadID := 0;
 FFractal := _Fractal;
 FThread := nil;
 FFinished := False;
+end;
+
+procedure TSFractalThreadData.StartThread(const Proc : TSThreadProcedure; const Para : TSPointer = nil);
+begin
+KillThread();
+Finished := False;
+FreeMemData();
+if (Para = nil) then
+	Thread := TSThread.Create(Proc, @Self)
+else
+	Thread := TSThread.Create(Proc, Para);
 end;
 
 // TSFractal

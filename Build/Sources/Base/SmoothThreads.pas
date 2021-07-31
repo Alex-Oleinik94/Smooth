@@ -84,8 +84,7 @@ type
 		{$ENDIF}{$ENDIF}
 		;
 	
-	TSThreadFunction = function ( p : TSPointer ): TSThreadFunctionResult;
-		{$IFDEF ANDROID}cdecl;{$ELSE} {$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
+	TSThreadFunction = function ( p : TSPointer ): TSThreadFunctionResult; {$IFDEF ANDROID}cdecl;{$ELSE} {$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
 	
 	TSThread = class(TSNamed)
 			public
@@ -201,8 +200,7 @@ if Pointer(FProcedure)<>nil then
 	FProcedure(FParametr);
 end;
 
-function TSThreadStart(ThreadClass : TSThread) : TSThreadFunctionResult;
-{$IFDEF ANDROID}cdecl;{$ELSE}{$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
+function TSThreadStart(ThreadClass : TSThread) : TSThreadFunctionResult;{$IFDEF ANDROID}cdecl;{$ELSE}{$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
 begin
 Result := {$IFDEF ANDROID}nil{$ELSE}0{$ENDIF};
 try
@@ -236,18 +234,16 @@ begin
 		end;
 	if FHandle <> 0 then
 		CloseHandle(FHandle);
-{$ELSE}
-	{$IFDEF ANDROID}
+{$ELSE} {$IFDEF ANDROID}
 		{if not FFinished then
 			pthread_cancel(FHandle);}
 		pthread_cond_destroy(@cond);
 		pthread_mutex_destroy(@mutex);
 		pthread_attr_destroy(@attr);
-	{$ELSE}
+{$ELSE}
 	if not FFinished then
 		KillThread(FHandle);
-		{$ENDIF}
-	{$ENDIF}
+ {$ENDIF} {$ENDIF}
 FillChar(FHandle,SizeOf(FHandle),0);
 FThreadID:=0;
 inherited;

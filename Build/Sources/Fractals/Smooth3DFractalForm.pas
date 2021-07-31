@@ -25,7 +25,7 @@ type
 			protected
 		procedure SetDepth(const _Depth : LongInt); override;
 		procedure EndOfPolygonsConstruction(const ObjectId : TSUInt32); virtual;
-		class function CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum; virtual; abstract;
+		class function CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum; virtual;
 		procedure ChangeDepth(const _IncrementOrDecrement : TSInt32);
 			protected
 		FLabelDepth, FLabelDepthCaption : TSScreenLabel; // Label depth and caption of depth label "Итерация"
@@ -34,6 +34,9 @@ type
 		FIs2D : TSBoolean;
 		FPrimetiveType : TSUInt32; // SR_LINES, SR_QUADS ...
 		FPrimetiveParam : TSUInt32;
+		procedure SetIs2D(const _Is2D : TSBoolean);
+			public
+		property Is2D : TSBoolean read FIs2D write SetIs2D;
 		end;
 
 procedure S3DFractalFormThreadCallback(FractalThreadData:PSFractalThreadData);
@@ -47,6 +50,20 @@ uses
 	,SmoothScreenBase
 	,SmoothThreads
 	;
+
+procedure TS3DFractalForm.SetIs2D(const _Is2D : TSBoolean);
+begin
+FIs2D := _Is2D;
+if (not FIs2D) then
+	InitEffectsComboBox(Render.Width - 160, 40, 150, 30, [SAnchRight]).BoundsMakeReal()
+else
+	SKill(FEffectsComboBox);
+end;
+
+class function TS3DFractalForm.CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum;
+begin
+Result := 0;
+end;
 
 procedure TS3DFractalForm.SetDepth(const _Depth : LongInt);
 begin
@@ -68,19 +85,13 @@ var
 begin
 inherited;
 Clear3dObject();
-NumberOfPolygons := CountingTheNumberOfPolygons(FDepth);;
+NumberOfPolygons := CountingTheNumberOfPolygons(FDepth);
 if (not FIs2D) or (FIs2D and (Render.RenderType in [SRenderDirectX9, SRenderDirectX8])) then 
 	Construct3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType3f, FPrimetiveParam)
 else
 	Construct3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType2f, FPrimetiveParam);
 if FThreadsEnable then
-	begin
-	ThreadData[0]^.KillThread();
-	ThreadData[0]^.Finished := False;
-	ThreadData[0]^.FreeMemData();
-	ThreadData[0]^.Thread   := TSThread.Create(TSPointerProcedure(@S3DFractalFormThreadCallback), ThreadData[0]);
-	//PolygonsConstruction();
-	end
+	ThreadData[0]^.StartThread(TSPointerProcedure(@S3DFractalFormThreadCallback), ThreadData[0]) //PolygonsConstruction();
 else
 	begin
 	PolygonsConstruction();

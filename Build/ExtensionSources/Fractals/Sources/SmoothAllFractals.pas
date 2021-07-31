@@ -37,6 +37,7 @@ uses
 	,SmoothFractalMengerSponge
 	,SmoothFractalSierpinskiCarpetSixAngle
 	,SmoothFractalSierpinskiCarpet2
+	,SmoothFractalMengerSponge2
 	;
 
 constructor TSAllFractals.Create();
@@ -52,6 +53,7 @@ FDrawClasses.Add(TSFractalLevyCurve);
 FDrawClasses.Add(TSFractalSierpinskiCarpet);
 FDrawClasses.Add(TSFractalSierpinskiCarpet2);
 FDrawClasses.Add(TSFractalSierpinskiCarpetSixAngle);
+FDrawClasses.Add(TSFractalMengerSponge2);
 FDrawClasses.Initialize();
 FDrawClasses.ComboBox.SetBounds(FDrawClasses.ComboBox.Left, 28, FDrawClasses.ComboBox.Width, FDrawClasses.ComboBox.Height);
 FDrawClasses.ComboBox.CursorQuickSelect := True;

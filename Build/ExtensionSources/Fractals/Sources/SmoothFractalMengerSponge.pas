@@ -83,7 +83,7 @@ uses
 	,SmoothFileUtils
 	;
 
-{MENGER SPUNCH RELEASE}
+{MENGER SPONGE RELEASE}
 
 procedure MengerSpongeButtonDepthPlusOnChange(VButton:TSScreenButton);
 begin
@@ -235,7 +235,7 @@ SKill(FLabelDepthCaption);
 inherited;
 end;
 
-{MENGER SPUNCH}
+{MENGER SPONGE}
 
 destructor TSFractalMengerSponge.Destroy;
 begin
