@@ -34,7 +34,7 @@ type
 	class function CountingTheNumberOfPolygonsMengerSponge(const _PolygonsSigns : TSMengerSpongePolygonsSigns; const _Depth : TSMaxEnum) : TSMaxEnum;
 	class function ValidIndexes(const _Index1, _Index2, _Index3 : TSMaxEnum) : TSBoolean;
 	class function CountingTheNumberOfPolygonsSierpinskiCarpet(const _Depth : TSMaxEnum) : TSMaxEnum;
-	class function ConstructPolygonsSigns(const _PolygonsSigns : TSMengerSpongePolygonsSigns; const _Index1, _Index2, _Index3 : TSMaxEnum) : TSMengerSpongePolygonsSigns;
+	class function ConstructPolygonsSigns(const _Index1, _Index2, _Index3 : TSMaxEnum) : TSMengerSpongePolygonsSigns;
 	class function ConstructCube(const _Cube : TSMengerSpongeVectors; const _Index1, _Index2, _Index3 : TSMaxEnum) : TSMengerSpongeVectors;
 	procedure ConstructMengerSponge(const _Depth : TSMaxEnum; _Cube : TSMengerSpongeVectors; const _PolygonsSigns : TSMengerSpongePolygonsSigns; var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt);
 	procedure PushPolygonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSFractalIndexInt; const v1, v2, v3, v4 : TSVector3f; const _NormalIndex : TSMaxEnum);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -94,7 +94,7 @@ if (_Depth > 0) then
 				if ValidIndexes(Index, Index2, Index3) then
 					ConstructMengerSponge(_Depth - 1,
 						ConstructCube(_Cube, Index, Index2, Index3),
-						ConstructPolygonsSigns(_PolygonsSigns, Index, Index2, Index3),
+						ConstructPolygonsSigns(Index, Index2, Index3),
 						_ObjectNumber, _VertexIndex, _FaceIndex);
 end;
 
@@ -223,9 +223,9 @@ _FaceIndex+=1;
 AfterPushingPolygonData(_ObjectNumber, FThreadsEnable, _VertexIndex, _FaceIndex);
 end;
 
-class function TSFractalMengerSponge2.ConstructPolygonsSigns(const _PolygonsSigns : TSMengerSpongePolygonsSigns; const _Index1, _Index2, _Index3 : TSMaxEnum) : TSMengerSpongePolygonsSigns;
+class function TSFractalMengerSponge2.ConstructPolygonsSigns(const _Index1, _Index2, _Index3 : TSMaxEnum) : TSMengerSpongePolygonsSigns;
 begin
-Result := _PolygonsSigns;
+Result := MengerSpongePolygonsSignsFalse;
 if (_Index1 = 1) or (_Index2 = 1) or (_Index3 = 1) then
 	begin
 	if _Index1 = 1 then
@@ -233,7 +233,7 @@ if (_Index1 = 1) or (_Index2 = 1) or (_Index3 = 1) then
 		Result[2] := False;
 		Result[4] := False;
 		end;
-	if _Index2 =1 then
+	if _Index2 = 1 then
 		begin
 		Result[0] := False;
 		Result[5] := False;
@@ -302,7 +302,7 @@ if _Depth > 0 then
 		for Index2 := 0 to 2 do
 			for Index3 := 0 to 2 do
 				if ValidIndexes(Index, Index2, Index3) then
-					Result += CountingTheNumberOfPolygonsMengerSponge(ConstructPolygonsSigns(_PolygonsSigns, Index, Index2, Index3), _Depth - 1);
+					Result += CountingTheNumberOfPolygonsMengerSponge(ConstructPolygonsSigns(Index, Index2, Index3), _Depth - 1);
 end;
 
 class function TSFractalMengerSponge2.CountingTheNumberOfPolygonsSierpinskiCarpet(const _Depth : TSMaxEnum) : TSMaxEnum;
