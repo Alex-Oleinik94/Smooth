@@ -356,9 +356,9 @@ inherited Create(VContext);
 
 EnableColors := True;
 EnableNormals := True;
-FFractalDimension := SFractal3D;
-FPrimetiveType := SR_QUADS;
-FPrimetiveParam := 0;
+FractalDimension := SFractal3D;
+FPolygonsType := SR_QUADS;
+FVertexMultiplier := 0;
 Threads := {$IFDEF ANDROID} 0 {$ELSE} 1 {$ENDIF};
 Depth := 3;
 FObjectSize := 5;

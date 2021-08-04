@@ -61,8 +61,8 @@ inherited Create(VContext);
 
 FEnableColors := True;
 FFractalDimension := SFractal2D;
-FPrimetiveType := SR_QUADS;
-FPrimetiveParam := 0;
+FPolygonsType := SR_QUADS;
+FVertexMultiplier := 0;
 Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
 Depth := 4;
 

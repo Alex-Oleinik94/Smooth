@@ -33,8 +33,8 @@ type
 		function FractalVertexFormat() : TSVertexFormat;
 			protected
 		FFractalDimension : TSFractalDimension;
-		FPrimetiveType : TSUInt32; // SR_LINES, SR_QUADS ...
-		FPrimetiveParam : TSUInt32;
+		FPolygonsType : TSUInt32; // SR_LINES, SR_QUADS ...
+		FVertexMultiplier : TSUInt32;
 		procedure SetFractalDimension(const _FractalDimension : TSFractalDimension);
 			protected
 		FLabelDepth, FLabelDepthCaption : TSScreenLabel; // Label depth and caption of depth label "Итерация"
@@ -100,7 +100,7 @@ begin
 inherited;
 Clear3dObject();
 NumberOfPolygons := CountingTheNumberOfPolygons(FDepth);
-Construct3dObjects(NumberOfPolygons, FPrimetiveType, FractalVertexFormat(), FPrimetiveParam);
+Construct3dObjects(NumberOfPolygons, FPolygonsType, FractalVertexFormat(), FVertexMultiplier);
 if FThreadsEnable then
 	ThreadData[0]^.StartThread(TSPointerProcedure(@S3DFractalFormThreadCallback), ThreadData[0]) //PolygonsConstruction();
 else
@@ -184,8 +184,8 @@ Screen.LastInternalComponent.BoundsMakeReal();
 
 FFractalDimension := SFractal3D;
 FLightingEnable := False;
-FPrimetiveType := SR_LINES;
-FPrimetiveParam := 0;
+FPolygonsType := SR_LINES;
+FVertexMultiplier := 0;
 
 FEnableColors  := False;
 FEnableNormals := False;

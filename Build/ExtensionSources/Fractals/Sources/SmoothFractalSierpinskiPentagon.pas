@@ -83,8 +83,8 @@ inherited Create(VContext);
 StartType := Random(2);
 FProportionate := StartType = 1;
 FFractalDimension := SFractal2D;
-FPrimetiveType := SR_LINES;
-FPrimetiveParam := 0;
+FPolygonsType := SR_LINES;
+FVertexMultiplier := 0;
 Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
 Depth := 5;
 

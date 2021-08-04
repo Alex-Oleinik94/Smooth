@@ -180,8 +180,8 @@ FPolygonsLimit := CalculatePolygonsLimit();
 StartType := Random(11);
 FSpins := TypeToSpins(StartType);
 FFractalDimension := SFractal2D;
-FPrimetiveType := SR_LINES;
-FPrimetiveParam := 0;
+FPolygonsType := SR_LINES;
+FVertexMultiplier := 0;
 Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
 Depth := 7;
 

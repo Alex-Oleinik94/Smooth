@@ -204,7 +204,7 @@ begin
 if LogEnablement <> SLogDisabled then
 	begin
 	SLog.Source('********************************************', False);
-	SLog.Source('* (v)_(O_o)_(V)  Smooth log  (V)_(o_O)_(v) *', False);
+	SLog.Source('*                Smooth log                *', False);
 	SLog.Source('********************************************', False);
 	SLog.Source('		<< Log created >>');
 	SLogParams(SSystemParamsToConsoleHandlerParams());

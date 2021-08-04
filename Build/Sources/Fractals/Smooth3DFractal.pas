@@ -29,10 +29,10 @@ type
 		F3dObject       : TSCustomModel;
 		F3dObjectsInfo  : TSUInt8List;
 		F3dObjectsReady : TSBoolean;
-		FPolygonsLimit  : TSFractalIndexInt;
+		FPolygonsLimit  : TSFractalIndexInt; // количественная величина зависящая от типа рендера и видеооборудования
 		
 		FLightSource    : TSVertex3f;
-		FLightSourceAbs : TSSingle;
+		FLightSourceRadius : TSSingle;
 		FLightSourceTrigonometry  : TSVector3d;
 		FLightingEnable : TSBoolean;
 		FCamera         : TSCamera;
@@ -46,8 +46,8 @@ type
 		function SizeLabelCaption() : TSString;
 		procedure CkeckConstructedObjects();
 		procedure PaintObject();
-		procedure SaveObject(); // видимо, не всегда срабатывает из-за хранения данных в памяти видеокарты
-		function CalculatePolygonsLimit() : TSUInt64; virtual;
+		function SaveObject() : TSBoolean; // не всегда срабатывает из-за хранения данных в памяти видеокарты
+		function CalculatePolygonsLimit() : TSUInt64; virtual; // количественная величина зависящая от типа рендера и видеооборудования
 		procedure SetMemoryDataType(const _MemoryDataType : TSMemoryDataType);
 			public
 		procedure DeleteRenderResources();override;
@@ -119,7 +119,7 @@ end;
 
 class function TS3DFractal.ClassName:string;
 begin
-Result := 'Smooth 3D fractal ';
+Result := 'Smooth 3D fractal';
 end;
 
 
@@ -156,11 +156,12 @@ FSizeLabel.FUserPointer1:=Self;
 Result := FSizeLabel;
 end;
 
-procedure TS3DFractal.SaveObject();
+function TS3DFractal.SaveObject() : TSBoolean;
 var
 	ObjectFileName : TSString;
 begin
 ObjectFileName := 'Save object of 3D fractal ''' + ClassName() + ''', d=' + SStr(Depth) + '.s3dm';
+Result := FMemoryDataType = SRAM;
 if (FMemoryDataType = SRAM) then
 	TS3dObjectS3DMLoader.SaveModelToFile(F3dObject, SFreeFileName(ObjectFileName, ''));
 end;
@@ -250,7 +251,7 @@ if _FaceIndex>=FPolygonsLimit then
 end;
 
 procedure TS3DFractal.Construct3dObjects(NumberOfPolygons : TSUInt64; const PolygonType:LongWord;const VVertexType:TS3dObjectVertexType = S3dObjectVertexType3f;const VertexMultiplier : TSByte = 0);
-// VertexMultiplier ?
+// VertexMultiplier отношение количества вершин к количеству полигонов, во сколько раз количество вершин больше количества полигонов
 var
 	AddedObject : TS3DObject;
 begin
@@ -318,8 +319,8 @@ end;
 constructor TS3DFractal.Create();
 begin
 inherited;
-FLightSourceAbs := 10;
-FLightSource := TSVector3f.Create(0, 0, -FLightSourceAbs);
+FLightSourceRadius := 10;
+FLightSource := TSVector3f.Create(0, 0, -FLightSourceRadius);
 FLightSourceTrigonometry := TSVector3d.Create(pi / 2, 0, pi + pi);
 FLightingEnable := True;
 F3dObject := nil;
@@ -396,7 +397,7 @@ begin
 if FLightingEnable then
 	begin
 	FLightSourceTrigonometry += TSVector3d.Create(pi/90, pi/60, pi/180)/20*Context.ElapsedTime;
-	FLightSource := TSVector3f.Create(cos(FLightSourceTrigonometry.x), sin(FLightSourceTrigonometry.y), cos(FLightSourceTrigonometry.z)) * FLightSourceAbs;
+	FLightSource := TSVector3f.Create(cos(FLightSourceTrigonometry.x), sin(FLightSourceTrigonometry.y), cos(FLightSourceTrigonometry.z)) * FLightSourceRadius;
 	Render.BeginScene(SR_POINTS);
 	Render.Vertex(FLightSource);
 	Render.EndScene();
