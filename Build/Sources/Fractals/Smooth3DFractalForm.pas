@@ -6,6 +6,7 @@ interface
 
 uses 
 	 SmoothBase
+	,SmoothRenderBase
 	,SmoothFractal
 	,Smooth3DFractal
 	,SmoothScreen
@@ -14,6 +15,8 @@ uses
 	;
 
 type
+	TSFractalDimension = (SFractal2D, SFractal3D);
+	
 	TS3DFractalForm = class(TS3DFractal)
 			public
 		constructor Create(const VContext : ISContext);override;
@@ -27,16 +30,17 @@ type
 		procedure EndOfPolygonsConstruction(const ObjectId : TSUInt32); virtual;
 		class function CountingTheNumberOfPolygons(const _Depth : TSMaxEnum) : TSMaxEnum; virtual;
 		procedure ChangeDepth(const _IncrementOrDecrement : TSInt32);
+		function FractalVertexFormat() : TSVertexFormat;
+			protected
+		FFractalDimension : TSFractalDimension;
+		FPrimetiveType : TSUInt32; // SR_LINES, SR_QUADS ...
+		FPrimetiveParam : TSUInt32;
+		procedure SetFractalDimension(const _FractalDimension : TSFractalDimension);
 			protected
 		FLabelDepth, FLabelDepthCaption : TSScreenLabel; // Label depth and caption of depth label "Итерация"
 		FButtonIncrementDepth, FButtonDecrementDepth : TSScreenButton; // Buttons of change depth (plus and minus)
-			protected
-		FIs2D : TSBoolean;
-		FPrimetiveType : TSUInt32; // SR_LINES, SR_QUADS ...
-		FPrimetiveParam : TSUInt32;
-		procedure SetIs2D(const _Is2D : TSBoolean);
 			public
-		property Is2D : TSBoolean read FIs2D write SetIs2D;
+		property FractalDimension : TSFractalDimension read FFractalDimension write SetFractalDimension;
 		end;
 
 procedure S3DFractalFormThreadCallback(FractalThreadData:PSFractalThreadData);
@@ -45,16 +49,15 @@ implementation
 
 uses
 	 SmoothStringUtils
-	,SmoothRenderBase
 	,SmoothVertexObject
 	,SmoothScreenBase
 	,SmoothThreads
 	;
 
-procedure TS3DFractalForm.SetIs2D(const _Is2D : TSBoolean);
+procedure TS3DFractalForm.SetFractalDimension(const _FractalDimension : TSFractalDimension);
 begin
-FIs2D := _Is2D;
-if (not FIs2D) then
+FFractalDimension := _FractalDimension;
+if (FFractalDimension = SFractal3D) then
 	begin
 	InitEffectsComboBox(Render.Width - 160, 40, 150, 30, [SAnchRight]).BoundsMakeReal();
 	FLightingEnable := True;
@@ -82,6 +85,14 @@ FractalThreadData^.Finished:=True;
 FractalThreadData^.FreeMemData();
 end;
 
+function TS3DFractalForm.FractalVertexFormat() : TSVertexFormat;
+begin
+if (FFractalDimension = SFractal3D) or ((FFractalDimension = SFractal2D) and (Render.RenderType in [SRenderDirectX9, SRenderDirectX8])) then 
+	Result := S3dObjectVertexType3f
+else
+	Result := S3dObjectVertexType2f;
+end;
+
 procedure TS3DFractalForm.Construct();
 var
 	NumberOfPolygons : TSUInt64;
@@ -89,10 +100,7 @@ begin
 inherited;
 Clear3dObject();
 NumberOfPolygons := CountingTheNumberOfPolygons(FDepth);
-if (not FIs2D) or (FIs2D and (Render.RenderType in [SRenderDirectX9, SRenderDirectX8])) then 
-	Construct3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType3f, FPrimetiveParam)
-else
-	Construct3dObjects(NumberOfPolygons, FPrimetiveType, S3dObjectVertexType2f, FPrimetiveParam);
+Construct3dObjects(NumberOfPolygons, FPrimetiveType, FractalVertexFormat(), FPrimetiveParam);
 if FThreadsEnable then
 	ThreadData[0]^.StartThread(TSPointerProcedure(@S3DFractalFormThreadCallback), ThreadData[0]) //PolygonsConstruction();
 else
@@ -174,7 +182,7 @@ Screen.LastInternalComponent.FUserPointer1:=Self;
 Screen.LastInternalComponent.Visible:=True;
 Screen.LastInternalComponent.BoundsMakeReal();
 
-FIs2D := False;
+FFractalDimension := SFractal3D;
 FLightingEnable := False;
 FPrimetiveType := SR_LINES;
 FPrimetiveParam := 0;

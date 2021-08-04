@@ -179,7 +179,7 @@ inherited Create(VContext);
 FPolygonsLimit := CalculatePolygonsLimit();
 StartType := Random(11);
 FSpins := TypeToSpins(StartType);
-FIs2D := True;
+FFractalDimension := SFractal2D;
 FPrimetiveType := SR_LINES;
 FPrimetiveParam := 0;
 Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};

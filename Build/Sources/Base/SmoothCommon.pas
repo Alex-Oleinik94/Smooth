@@ -121,8 +121,9 @@ function SZ(const Z : TSCommonFloat) : TSCommonVector3;{$IFDEF SUPPORTINLINE}inl
 function SY(const Y : TSCommonFloat) : TSCommonVector2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SX(const X : TSCommonFloat) : TSCommonVector2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-function STwoLinesIntersectionVector(const Line1Point1, Line1Point2, Line2Point1, Line2Point2 : TSCommonVector3) : TSCommonVector3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SThreePlaneIntersectionVector(const p1, p2, p3 : TSPlane3D): TSCommonVector3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function S2LinesIntersectionVector(const Line1Point1, Line1Point2, Line2Point1, Line2Point2 : TSCommonVector3) : TSCommonVector3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function S2LinesIntersectionVector(const Line1Point1, Line1Point2, Line2Point1, Line2Point2 : TSCommonVector2) : TSCommonVector2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function S3PlaneIntersectionVector(const p1, p2, p3 : TSPlane3D): TSCommonVector3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 function STriangleNormal(const Point1, Point2, Point3 : TSCommonVector3) : TSCommonVector3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SVectorInAttitude(const t1, t2 : TSCommonVector3; const r : TSCommonFloat = 0.5) : TSCommonVector3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -572,13 +573,22 @@ Result.Import(
 	- r * (t1.z - t2.z) + t1.z);
 end;
 
-function STwoLinesIntersectionVector(const Line1Point1, Line1Point2, Line2Point1, Line2Point2 : TSCommonVector3) : TSCommonVector3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function S2LinesIntersectionVector(const Line1Point1, Line1Point2, Line2Point1, Line2Point2 : TSCommonVector2) : TSCommonVector2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := S2LinesIntersectionVector(
+	TSCommonVector3.Create(Line1Point1.x, Line1Point1.y),
+	TSCommonVector3.Create(Line1Point2.x, Line1Point2.y),
+	TSCommonVector3.Create(Line2Point1.x, Line2Point1.y),
+	TSCommonVector3.Create(Line2Point2.x, Line2Point2.y));
+end;
+
+function S2LinesIntersectionVector(const Line1Point1, Line1Point2, Line2Point1, Line2Point2 : TSCommonVector3) : TSCommonVector3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Point : TSCommonVector3;
 begin
 Point := Line1Point2;
 Point += STriangleNormal(Line1Point1, Line1Point2, Line2Point1);
-Result := SThreePlaneIntersectionVector(
+Result := S3PlaneIntersectionVector(
 	SPlane3DFrom3Points(Line1Point1, Line1Point2, Point),
 	SPlane3DFrom3Points(SVectorInAttitude(Line1Point1, Line1Point2), Line2Point1, Line2Point2),
 	SPlane3DFrom3Points(SVectorInAttitude(Line1Point1, Point),       Line2Point1, Line2Point2));
@@ -626,7 +636,7 @@ Result := Abs(
 	) < SZero;
 end;
 
-function SThreePlaneIntersectionVector(const p1, p2, p3 : TSPlane3D): TSCommonVector3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function S3PlaneIntersectionVector(const p1, p2, p3 : TSPlane3D): TSCommonVector3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	de, de1, de2, de3 : TSMathFloat;
 	p1_d, p2_d, p3_d : TSMathFloat;

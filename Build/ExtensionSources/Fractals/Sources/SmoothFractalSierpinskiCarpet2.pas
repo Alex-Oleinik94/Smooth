@@ -60,7 +60,7 @@ begin
 inherited Create(VContext);
 
 FEnableColors := True;
-FIs2D := True;
+FFractalDimension := SFractal2D;
 FPrimetiveType := SR_QUADS;
 FPrimetiveParam := 0;
 Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
