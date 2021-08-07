@@ -131,7 +131,7 @@ end;
 
 procedure TSFractalSierpinskiPentagon.Generate(const _PointCenter : TSVector2d; const _Radius : TSFloat64);
 var
-	ObjectNumber, VertexIndex, FaceIndex : TSFractalIndexInt;
+	ObjectNumber, VertexIndex, FaceIndex{Polygons Index} : TSFractalIndexInt;
 
 procedure Rec(const _List : TSVector2fList5; const _Depth : TSUInt32);
 var
@@ -152,15 +152,15 @@ if _Depth > 0 then
 		Points[0] := _List[Index];
 		Points[2] := InteriorPoints[Index];
 		Points[3] := InteriorPoints[NormalizeIndex(Index - 1)];
-		if not FProportionate then
-			begin
-			Points[1] := (_List[Index] + _List[NormalizeIndex(Index + 1)]) / 2;
-			Points[4] := (_List[NormalizeIndex(Index - 1)] + _List[Index]) / 2;
-			end
-		else
+		if (FProportionate) then
 			begin
 			Points[1] := (_List[NormalizeIndex(Index + 1)] - _List[Index]).Normalized * SizeB + _List[Index];
 			Points[4] := (_List[NormalizeIndex(Index - 1)] - _List[Index]).Normalized * SizeB + _List[Index];
+			end
+		else
+			begin
+			Points[1] := (_List[Index] + _List[NormalizeIndex(Index + 1)]) / 2;
+			Points[4] := (_List[NormalizeIndex(Index - 1)] + _List[Index]) / 2;
 			end;
 		Rec(Points, _Depth - 1);
 		end;

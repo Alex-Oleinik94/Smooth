@@ -1,6 +1,6 @@
 {$INCLUDE Includes\Smooth.inc}
 
-unit SmoothLibrary;
+unit Smooth;
 
 interface
 
@@ -38,11 +38,11 @@ var
 
 procedure FreeLibrary();
 begin
+SConsoleHandler := nil;
+SGetEngineVersion := nil;
 if Lib <> 0 then
 	UnloadLibrary(Lib);
 Lib := 0;
-SConsoleHandler := nil;
-SGetEngineVersion := nil;
 end;
 
 procedure InitLibrary();

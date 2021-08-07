@@ -1,7 +1,7 @@
 {$INCLUDE Smooth.inc}
 
 {$IF not defined(MOBILE)}
-	//{$DEFINE WITHSmoothLIBRARY}
+	//{$DEFINE WITHSmoothLIBRARY} использование директивы невозможно из-за того, что несколько файлов программ называются одинакого "Smooth"
 	{$IF not defined(DARWIN)}
 		{$IF defined(RELEASE)}
 			{$APPTYPE GUI}
@@ -10,9 +10,9 @@
 			{$ENDIF}
 		{$ENDIF}
 	
-	program Main;
+	program Smooth;
 {$ELSE}
-	library Main;
+	library Smooth;
 	{$ENDIF}
 
 uses
@@ -29,18 +29,21 @@ uses
 		,SmoothContextUtils
 		,SmoothLists
 		{$ENDIF}
-	{$IF defined(WITHSmoothLIBRARY)}
-		,SmoothLibrary
-		{$ENDIF}
+	///{$IF defined(WITHSmoothLIBRARY)} использование директивы невозможно из-за того, что несколько файлов программ называются одинакого "Smooth"
+	///	,SmoothLibrary
+	///	{$ENDIF}
 	{$IF (not defined(WITHSmoothLIBRARY)) and (not defined(ANDROID))}
 		,SmoothConsoleTools
 		{$ENDIF}
 	;
 
 {$IF defined(ANDROID)}
+	// Нужно ли переименовать эту процедуру
+	// Нужно ли переименовать libmain.so
+	// Видимо нет потому что эти компоненты относятся к внешним (External)
 	procedure android_main(State: PAndroid_App); cdecl; export;
 	begin
-	SLog.Source('Entering "procedure android_main(state: Pandroid_app); cdecl; export;" in "Main"');
+	SLog.Source('Entering "procedure android_main(state: Pandroid_app); cdecl; export;" in "Smooth"');
 	{$IFDEF WITHEXCEPTIONTRACEING}
 	try
 	{$ENDIF}

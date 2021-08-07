@@ -17,10 +17,9 @@ SFILEREGISTRATIONRESOURCES=$(SRESOURCESPATH)/SmoothFileRegistrationResources.inc
 SFILEFORREGISTRATIONEXTENSIONS=$(SRESOURCESPATH)/SmoothFileForRegistrationExtensions.inc
 PASCALCOMPILER=fpc
 CROSSPASCALCOMPILER=$(PASCALCOMPILER)
-DESKTOPFILENAME=Main
+DESKTOPFILENAME=Smooth
 LIBRARYFILENAME=Smooth
-PROJECTSDIR=Sources/Projects
-DESKTOPFILE=$(PROJECTSDIR)/$(DESKTOPFILENAME)
+DESKTOPFILE=Sources/$(DESKTOPFILENAME)
 EXTERNALARGS= -FuExternalSources/NVidia -FuExternalSources/OpenAL -FuExternalSources/OpenSSL -FuExternalSources/sdl2 -FuExternalSources/sdl -FuExternalSources/ffmpeg -FuExternalSources/DCP/Ciphers -FuExternalSources/DCP/Hashes -FuExternalSources/DCP -FuExternalSources/Ogg -FuExternalSources/Synapse -FuExternalSources/lNet -FuExternalSources/lNet/sys -FuExternalSources -FuExternalSources/PasJpeg 
 INCLUDESARGS= -FiSources/Includes/Screen -FiSources/Includes/Encoding -FiSources/Includes -FiSources/Includes/Mesh -FiSources/Includes/Render -FiSources/Includes/Common -FiSources/Includes/Fractals -FiSources/Includes
 SOURCEARGS= -FuSources/Image -FuSources/ConsoleTools -FuSources/SystemTray -FuSources/Base -FuSources/Game -FuSources/3dObject -FuSources/RenderUtils -FuSources/Screen -FuSources/Fractals -FuSources/Managers -FuSources/ConsolePrograms -FuSources/Audio -FuSources/Console -FuSources/Context -FuSources/Render -FuSources/Programs -FuSources/Internet 
@@ -41,7 +40,7 @@ DOANDROID= -Tandroid -dANDROID -Xs -Sic -XX -O3 -CX
 DOANDROID_ARM= $(DOANDROID) -Parm -CpARMV6 -XParm-linux-androideabi-
 DOANDROID_I386= $(DOANDROID) -Pi386 -XPi686-linux-android- 
 Smooth="$(SBINARYPATH)/$(DESKTOPFILENAME)"
-SmoothLIB=$(PROJECTSDIR)/$(LIBRARYFILENAME)
+SmoothLIB=Sources/Library/$(LIBRARYFILENAME)
 S_TARGET_LIST=debug, release, release_x32, release_x64, debug_x32, debug_x64, lib_x32, lib_x64, android_arm, android_i386
 S_TARGET=
 
@@ -131,7 +130,7 @@ clear:
 	@rm -f fpc-res.res
 	@rm -f Sources/*.o
 	@rm -f Sources/*.ppu
-	@rm -f Main.res
+	@rm -f Smooth.res
 	@$(MAKE) clear_files
 S_compile:
 	$(MAKE) clear_files

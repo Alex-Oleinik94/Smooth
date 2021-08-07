@@ -1,10 +1,10 @@
 @echo off
 cd ..
 cd ../Binaries
-Main.exe --bt --ic
+Smooth.exe --bt --ic
 if %errorlevel% equ 1 (
-	del "Main_Console.exe"
-	copy "Main.exe" "Main_Console.exe"
+	del "SmoothConsole.exe"
+	copy "Smooth.exe" "SmoothConsole.exe"
 	)
 cd ../Build
 cd Scripts
