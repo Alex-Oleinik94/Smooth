@@ -20,7 +20,7 @@ Build/Main.res
 Build/CompiledUnits
 Build/Smooth.sublime-workspace
 Build/Output
-Build/Scripts
+#Build/Scripts
 Build/AndroidTools/CodeResourses
 Build/AndroidTools/Smooth
 Build/AndroidTools/Libs/platforms
