@@ -10,8 +10,8 @@ uses
 type
 	TSVertexFormat = (SVertexFormat2f, SVertexFormat3f, SVertexFormat4f);
 const
-	TSRenderFar  = 5000;
-	TSRenderNear = 1;
+	TSRenderFar  = 5000.0; //Depth
+	TSRenderNear = 0.3;
 const
 	S_3D =                              $000011;
 	S_3D_ORTHO =                        $000012;

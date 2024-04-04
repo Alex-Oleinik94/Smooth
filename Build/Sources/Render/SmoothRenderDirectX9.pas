@@ -23,7 +23,7 @@ uses
 	,windows
 	,DynLibs
 	
-	// Direct X 9
+	// DirectX 9
 	,DXTypes
 	,DXErr9
 	,D3DX9
@@ -65,6 +65,7 @@ type
 		procedure Vertex3f(const x,y,z:single);override;
 		procedure BeginScene(const VPrimitiveType:TSPrimtiveType);override;
 		procedure EndScene();override;
+		procedure ClearColor(const r,g,b,a : TSFloat);override;
 		// Сохранения ресурсов рендера и убивание самого рендера
 		procedure LockResources();override;
 		// Инициализация рендера и загрузка сохраненных ресурсов
@@ -270,6 +271,12 @@ uses
 	
 	,SysUtils
 	;
+
+procedure TSRenderDirectX9.ClearColor(const r,g,b,a : TSFloat);
+begin
+// Setup the color to clear the buffer to.
+FClearColor := D3DCOLOR_COLORVALUE(r,g,b,a);
+end;
 
 class function TSRenderDirectX9.RenderName() : TSString;
 begin

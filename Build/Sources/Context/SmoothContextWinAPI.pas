@@ -805,8 +805,8 @@ if (Result <> 0) then
 		SPlacementMaximized : ShowWindow(Result, SW_SHOWMAXIMIZED);
 		SPlacementMinimized : ShowWindow(Result, SW_SHOWMINIMIZED);
 		end;
-		SetFocus(Result);
 		SetForegroundWindow(Result);
+		SetFocus(Result);
 		end;
 	UpdateWindow(Result);
 	Active := True;

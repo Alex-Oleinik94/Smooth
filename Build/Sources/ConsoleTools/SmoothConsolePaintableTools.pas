@@ -47,9 +47,11 @@ uses
 	
 	// System-dependent includes
 	{$IFDEF MSWINDOWS}
+		,SmoothRenderDirectX12
+		,SmoothRenderDirectX11
+		//,SmoothRenderDirectX10
 		,SmoothRenderDirectX9
 		,SmoothRenderDirectX8
-		,SmoothRenderDirectX12
 		{$ENDIF}
 	,SmoothRenderOpenGL
 	{$IFDEF WITH_GLUT}
@@ -143,6 +145,15 @@ Result := False;
 {$ENDIF}
 end;
 
+function IsD3DX11Supported() : TSBool;
+begin
+{$IFDEF MSWINDOWS}
+Result := TSRenderDirectX11.Supported();
+{$ELSE}
+Result := False;
+{$ENDIF}
+end;
+
 function IsD3DX12Supported() : TSBool;
 begin
 {$IFDEF MSWINDOWS}
@@ -180,6 +191,20 @@ if Result then
 {$ENDIF}
 end;
 
+function ProccessDirectX11(const Comand : TSString):TSBool;
+begin
+Result := True;
+if not IsD3DX11Supported() then
+	begin
+	WriteLn('Direct3D X 11 can''t be used in your system!');
+	Result := False;
+	end;
+{$IFDEF MSWINDOWS}
+if Result then
+	RenderClass := TSRenderDirectX11;
+{$ENDIF}
+end;
+
 function ProccessDirectX9(const Comand : TSString):TSBool;
 begin
 Result := True;
@@ -213,6 +238,8 @@ begin
 Result := False;
 if IsD3DX12Supported and (not Result) then
 	Result := ProccessDirectX12('');
+if IsD3DX11Supported and (not Result) then
+	Result := ProccessDirectX11('');
 if IsD3DX9Supported and (not Result) then
 	Result := ProccessDirectX9('');
 if IsD3DX8Supported and (not Result) then
@@ -409,6 +436,11 @@ begin
 Result := 'For use Direct3D X 12' + ImposibleParam(IsD3DX12Supported());
 end;
 
+function HelpFuncDX11() : TSString;
+begin
+Result := 'For use Direct3D X 11' + ImposibleParam(IsD3DX11Supported());
+end;
+
 function HelpFuncDX() : TSString;
 begin
 Result := 'For use Direct3D X, with most highest version' + ImposibleParam(IsD3DX12Supported() or IsD3DX9Supported() or IsD3DX8Supported());
@@ -473,6 +505,7 @@ if (VParams <> nil) and (Length(VParams) > 0) then
 		Category('Render settings');
 		AddComand(@ProccessDirectX,   ['D3D','D3DX'],         @HelpFuncDX);
 		AddComand(@ProccessDirectX12, ['D3D12','D3DX12'],     @HelpFuncDX12);
+		AddComand(@ProccessDirectX11, ['D3D11','D3DX11'],     @HelpFuncDX11);
 		AddComand(@ProccessDirectX9,  ['D3D9', 'D3DX9'],      @HelpFuncDX9);
 		AddComand(@ProccessDirectX8,  ['D3D8', 'D3DX8'],      @HelpFuncDX8);
 		AddComand(@ProccessOpenGL  ,  ['ogl', 'OpenGL'],      @HelpFuncOGL);

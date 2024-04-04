@@ -180,6 +180,8 @@ uses
 	,SmoothCasesOfPrint
 	{$IFDEF MSWINDOWS}
 		,SmoothRenderDirectX12
+		,SmoothRenderDirectX11
+		//,SmoothRenderDirectX10
 		,SmoothRenderDirectX9
 		,SmoothRenderDirectX8
 		,SmoothNvidiaInformationUtils

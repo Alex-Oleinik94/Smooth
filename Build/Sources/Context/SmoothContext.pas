@@ -713,7 +713,7 @@ if (KeysPressed(S_CTRL_KEY)) and
    (KeysPressed(S_ALT_KEY)) and
    (KeyPressedType = SDownKey) and
    (KeyPressedChar = 'O') and
-   TSEngineConfigurationPanel.CanCreate(FScreen) then
+   TSEngineConfigurationPanel.CanCreate(FScreen) then // Ctrl + Alt + O
 	begin
 	FScreen.CreateInternalComponent(TSEngineConfigurationPanel.Create()).Resize();
 	SetKey(SNullKey, 0);

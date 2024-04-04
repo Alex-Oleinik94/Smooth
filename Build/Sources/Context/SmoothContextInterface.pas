@@ -57,9 +57,6 @@ type
 		procedure ShowCursor(const VShowing : TSBoolean);
 		procedure ReinitializeRender();
 		function GetRender() : ISRender;
-		
-		function  GetFullscreen() : TSBoolean;
-		procedure InitFullscreen(const VFullscreen : TSBoolean);
 
 		procedure SetActive(const VActive : TSBoolean);
 		function  GetActive():TSBoolean;

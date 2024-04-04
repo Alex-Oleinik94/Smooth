@@ -18,7 +18,7 @@ uses
 	
 	// OS units
 	,crt
-	,windows
+	,Windows
 	,DynLibs
 	
 	// DirectX unit

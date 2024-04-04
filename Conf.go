@@ -7,7 +7,7 @@ fullscreen=true
 
 [gource]
 seconds-per-day=0.39
-title=SaGe
+title=Smooth
 //user-image-dir=.git/avatar/
 background-colour=252525
 key=true

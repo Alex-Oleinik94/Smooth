@@ -55,6 +55,8 @@ uses
 	{$IFDEF MSWINDOWS}
 		,SmoothContextWinAPI
 		,SmoothRenderDirectX12
+		,SmoothRenderDirectX11
+		//,SmoothRenderDirectX10
 		,SmoothRenderDirectX9
 		,SmoothRenderDirectX8
 		{$ENDIF}
@@ -95,15 +97,17 @@ Context.NewContext := VContextClass;
 end;
 
 var
-	Renders : packed array [0 .. 3] of
+	Renders : packed array [0 .. 5] of
 		packed record
 			FClass : TSRenderClass;
 			FName : TSString;
 			end = (
-			(FClass :                    TSRenderOpenGL                      ; FName : 'OpenGL' ),
+			(FClass :                    TSRenderOpenGL ;                       FName : 'OpenGL' ),
 			(FClass : {$IFDEF MSWINDOWS} TSRenderDirectX12{$ELSE} nil {$ENDIF}; FName : 'DirectX 12'),
-			(FClass : {$IFDEF MSWINDOWS} TSRenderDirectX9{$ELSE} nil {$ENDIF}; FName : 'DirectX 9'),
-			(FClass : {$IFDEF MSWINDOWS} TSRenderDirectX8{$ELSE} nil {$ENDIF}; FName : 'DirectX 8')
+			(FClass : {$IFDEF MSWINDOWS} TSRenderDirectX11{$ELSE} nil {$ENDIF}; FName : 'DirectX 11'),
+			(FClass : nil ;                                                     FName : 'DirectX 10'),
+			(FClass : {$IFDEF MSWINDOWS} TSRenderDirectX9{$ELSE} nil {$ENDIF};  FName : 'DirectX 9'),
+			(FClass : {$IFDEF MSWINDOWS} TSRenderDirectX8{$ELSE} nil {$ENDIF};  FName : 'DirectX 8')
 			);
 	Contexts : packed array [0 .. 4] of
 		packed record

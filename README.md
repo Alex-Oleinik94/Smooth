@@ -27,6 +27,8 @@
    - [3ds][3ds_format]
  * [WinPCap]/[PCap]
 
+ * Configuration panel: Ctrl + Alt + O
+
 ### Links
 
  * See also: [Smooth programming]

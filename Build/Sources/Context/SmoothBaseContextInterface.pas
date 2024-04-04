@@ -62,6 +62,9 @@ type
 		
 		procedure Resize();
 		
+		function  GetFullscreen() : TSBoolean;
+		procedure InitFullscreen(const VFullscreen : TSBoolean);
+		
 		property Left : TSAreaInt read GetLeft write SetLeft;
 		property Top : TSAreaInt read GetTop write SetTop;
 		property Width : TSAreaInt read GetWidth write SetWidth;
@@ -72,6 +75,7 @@ type
 		property Window : TSPointer read GetWindow;
 		property ClientWidth : TSAreaInt read GetClientWidth write SetClientWidth;
 		property ClientHeight : TSAreaInt read GetClientHeight write SetClientHeight;
+		property Fullscreen : TSBoolean read GetFullscreen write InitFullscreen;
 		end;
 
 implementation
