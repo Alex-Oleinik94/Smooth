@@ -27,13 +27,14 @@
    - [3ds][3ds_format]
  * [WinPCap]/[PCap]
 
- * Configuration panel: Ctrl + Alt + O
-
 ### Links
 
- * See also: [Smooth programming]
+ * See also: [Smooth programming], [Smooth programming 2]
+
+ Configuration panel: Ctrl + Alt + O
 
 [Smooth programming]: http://yadi.sk/d/2dXlhmaQ3VmgBd "Smooth programming files"
+[Smooth programming 2]: https://disk.yandex.ru/d/oikcHjrE3ZaOQA "Smooth programming files 2"
 [Free Pascal Compiler]: http://www.freepascal.org "Free Pascal Compiler Homepage"
 [Smooth]: http://github.com/Byeneg/Smooth "Smooth Repository"
 [OpenGL]: http://www.opengl.org "OpenGL Homepage"
