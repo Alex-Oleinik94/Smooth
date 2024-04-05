@@ -9,6 +9,8 @@ unit SmoothRenderDirectX11;
 // https://www.rastertek.com/tutdx11win10.html
 // https://www.rastertek.com/tutindex.html
 // https://www.rastertek.com/index.html
+//
+// https://github.com/AntonAngeloff/DX11_Examples?ysclid=lulmf72mni387948694
 
 interface
 
@@ -49,14 +51,14 @@ type
 		m_vsync_enabled:Boolean;
 		m_videoCardMemory:Extended;
 		m_videoCardDescription:array[0..127] of Char;
-		m_swapChain:^IDXGISwapChain;
-		m_device:^ID3D11Device;
-		m_deviceContext:^ID3D11DeviceContext;
-		m_renderTargetView:PID3D11RenderTargetView;
-		m_depthStencilBuffer:^ID3D11Texture2D;
-		m_depthStencilState:^ID3D11DepthStencilState;
-		m_depthStencilView:^ID3D11DepthStencilView;
-		m_rasterState:^ID3D11RasterizerState;
+		m_swapChain:IDXGISwapChain;
+		m_device:ID3D11Device;
+		m_deviceContext:ID3D11DeviceContext;
+		m_renderTargetView:ID3D11RenderTargetView;
+		m_depthStencilBuffer:ID3D11Texture2D;
+		m_depthStencilState:ID3D11DepthStencilState;
+		m_depthStencilView:ID3D11DepthStencilView;
+		m_rasterState:ID3D11RasterizerState;
 		m_projectionMatrix:TXMMATRIX;
 		m_worldMatrix:TXMMATRIX;
 		m_orthoMatrix:TXMMATRIX;
@@ -170,6 +172,7 @@ type
 
 implementation
 
+uses SmoothLog;
 
 procedure TSRenderDirectX11.ClearColor(const r,g,b,a : TSFloat);
 begin
@@ -182,17 +185,17 @@ end;
 
 function TSRenderDirectX11.Initialize(screenWidth:LongInt;screenHeight:LongInt; vsync:Boolean; hwnd:HWND;fullscreen:Boolean; screenDepth:Single; screenNear:Single):HRESULT;
 var
-	factory:^PIDXGIFactory;
-	adapter:^IDXGIAdapter;
-	adapterOutput:^IDXGIOutput;
+	factory:IDXGIFactory;
+	adapter:IDXGIAdapter;
+	adapterOutput:IDXGIOutput;
 	numModes, i, numerator, denominator:LongWord;
 	stringLength:QWord;
-	displayModeList:^TDXGI_MODE_DESC = nil;
+	displayModeList:^TDXGI_MODE_DESC;
 	adapterDesc:TDXGI_ADAPTER_DESC;
 	error:LongInt = 0;
 	swapChainDesc:TDXGI_SWAP_CHAIN_DESC;
 	featureLevel:TD3D_FEATURE_LEVEL;
-	backBufferPtr:^ID3D11Texture2D;
+	backBufferPtr:ID3D11Texture2D;
 	depthBufferDesc:TD3D11_TEXTURE2D_DESC;
 	depthStencilDesc:TD3D11_DEPTH_STENCIL_DESC;
 	depthStencilViewDesc:TD3D11_DEPTH_STENCIL_VIEW_DESC;
@@ -201,79 +204,84 @@ var
 begin
 Result := 1;
 
-WriteLn('=2');
 // Store the vsync setting.
 m_vsync_enabled := vsync;
 
 // Create a DirectX graphics interface factory.
-GetMem(factory, SizeOf(Pointer));
-Result := CreateDXGIFactory(IDXGIFactory, factory);
-if(FAILED(result))then
-	exit;
+if CreateDXGIFactory <> nil then
+	begin
+	Result := CreateDXGIFactory(IDXGIFactory, factory);
+	if(FAILED(result))then
+		exit;
 
-WriteLn('=4');
-// Use the factory to create an adapter for the primary graphics interface (video card).
-Result := factory^^.EnumAdapters(0, adapter^);
-if(FAILED(result))then
-	exit;
+	// Use the factory to create an adapter for the primary graphics interface (video card).
+	Result := factory.EnumAdapters(0, adapter);
+	if(FAILED(result))then
+		exit;
 
-WriteLn('=5');
-// Enumerate the primary adapter output (monitor).
-Result := adapter^.EnumOutputs(0, adapterOutput^);
-if(FAILED(result))then
-	exit;
+	// Enumerate the primary adapter output (monitor).
+	Result := adapter.EnumOutputs(0, adapterOutput);
+	if(FAILED(result))then
+		exit;
 
-// Get the number of modes that fit the DXGI_FORMAT_R8G8B8A8_UNORM display format for the adapter output (monitor).
-Result := adapterOutput^.GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, numModes, nil);
-if(FAILED(result))then
-	exit;
+	// Get the number of modes that fit the DXGI_FORMAT_R8G8B8A8_UNORM display format for the adapter output (monitor).
+	Result := adapterOutput.GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, numModes, nil);
+	if(FAILED(result))then
+		exit;
 
-// Create a list to hold all the possible display modes for this monitor/video card combination.
-GetMem(displayModeList, SizeOf(TDXGI_MODE_DESC) * numModes);
-if(displayModeList=nil)then
-	exit;
+	// Create a list to hold all the possible display modes for this monitor/video card combination.
+	GetMem(displayModeList, SizeOf(TDXGI_MODE_DESC) * numModes);
+	if(displayModeList=nil)then
+		exit;
 
-// Now fill the display mode list structures.
-Result := adapterOutput^.GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, numModes, displayModeList);
-if(FAILED(result))then
-	exit;
+	// Now fill the display mode list structures.
+	Result := adapterOutput.GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, numModes, displayModeList);
+	if(FAILED(result))then
+		exit;
 
-// Now go through all the display modes and find the one that matches the screen width and height.
-// When a match is found store the numerator and denominator of the refresh rate for that monitor.
-for i := 0 to numModes - 1 do
-	if(displayModeList[i].Width = screenWidth) and (displayModeList[i].Height = screenHeight)then
-		begin
-		numerator := displayModeList[i].RefreshRate.Numerator;
-		denominator := displayModeList[i].RefreshRate.Denominator;
-		end;
+	// Now go through all the display modes and find the one that matches the screen width and height.
+	// When a match is found store the numerator and denominator of the refresh rate for that monitor.
+	for i := 0 to numModes - 1 do
+		if(displayModeList[i].Width = screenWidth) and (displayModeList[i].Height = screenHeight)then
+			begin
+			numerator := displayModeList[i].RefreshRate.Numerator;
+			denominator := displayModeList[i].RefreshRate.Denominator;
+			end;
 
-// Get the adapter (video card) description.
-Result := adapter^.GetDesc(adapterDesc);
-if(FAILED(result))then
-	exit;
+	// Get the adapter (video card) description.
+	Result := adapter.GetDesc(adapterDesc);
+	if(FAILED(result))then
+		exit;
 
-// Store the dedicated video card memory in megabytes.
-m_videoCardMemory := adapterDesc.DedicatedVideoMemory / 1024 / 1024;
+	// Store the dedicated video card memory in megabytes.
+	m_videoCardMemory := adapterDesc.DedicatedVideoMemory / 1024 / 1024;
 
-// Convert the name of the video card to a character array and store it.
-for i := 0 to 127 do
-	m_videoCardDescription[i] := adapterDesc.Description[i];
+	// Convert the name of the video card to a character array and store it.
+	for i := 0 to 127 do
+		m_videoCardDescription[i] := adapterDesc.Description[i];
 
-// Release the display mode list.
-FreeMem(displayModeList);
-displayModeList := nil;
+	// Release the display mode list.
+	FreeMem(displayModeList);
+	displayModeList := nil;
 
-// Release the adapter output.
-adapterOutput^._Release();
-adapterOutput := nil;
+	// Release the adapter output.
+	adapterOutput._Release();
+	adapterOutput := nil;
 
-// Release the adapter.
-adapter^._Release();
-adapter := nil;
+	// Release the adapter.
+	adapter._Release();
+	adapter := nil;
 
-// Release the factory.
-factory^^._Release();
-factory := nil;
+	// Release the factory.
+	factory._Release();
+	factory := nil;
+	end
+else
+	begin
+	SLog.Source(['TSRenderDirectX11.Initialize : CreateDXGIFactory is nil!']); WriteLn('TSRenderDirectX11.Initialize : CreateDXGIFactory is nil!');
+	numerator := 0;
+	denominator := 1;
+	end;
 
 // Initialize the swap chain description.
 FillChar(swapChainDesc, sizeof(swapChainDesc), 0);
@@ -328,22 +336,25 @@ featureLevel := D3D_FEATURE_LEVEL_11_0;
 
 // Create the swap chain, Direct3D device, and Direct3D device context.
 Result := D3D11CreateDeviceAndSwapChain(nil, D3D_DRIVER_TYPE_HARDWARE, 0, 0, @featureLevel, 1, 
-										D3D11_SDK_VERSION, swapChainDesc, m_swapChain^, m_device^, featureLevel, m_deviceContext^);
+										D3D11_SDK_VERSION, swapChainDesc, m_swapChain, m_device, featureLevel, m_deviceContext);
 if(FAILED(result))then
+	begin
+	SLog.Source(['TSRenderDirectX11.Initialize : D3D11CreateDeviceAndSwapChain return', Result]); WriteLn('TSRenderDirectX11.Initialize : D3D11CreateDeviceAndSwapChain return "', Result, '"');
 	exit;
+	end;
 
 // Get the pointer to the back buffer.
-Result := m_swapChain^.GetBuffer(0, ID3D11Texture2D, backBufferPtr);
+Result := m_swapChain.GetBuffer(0, ID3D11Texture2D, backBufferPtr);
 if(FAILED(result))then
 	exit;
 
 // Create the render target view with the back buffer pointer.
-Result := m_device^.CreateRenderTargetView(backBufferPtr^, nil, m_renderTargetView^);
+Result := m_device.CreateRenderTargetView(backBufferPtr, nil, m_renderTargetView);
 if(FAILED(result))then
 	exit;
 
 // Release pointer to the back buffer as we no longer need it.
-backBufferPtr^._Release();
+backBufferPtr._Release();
 backBufferPtr := nil;
 
 // Initialize the description of the depth buffer.
@@ -363,7 +374,7 @@ depthBufferDesc.CPUAccessFlags := 0;
 depthBufferDesc.MiscFlags := 0;
 
 // Create the texture for the depth buffer using the filled out description.
-Result := m_device^.CreateTexture2D(depthBufferDesc, nil, m_depthStencilBuffer^);
+Result := m_device.CreateTexture2D(depthBufferDesc, nil, m_depthStencilBuffer);
 if(FAILED(result))then
 	exit;
 
@@ -392,12 +403,12 @@ depthStencilDesc.BackFace.StencilPassOp := D3D11_STENCIL_OP_KEEP;
 depthStencilDesc.BackFace.StencilFunc := D3D11_COMPARISON_ALWAYS;
 
 // Create the depth stencil state.
-Result := m_device^.CreateDepthStencilState(depthStencilDesc, m_depthStencilState^);
+Result := m_device.CreateDepthStencilState(depthStencilDesc, m_depthStencilState);
 if(FAILED(result))then
 	exit;
 
 // Set the depth stencil state.
-m_deviceContext^.OMSetDepthStencilState(m_depthStencilState^, 1);
+m_deviceContext.OMSetDepthStencilState(m_depthStencilState, 1);
 
 // Initialize the depth stencil view.
 FillChar(depthStencilViewDesc, SizeOf(depthStencilViewDesc), 0);
@@ -408,12 +419,12 @@ depthStencilViewDesc.ViewDimension := D3D11_DSV_DIMENSION_TEXTURE2D;
 depthStencilViewDesc.Texture2D.MipSlice := 0;
 
 // Create the depth stencil view.
-Result := m_device^.CreateDepthStencilView(m_depthStencilBuffer^, @depthStencilViewDesc, m_depthStencilView^);
+Result := m_device.CreateDepthStencilView(m_depthStencilBuffer, @depthStencilViewDesc, m_depthStencilView);
 if(FAILED(result))then
 	exit;
 
 // Bind the render target view and depth stencil buffer to the output render pipeline.
-m_deviceContext^.OMSetRenderTargets(1, m_renderTargetView, m_depthStencilView^);
+m_deviceContext.OMSetRenderTargets(1, @m_renderTargetView, m_depthStencilView);
 
 // Setup the raster description which will determine how and what polygons will be drawn.
 rasterDesc.AntialiasedLineEnable := false;
@@ -428,12 +439,12 @@ rasterDesc.ScissorEnable := false;
 rasterDesc.SlopeScaledDepthBias := 0.0;
 
 // Create the rasterizer state from the description we just filled out.
-Result := m_device^.CreateRasterizerState(rasterDesc, m_rasterState^);
+Result := m_device.CreateRasterizerState(rasterDesc, m_rasterState);
 if(FAILED(result))then
 	exit;
 
 // Now set the rasterizer state.
-m_deviceContext^.RSSetState(m_rasterState^);
+m_deviceContext.RSSetState(m_rasterState);
 
 // Setup the viewport for rendering.
 m_viewport.Width := screenWidth;
@@ -444,7 +455,7 @@ m_viewport.TopLeftX := 0.0;
 m_viewport.TopLeftY := 0.0;
 
 // Create the viewport.
-m_deviceContext^.RSSetViewports(1, @m_viewport);
+m_deviceContext.RSSetViewports(1, @m_viewport);
 
 // Setup the projection matrix.
 fieldOfView := 3.141592654 / 4.0;
@@ -466,56 +477,55 @@ procedure TSRenderDirectX11.Shutdown();
 begin
 // Before shutting down set to windowed mode or when you release the swap chain it will throw an exception.
 if(m_swapChain<>nil)then
-	m_swapChain^.SetFullscreenState(false, nil);
-
+	m_swapChain.SetFullscreenState(false, nil);
 
 if(m_rasterState<>nil)then
 	begin
-	m_rasterState^._Release();
+	SDestroyInterface(m_rasterState);//._Release();
 	m_rasterState := nil;
 	end;
 
 if(m_depthStencilView<>nil)then
 	begin
-	m_depthStencilView^._Release();
+	SDestroyInterface(m_depthStencilView);//._Release();
 	m_depthStencilView := nil;
 	end;
 
 if(m_depthStencilState<>nil)then
 	begin
-	m_depthStencilState^._Release();
+	SDestroyInterface(m_depthStencilState);//^._Release();
 	m_depthStencilState := nil;
 	end;
 
 if(m_depthStencilBuffer<>nil)then
 	begin
-	m_depthStencilBuffer^._Release();
+	SDestroyInterface(m_depthStencilBuffer);//^._Release();
 	m_depthStencilBuffer := nil;
 	end;
 
 if(m_renderTargetView<>nil)then
 	begin
-	m_renderTargetView^._Release();
+	SDestroyInterface(m_renderTargetView);//^._Release();
 	m_renderTargetView := nil;
 	end;
 
 if(m_deviceContext<>nil)then
 	begin
-	m_deviceContext^._Release();
+	SDestroyInterface(m_deviceContext);//^._Release();
 	m_deviceContext := nil;
 	end;
 
 if(m_device<>nil)then
 	begin
-	m_device^._Release();
+	SDestroyInterface(m_device);//^._Release();
 	m_device := nil;
 	end;
 
 if(m_swapChain<>nil)then
 	begin
-	m_swapChain^._Release();
+	SDestroyInterface(m_swapChain);//^._Release();
 	m_swapChain := nil;
-	end
+	end;
 end;
 
 class function TSRenderDirectX11.RenderName() : TSString;
@@ -595,10 +605,10 @@ begin
 // Present the back buffer to the screen since rendering is complete.
 if(m_vsync_enabled)then
 	// Lock to screen refresh rate.
-	m_swapChain^.Present(1, 0)
+	m_swapChain.Present(1, 0)
 else
 	// Present as fast as possible.
-	m_swapChain^.Present(0, 0);
+	m_swapChain.Present(0, 0);
 end;
 
 function TSRenderDirectX11.SupportedMemoryBuffers():Boolean;
@@ -799,10 +809,10 @@ procedure TSRenderDirectX11.Clear(const VParam:Cardinal);
 begin 
 if (SR_COLOR_BUFFER_BIT and VParam > 0)then
 	// Clear the back buffer.
-	m_deviceContext^.ClearRenderTargetView(m_renderTargetView^, FClearColor);
+	m_deviceContext.ClearRenderTargetView(m_renderTargetView, FClearColor);
 if (SR_DEPTH_BUFFER_BIT and VParam > 0)then
 	// Clear the depth buffer.
-	m_deviceContext^.ClearDepthStencilView(m_depthStencilView^, LongWord(D3D11_CLEAR_DEPTH), 1.0, 0);
+	m_deviceContext.ClearDepthStencilView(m_depthStencilView, LongWord(D3D11_CLEAR_DEPTH), 1.0, 0);
 end;
 
 procedure TSRenderDirectX11.BeginScene(const VPrimitiveType:TSPrimtiveType);

@@ -238,8 +238,8 @@ begin
 Result := False;
 if IsD3DX12Supported and (not Result) then
 	Result := ProccessDirectX12('');
-if IsD3DX11Supported and (not Result) then
-	Result := ProccessDirectX11('');
+{if IsD3DX11Supported and (not Result) then
+	Result := ProccessDirectX11('');}
 if IsD3DX9Supported and (not Result) then
 	Result := ProccessDirectX9('');
 if IsD3DX8Supported and (not Result) then

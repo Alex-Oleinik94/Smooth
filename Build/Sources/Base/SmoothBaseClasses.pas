@@ -116,12 +116,14 @@ inherited;
 end;
 {$ENDIF}
 
-procedure SDestroyInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} i : IInterface);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SDestroyInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} I : IInterface);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-try
-while i._Release() > 0 do ;
+{try
+//while i._Release() > 0 do ;
 except
-end;
+end;}
+if I <> nil then
+	i._Release();
 end;
 
 constructor TSObject.Create();

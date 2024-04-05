@@ -1831,6 +1831,7 @@ if pDevice = nil then
 		begin
 		SLogMakeSignificant();
 		SLog.Source(['TSRenderDirectX9__CreateContext: Failed create device with anything params, WindowHandle = ',SAddrStr(Context.Window), '.']);
+		Result := False;
 		end;
 	end
 else
