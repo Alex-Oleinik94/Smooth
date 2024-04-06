@@ -35,7 +35,7 @@ uses
 		// Image formats
 	,SmoothImageBmp
 	,SmoothImageJpeg
-	,SmoothImagePng
+	{$IF (not defined(MOBILE)) and (not (defined(DARWIN) and defined(CPU32)))},SmoothImagePng{$ENDIF}
 	,SmoothImageTga
 	,SmoothImageSia
 	,SmoothImageIco
@@ -78,12 +78,14 @@ SImageFormatIco, SImageFormatCur:
 	SLoadICO(_Stream, Result);
 SImageFormatMbm:
 	Result := SLoadMBMFromStream(_Stream);
+{$IF (not defined(MOBILE)) and (not (defined(DARWIN) and defined(CPU32)))}
 SImageFormatPng:
 	if SResourceManager.LoadingIsSupported('PNG') and SupportedPNG() then
 		begin
 		SKill(Result);
 		Result := SResourceManager.LoadResourceFromStream(_Stream, 'PNG') as TSBitMap;
 		end;
+{$ENDIF}
 SImageFormatNull : SLog.Source(['SLoadBitMapFromStream: Determining image format for "', _FileName, '" failed!'])
 else SLog.Source(['SLoadBitMapFromStream: Unknown image format "' + _FileName + '"!'])
 end;
@@ -107,13 +109,13 @@ end;
 function SDefaultSaveImageFormat(const _Channels : TSUInt8) : TSImageFormat; overload;
 begin
 case _Channels of
-4 : if SupportedPNG() and SResourceManager.SaveingIsSupported('PNG') then
+4 : {$IF (not defined(MOBILE)) and (not (defined(DARWIN) and defined(CPU32)))}if SupportedPNG() and SResourceManager.SaveingIsSupported('PNG') then
 		Result := SImageFormatPNG
-	else
+	else{$ENDIF}
 		Result := SImageFormatSIA;
-3 : if SupportedPNG() and SResourceManager.SaveingIsSupported('PNG') then
+3 : {$IF (not defined(MOBILE)) and (not (defined(DARWIN) and defined(CPU32)))}if SupportedPNG() and SResourceManager.SaveingIsSupported('PNG') then
 		Result := SImageFormatPNG
-	else
+	else{$ENDIF}
 		Result := SImageFormatJpeg;
 else Result := SImageFormatJpeg
 end;

@@ -53,7 +53,7 @@ function SContextOptionMin() : TSContextOption;
 function SContextOptionTitle(const VVariable : TSString) : TSContextOption;
 function SContextOptionImport(const VName : TSString; const VOption : TSPointer) : TSContextOption;
 {$IFDEF ANDROID}
-function SContextOptionAndroidApp(const State : TSPointer) : TSContextOption;
+function SContextOptionAndroidApp(const State : PAndroid_App) : TSContextOption;
 {$ENDIF}
 function SContextOptionAudioRender(const VAudioRender : TSAudioRenderClass) : TSContextOption;
 
@@ -130,7 +130,7 @@ Result.Import(SCFullscreenWindow, TSPointer(TSByte(VVariable)));
 end;
 
 {$IFDEF ANDROID}
-function SContextOptionAndroidApp(const State : TSPointer) : TSContextOption;
+function SContextOptionAndroidApp(const State : PAndroid_App) : TSContextOption;
 begin
 Result.Import('ANDROIDAPP', State);
 end;

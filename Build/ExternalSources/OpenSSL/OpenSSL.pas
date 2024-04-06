@@ -3505,9 +3505,9 @@ end;
    {$ELSE OS2}
 	case ChunkIndex of
 	1 : for i := Low(DLLVersions) to High(DLLVersions) do
-			Result += DLLSSLName + DLLVersions[i];
+			SAddStringToStringList(Result, DLLSSLName + DLLVersions[i]);
 	0 : for i := Low(DLLVersions) to High(DLLVersions) do
-			Result += DLLUtilName + DLLVersions[i];
+			SAddStringToStringList(Result, DLLUtilName + DLLVersions[i]);
 	end;
    {$ENDIF OS2}
   {$ENDIF WINDOWS}

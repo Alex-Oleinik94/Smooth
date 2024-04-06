@@ -359,7 +359,8 @@ if not ReadParams(Make) then
 else
 	SLogMakeSignificant();
 PrintLogo();
-Make.Execute('clear_files');
+if not((SUpCaseString(Target) = 'ANDROID') or (SUpCaseString(Target) = 'ANDROID_ARM') or  (SUpCaseString(Target) = 'ANDROID_I386')) then
+	Make.Execute('clear_files');
 if IsRelease then
 	begin
 	SBuildFiles(
@@ -372,7 +373,7 @@ if IsRelease then
 else
 	ProcessVersionFile(Make, 'False');
 ProcessExtensions(Make);
-if SUpCaseString(Target) = 'ANDROID' then
+if ((SUpCaseString(Target) = 'ANDROID') or (SUpCaseString(Target) = 'ANDROID_ARM') or  (SUpCaseString(Target) = 'ANDROID_I386')) then
 	Bitrate := 32
 else if IsRelease() then
 	begin
@@ -390,7 +391,8 @@ else
 	end;
 PrintTarget(Target);
 Make.Execute(Target);
-Make.Execute('clear_files');
+if not((SUpCaseString(Target) = 'ANDROID') or (SUpCaseString(Target) = 'ANDROID_ARM') or  (SUpCaseString(Target) = 'ANDROID_I386')) then
+	Make.Execute('clear_files');
 Make.Destroy();
 end;
 

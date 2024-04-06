@@ -5,6 +5,7 @@
 {$ELSE}
 	program Example6;
 	{$ENDIF}
+// http://www.sulaco.co.za/opengl.htm
 uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,

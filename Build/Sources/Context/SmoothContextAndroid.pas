@@ -266,7 +266,7 @@ if not FInitialized then
 		begin
 		FPaintable := FPaintableClass.Create(Self);
 		SetPaintableSettings();
-		FPaintable.LoadDeviceResources();
+		FPaintable.LoadRenderResources();
 		SLog.Source('"TSContextAndroid.InitWindow" : Paintable created');
 		end;
 	end;

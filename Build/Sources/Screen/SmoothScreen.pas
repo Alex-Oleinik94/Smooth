@@ -47,6 +47,7 @@ uses
 	,SmoothRenderBase
 	,SmoothScreenSkin
 	,SmoothContextUtils
+	{$IFDEF ANDROID},SmoothStringUtils{$ENDIF}
 	;
 
 procedure SKill(var Screen : TSScreen); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;

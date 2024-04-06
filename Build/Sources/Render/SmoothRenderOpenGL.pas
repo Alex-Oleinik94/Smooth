@@ -284,6 +284,9 @@ procedure SRGLPerspective(const vAngle, vAspectRatio, vNear, vFar : TSMatrix4x4T
 procedure SRGLLookAt(const Eve, At, Up : TSVertex3f);inline;
 
 procedure SRGLOrtho(const l,r,b,t,vNear,vFar:TSMatrix4x4Type);inline;
+{$IFDEF MOBILE}
+function SGetEGLError() : TSString;
+{$ENDIF}
 
 implementation
 
@@ -297,13 +300,21 @@ uses
 	{$ENDIF}
 	;
 
+{$IFDEF MOBILE}
+function SGetEGLError() : TSString;
+begin
+Result := '';
+// TO DO
+end;
+{$ENDIF}
+
 class function TSRenderOpenGL.RenderName() : TSString;
 begin
 Result := 
 	{$IFNDEF MOBILE}
 		'OpenGL'
 	{$ELSE}
-		'GLES'
+		'OpenGLES'
 		{$ENDIF}
 	;
 end;

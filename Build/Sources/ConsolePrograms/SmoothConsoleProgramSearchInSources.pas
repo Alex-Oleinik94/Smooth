@@ -519,6 +519,7 @@ FFileExtensions += 'hpp';
 FFileExtensions += 'hxx';
 FFileExtensions += 'c';
 FFileExtensions += 'html';
+FFileExtensions += 'xml';
 FFileExtensions += 'bat';
 FFileExtensions += 'cmd';
 FFileExtensions += 'sh';

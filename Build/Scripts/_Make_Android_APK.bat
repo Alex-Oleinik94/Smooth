@@ -6,15 +6,18 @@ cls
 make build_files
 @echo off
 cd Scripts
-CALL _Make_Android_ARM apk
+IF "%1"=="" (
+	CALL _Make_Android_ARM apk
+) ELSE (
+	CALL _Make_Extensions android_arm false
+)
 cd ..
 make clear_files
 
-set LIB=""
-if exist "Output\AndroidApplication\libs\armeabi\libmain.so" set LIB="1"
-if exist "Output\AndroidApplication\libs\i386eabi\libmain.so" set LIB="1"
+if exist "Output\AndroidApplication\libs\armeabi\libmain.so" set LIB="existed"
+rem if exist "Output\AndroidApplication\libs\i386eabi\libmain.so" set LIB="existed"
 
-if "%LIB%"==""1"" (
+if "%LIB%"==""existed"" (
 	echo "================"
 	echo "| Building APK |"
 	echo "================"
@@ -54,35 +57,29 @@ if "%LIB%"==""1"" (
 	
 	CD Output
 	SET PATH=C:\Programming\jdk\bin;C:\Programming\android-sdk\tools;C:\Programming\apache-ant\bin;C:\Programming\jdk\lib
-	SET APP_NAME=SmoothGameEngine-release
-	SET TARGETVER=""
-	IF "%1"=="" (
-		set TARGETVER="debug"
-	) else (
-		set TARGETVER="release"
-	)
 	cd AndroidApplication
-	
-	ant %TARGETVER%
-	
-	if "%TARGETVER%"==""release"" (
-		del bin\%APP_NAME%-unaligned.apk
-		jarsigner -verbose -keystore bin\SmoothKeystore.keystore -keypass 12345678 -storepass 12345678 -signedjar bin\%APP_NAME%-unaligned.apk bin\%APP_NAME%-unsigned.apk SmoothKeystore
-		C:\Programming\android-sdk\tools\zipalign -v 4 bin\%APP_NAME%-unaligned.apk bin\%APP_NAME%.apk
-	)
-	
-	CD ..\..
-	if "%TARGETVER%"==""debug"" (
-		COPY Output\AndroidApplication\bin\SmoothGameEngine-debug.apk ..\Binaries\Smooth.apk
+	IF "%1"=="release" (
+		ant release
+		rem TO DO
+		del bin\Smooth-release-unaligned.apk
+		jarsigner -verbose -keystore bin\SmoothKeystore.keystore -keypass 12345678 -storepass 12345678 -signedjar bin\Smooth-release-unaligned.apk bin\Smooth-release-unsigned.apk SmoothKeystore
+		zipalign -v 4 bin\Smooth-release-unaligned.apk bin\Smooth-release.apk
+		CD ..\..
+		COPY Output\AndroidApplication\bin\Smooth-release.apk ..\Binaries\Smooth-release.apk
 	) else (
-		COPY Output\AndroidApplication\bin\SmoothGameEngine-release.apk ..\Binaries\Smooth.apk
+		ant debug
+		CD ..\..
+		COPY Output\AndroidApplication\bin\Smooth-debug.apk ..\Binaries\Smooth-debug.apk
 	)
-	DEL Output\AndroidApplication /F/S/Q
+	
+	rem DEL Output\AndroidApplication /F/S/Q
+	cd Scripts
 ) else (
 	@echo off
 	echo "==========================="
 	echo "| Error while compilation |"
 	echo "==========================="
-	DEL Output\AndroidApplication /F/S/Q
+	rem DEL Output\AndroidApplication /F/S/Q
+	cd Scripts
 )
 PAUSE

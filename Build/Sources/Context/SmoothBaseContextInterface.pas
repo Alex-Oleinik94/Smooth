@@ -52,6 +52,7 @@ type
 		['{2746e985-11ee-4a85-a840-fe89d1d81f0d}']
 		function GetWindow() : TSPointer;
 		function GetDevice() : TSPointer;
+		function GetOption(const What : TSString) : TSPointer;
 		
 		procedure StartComputeTimer();
 		procedure UpdateTimer();

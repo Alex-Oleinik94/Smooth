@@ -2,7 +2,7 @@
 CALL _Create_Output_Directoryes
 cd ..
 set S1="=============================="
-if "%1" equ "android" (
+if "%1" equ "android_arm" (
 	set S2="Compiling extensions for Android"
 ) else (
 	set S2="Compiling extensions for Windows"
@@ -17,7 +17,7 @@ if exist "../Binaries/SmoothConsole.exe" (
 	echo %S2%
 	echo %S1%
 	"../Binaries/SmoothConsole.exe" --bt --build --extensions --%TARGET%
-	if not "%1" equ "android" (
+	if not "%1" equ "android_arm" (
 		if %errorlevel% equ 0 (
 			copy .\..\Binaries\Smooth.exe .\..\Binaries\SmoothExtensions.exe
 			rem cd Scripts
