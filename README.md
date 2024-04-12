@@ -29,7 +29,7 @@
 
 ### Links
 
- * See also: [Smooth programming], [Smooth programming 2]
+ * See also, downloads(Sources and executables): [Smooth programming], [Smooth programming 2]
 
  Configuration panel: Ctrl + Alt + O
 

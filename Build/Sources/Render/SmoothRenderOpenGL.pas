@@ -1385,6 +1385,7 @@ var
 	TempLightPosition : array[0..3] of glFloat = (0,1,0,2);
 	fogColor:array[0..3] of glFloat = (0,0,0,1);
 begin
+SLog.Source([ClassName(), '__Init: beginning.']);
 {$IFDEF RENDER_OGL_DEBUG}
 	WriteLn(ClassName(), '__Init: Begining.');
 	{$ENDIF}
@@ -1406,26 +1407,33 @@ SLog.Source([ClassName(), '__Init: SetRenderPixelFormatWinAPI returned "', SetRe
 {$ENDIF}
 
 {$IFDEF MOBILE}
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-	{$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glHint = nil then TSRenderOpenGL_DynLinkError('glHint');{$ENDIF}
+glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+{$ENDIF}
 
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glEnable = nil then TSRenderOpenGL_DynLinkError('glEnable');{$ENDIF}
 glEnable(GL_FOG);
 {$IFNDEF MOBILE}
 	glFogi(GL_FOG_MODE, GL_LINEAR);
 	{$ENDIF}
 glHint (GL_FOG_HINT, GL_NICEST);
 //glHint(GL_FOG_HINT, GL_DONT_CARE);
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glFogf = nil then TSRenderOpenGL_DynLinkError('glFogf');{$ENDIF}
 glFogf (GL_FOG_START, 300);
 glFogf (GL_FOG_END, 400);
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glFogfv = nil then TSRenderOpenGL_DynLinkError('glFogfv');{$ENDIF}
 glFogfv(GL_FOG_COLOR, @fogColor);
 glFogf(GL_FOG_DENSITY, 0.55);
 
-
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glDisable = nil then TSRenderOpenGL_DynLinkError('glDisable');{$ENDIF}
 glDisable(GL_FOG);
 
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glClearColor = nil then TSRenderOpenGL_DynLinkError('glClearColor');{$ENDIF}
 glClearColor(0, 0, 0, 0);
 glEnable(GL_DEPTH_TEST);
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if {$IFNDEF MOBILE}glClearDepth{$ELSE}glClearDepthf{$ENDIF} = nil then TSRenderOpenGL_DynLinkError({$IFNDEF MOBILE}'glClearDepth'{$ELSE}'glClearDepthf'{$ENDIF});{$ENDIF}
 {$IFNDEF MOBILE}glClearDepth{$ELSE}glClearDepthf{$ENDIF}(1.0);
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glDepthFunc = nil then TSRenderOpenGL_DynLinkError('glDepthFunc');{$ENDIF}
 glDepthFunc(GL_LESS);
 
 //Если включить GL_LINE_SMOOTH в GLES без шeйдеров то линии отображаются, видимо, неправильно
@@ -1435,13 +1443,17 @@ glDepthFunc(GL_LESS);
 	glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 	{$ENDIF}
 
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glLineWidth = nil then TSRenderOpenGL_DynLinkError('glLineWidth');{$ENDIF}
 glLineWidth (1.0);
 
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glShadeModel = nil then TSRenderOpenGL_DynLinkError('glShadeModel');{$ENDIF}
 glShadeModel(GL_SMOOTH);
 glEnable (GL_BLEND);
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glBlendFunc = nil then TSRenderOpenGL_DynLinkError('glBlendFunc');{$ENDIF}
 glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 glEnable(GL_LIGHTING);
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glLightfv = nil then TSRenderOpenGL_DynLinkError('glLightfv');{$ENDIF}
 glLightfv(GL_LIGHT0,GL_AMBIENT, @AmbientLight);
 glLightfv(GL_LIGHT0,GL_DIFFUSE, @DiffuseLight);
 glLightfv(GL_LIGHT0,GL_SPECULAR, @SpecularLight);
@@ -1453,6 +1465,7 @@ glEnable(GL_COLOR_MATERIAL);
 {$IFNDEF MOBILE}
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 	{$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glMaterialfv = nil then TSRenderOpenGL_DynLinkError('glMaterialfv');{$ENDIF}
 glMaterialfv(GL_FRONT, GL_SPECULAR, @SpecularReflection);
 {$IFNDEF MOBILE}
 	glMateriali(GL_FRONT,GL_SHININESS,100);
@@ -1471,6 +1484,7 @@ glDisable(GL_LIGHTING);
 {$IFDEF RENDER_OGL_DEBUG}
 	WriteLn(ClassName(), '__Init: End.');
 	{$ENDIF}
+SLog.Source([ClassName(), '__Init: ending.']);
 end;
 
 constructor TSRenderOpenGL.Create();
@@ -1675,7 +1689,7 @@ Result:=False;
 	{$ELSE}
 		{$IFDEF ANDROID}
 			FContext := eglCreateContext(Context.Device, Context.GetOption('VISUAL INFO'), nil, nil);
-			SLog.Source('TSRenderOpenGL__CreateContext: Called "eglCreateContext"; Result = "' + SStr(TSMaxEnum(FContext)) + '".');
+			SLog.Source(['TSRenderOpenGL__CreateContext: Called eglCreateContext(Device=',Context.Device,',VisualInfo=',Context.GetOption('VISUAL INFO'),') Result = "' + SStr(TSMaxEnum(FContext)) + '".']);
 			Result:=TSMaxEnum(FContext)<>0;
 		{$ELSE}
 			{$IFDEF DARWIN}

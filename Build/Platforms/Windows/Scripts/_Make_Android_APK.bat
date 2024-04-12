@@ -6,8 +6,11 @@ cls
 make build_files
 @echo off
 cd Scripts
-rem CALL _Make_Android_ARM apk
-CALL _Make_Extensions android_arm false
+IF "%1"=="" (
+	CALL _Make_Android_ARM apk
+) ELSE (
+	CALL _Make_Extensions android_arm false
+)
 cd ..
 make clear_files
 
@@ -55,11 +58,7 @@ if "%LIB%"==""existed"" (
 	CD Output
 	SET PATH=C:\Programming\jdk\bin;C:\Programming\android-sdk\tools;C:\Programming\apache-ant\bin;C:\Programming\jdk\lib
 	cd AndroidApplication
-	IF "%1"=="" (
-		ant debug
-		CD ..\..
-		COPY Output\AndroidApplication\bin\Smooth-debug.apk ..\Binaries\Smooth-debug.apk
-	) else (
+	IF "%1"=="release" (
 		ant release
 		rem TO DO
 		del bin\Smooth-release-unaligned.apk
@@ -67,6 +66,10 @@ if "%LIB%"==""existed"" (
 		zipalign -v 4 bin\Smooth-release-unaligned.apk bin\Smooth-release.apk
 		CD ..\..
 		COPY Output\AndroidApplication\bin\Smooth-release.apk ..\Binaries\Smooth-release.apk
+	) else (
+		ant debug
+		CD ..\..
+		COPY Output\AndroidApplication\bin\Smooth-debug.apk ..\Binaries\Smooth-debug.apk
 	)
 	
 	rem DEL Output\AndroidApplication /F/S/Q

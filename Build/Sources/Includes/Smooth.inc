@@ -70,7 +70,7 @@
 	{$OVERFLOWCHECKS OFF}
 	{$ENDIF}
 
-{$IF not defined(RELEASE)}
+{$IF (not defined(RELEASE)) and (not defined(ANDROID))}
 	{$DEFINE WITHLEAKSDETECTOR}
 	{$ENDIF}
 

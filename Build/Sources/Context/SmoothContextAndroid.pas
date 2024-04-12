@@ -34,6 +34,7 @@ type
 		destructor Destroy();override;
 			public
 		class function ContextName() : TSString; override;
+		class function ClassName() : TSString; override;
 		procedure Initialize(const _WindowPlacement : TSContextWindowPlacement = SPlacementNormal);override;
 		procedure Run();override;
 		procedure Messages();override;
@@ -47,12 +48,13 @@ type
 			public
 		procedure ShowCursor(const b:Boolean);override;
 		procedure SetCursorPosition(const a: TSPoint2int32);override;
-			public
+			protected
 		FDisplay:Pointer;
 		FSurface: EGLSurface;
 		FAndroidApp:Pandroid_app;
 		FConfig: EGLConfig;
 		FAnimating:cint;
+		function GetDevice() : TSPointer; override;
 			private
 		FLastTouch: TSPoint2int32;
 		function InitWindow():TSBoolean;
@@ -66,6 +68,8 @@ type
 		property AndroidApp:Pandroid_app read FAndroidApp write FAndroidApp;
 		end;
 
+function SStrEGLSurface(const What : EGLSurface):TSString;
+
 implementation
 
 uses
@@ -73,6 +77,33 @@ uses
 	,SmoothLog
 	,SmoothStringUtils
 	;
+
+function SStrEGLSurface(const What : EGLSurface):TSString;
+begin
+if What = EGL_NO_SURFACE then
+	Result := 'EGL_NO_SURFACE'
+else if What = Pointer(EGL_BAD_DISPLAY) then
+	Result := 'EGL_BAD_DISPLAY'
+else if What = Pointer(EGL_NOT_INITIALIZED) then
+	Result := 'EGL_NOT_INITIALIZED'
+else if What = Pointer(EGL_BAD_CONFIG) then
+	Result := 'EGL_BAD_CONFIG'
+else if What = Pointer(EGL_BAD_NATIVE_WINDOW) then
+	Result := 'EGL_BAD_NATIVE_WINDOW'
+else if What = Pointer(EGL_BAD_ATTRIBUTE) then
+	Result := 'EGL_BAD_ATTRIBUTE'
+else if What = Pointer(EGL_BAD_ALLOC) then
+	Result := 'EGL_BAD_ALLOC'
+else if What = Pointer(EGL_BAD_MATCH) then
+	Result := 'EGL_BAD_MATCH'
+else
+	Result := '';
+end;
+
+class function TSContextAndroid.ClassName() : TSString;
+begin
+Result := 'TSContextAndroid';
+end;
 
 class function TSContextAndroid.ContextName() : TSString;
 begin
@@ -82,6 +113,11 @@ end;
 class function TSContextAndroid.Supported() : TSBoolean;
 begin
 Result := True;
+end;
+
+function TSContextAndroid.GetDevice() : TSPointer;
+begin
+Result:=FDisplay;
 end;
 
 function TSContextAndroid.GetOption(const What : TSString) : TSPointer;
@@ -188,18 +224,19 @@ const
 		{$IFDEF SDEPTHANDROID}EGL_DEPTH_SIZE, 24,{$ENDIF}
 		EGL_NONE);
 var
-	Format,NumConfigs: EGLint;
-	FunctiosResult : TSMaxEnum;
+	Format: EGLint = 0;
+	NumConfigs: EGLint;
+	FunctionResult : TSMaxEnum;
 
 procedure InitPixelFormat();inline;
 begin
-FunctiosResult := eglChooseConfig(FDisplay, Attribs, @FConfig, 1, @NumConfigs);
-SLog.Source('"TSContextAndroid.InitWindow" : Called "eglChooseConfig". Result="'+SStr(FunctiosResult)+'".');
-FunctiosResult := eglGetConfigAttrib(FDisplay, FConfig, EGL_NATIVE_VISUAL_ID, @Format);
+FunctionResult := eglChooseConfig(FDisplay, Attribs, @FConfig, 1, @NumConfigs);
+SLog.Source('"TSContextAndroid.InitWindow" : Called "eglChooseConfig". Result="'+SStr(FunctionResult)+'".');
+FunctionResult := eglGetConfigAttrib(FDisplay, FConfig, EGL_NATIVE_VISUAL_ID, @Format);
 if Attribs[8] <> EGL_NONE then
-	SLog.Source('"TSContextAndroid.InitWindow" : Called "eglGetConfigAttrib". Result="'+SStr(FunctiosResult)+'", Depth Size = "'+SStr(Attribs[9])+'".')
+	SLog.Source('"TSContextAndroid.InitWindow" : Called "eglGetConfigAttrib". Result="'+SStr(FunctionResult)+'", Depth Size = "'+SStr(Attribs[9])+'".')
 else
-	SLog.Source('"TSContextAndroid.InitWindow" : Called "eglGetConfigAttrib". Result="'+SStr(FunctiosResult)+'", Without Depth.');
+	SLog.Source('"TSContextAndroid.InitWindow" : Called "eglGetConfigAttrib". Result="'+SStr(FunctionResult)+'", Without Depth.');
 end;
 
 begin
@@ -209,33 +246,34 @@ if FDisplay = EGL_NO_DISPLAY then
 	begin
 	FDisplay       := eglGetDisplay(EGL_DEFAULT_DISPLAY);
 	SLog.Source('"TSContextAndroid.InitWindow" : "eglGetDisplay" calling sucssesful! Result="'+SStr(TSMaxEnum(FDisplay))+'"');
-	FunctiosResult := eglInitialize(FDisplay, nil,nil);
-	SLog.Source('"TSContextAndroid.InitWindow" : Called "eglInitialize". Result="'+SStr(FunctiosResult)+'".');
+	FunctionResult := eglInitialize(FDisplay, nil,nil);
+	SLog.Source('"TSContextAndroid.InitWindow" : Called "eglInitialize". Result="'+SStr(FunctionResult)+'".');
 	InitPixelFormat();
 	{$IFDEF SDEPTHANDROID}
-		while (FunctiosResult = 0) and (Attribs[9]<>8) do
+		while (FunctionResult = 0) and (Attribs[9]<>8) do
 			begin
 			Attribs[9] -= 8;
 			InitPixelFormat();
 			end;
-		if FunctiosResult = 0 then
+		if FunctionResult = 0 then
 			begin
 			Attribs[8] := EGL_NONE;
 			InitPixelFormat();
 			end;
 		{$ENDIF}
-	if FunctiosResult = 0 then
+	if FunctionResult = 0 then
 		begin
 		SLog.Source('"TSContextAndroid.InitWindow" : FATAL : Can''t initialize pixel formats.');
 		Result := False;
 		Active := False;
 		Exit;
 		end;
-	FunctiosResult := ANativeWindow_SetBuffersGeometry(FAndroidApp^.Window, 0, 0, Format);
-	SLog.Source('"TSContextAndroid.InitWindow" : Called "ANativeWindow_SetBuffersGeometry". Result="'+SStr(FunctiosResult)+'"');
+	FunctionResult := ANativeWindow_SetBuffersGeometry(FAndroidApp^.Window, 0, 0, Format);
+	SLog.Source('"TSContextAndroid.InitWindow" : Called "ANativeWindow_SetBuffersGeometry". Result="'+SStr(FunctionResult)+'"');
 	end;
 FSurface       := eglCreateWindowSurface(FDisplay, FConfig, AndroidApp^.Window, nil);
-SLog.Source('"TSContextAndroid.InitWindow" : Called "eglCreateWindowSurface". Result="'+SStr(FunctiosResult)+'"');
+SLog.Source(['"TSContextAndroid.InitWindow" : Called "eglCreateWindowSurface(Display=',FDisplay,',Config=', FConfig,',Window=', AndroidApp^.Window,')". Result="',FSurface,'" is "',SStrEGLSurface(FSurface),'"']);
+SLog.Source(['"TSContextAndroid.InitWindow" : Render is "',Render,'"']);
 if FRender=nil then
 	begin
 	FRender:=FRenderClass.Create();
@@ -270,7 +308,7 @@ if not FInitialized then
 		SLog.Source('"TSContextAndroid.InitWindow" : Paintable created');
 		end;
 	end;
-SLog.Source('Leaving "TSContextAndroid.InitWindow".');
+SLog.Source(['Leaving "TSContextAndroid.InitWindow()". Result=', Result]);
 FInitialized:=Result;
 end;
 
@@ -325,6 +363,7 @@ APP_CMD_TERM_WINDOW://Убиваем окно
 APP_CMD_GAINED_FOCUS://Тогда когда приложение используется
 	begin
 	FAnimating:=1;
+	//FActive := True;
 	end;
 APP_CMD_LOST_FOCUS,APP_CMD_PAUSE,APP_CMD_STOP://Тогда когда приложение свернуто/блакировка экрана или т п, в общем ради батарейки
 	begin
@@ -419,13 +458,16 @@ AINPUT_EVENT_TYPE_MOTION:
 	SLog.Source(s);}
 	FAnimating:=1;
 	end;
-{AINPUT_EVENT_TYPE_KEY:
+AINPUT_EVENT_TYPE_KEY:
 	begin
 	EventCode     := AKeyEvent_getKeyCode(event);
 	EventScanCode := AKeyEvent_getScanCode(event);
-
+	
+	SetKey(SDownKey,EventCode);
+	//SetKey(SUpKey,WParam);
+	
 	SLog.Source('"TSContextAndroid.HandleEvent" : Key = (Code:'+SStr(EventCode)+';ScanCode:'+SStr(EventScanCode)+'), Action = "'+WITA()+'"');
-	end;}
+	end;
 else
 	begin
 	Result:=0;

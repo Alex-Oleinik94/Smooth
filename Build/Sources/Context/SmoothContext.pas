@@ -399,7 +399,7 @@ Result :=
 	{$IFDEF ANDROID}  TSContextAndroid{$ELSE}
 	{$IFDEF DARWIN}   TSContextMacOSX {$ELSE}
 	                  nil
-	{$ENDIF}   {$ENDIF}   {$ENDIF}    {$ENDIF}
+	{$ENDIF}   {$ENDIF}   {$ENDIF}   {$ENDIF}
 	;
 {$IFDEF WITH_GLUT}
 if Result = nil then

@@ -251,6 +251,7 @@ begin
 Result := True;
 if not TSRenderOpenGL.Supported() then
 	begin
+	SLog.Source('OpenGL can''t be used in your system!');
 	WriteLn('OpenGL can''t be used in your system!');
 	Result := False;
 	end;
@@ -535,11 +536,13 @@ if (AudioRenderClass <> nil) then
 	ContextSettings += SContextOptionAudioRender(AudioRenderClass);
 if Success then
 	if (ContextClass <> nil) and (RenderClass <> nil) then
+		begin
 		SRunPaintable(
 			VPaintabeClass,
 			ContextClass,
 			RenderClass,
-			ContextSettings)
+			ContextSettings);
+		end
 	else
 		begin
 		if ContextClass = nil then

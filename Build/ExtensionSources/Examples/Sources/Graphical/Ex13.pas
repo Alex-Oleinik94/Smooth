@@ -5,6 +5,7 @@
 {$ELSE}
 	program Example13;
 	{$ENDIF}
+// https://tmtlib.narod.ru/files/glsl-bones/index.htm
 uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
