@@ -29,7 +29,8 @@ type
 		procedure Resize();override;
 			public
 		class function CanCreate(const VScreen : TSScreenComponent): TSBoolean;
-		procedure InitRender(const VRenderClass : TSRenderClass);
+		procedure InitRender(const VRenderClass : TSRenderClass); overload;
+		//procedure InitRender(const VContextClass : TSContextClass; const VRenderClass : TSRenderClass); overload;
 		procedure InitContext(const VContextClass : TSContextClass);
 			private
 		FContextsComboBox,
@@ -74,17 +75,6 @@ uses
 		{$ENDIF}
 	;
 
-procedure TSEngineConfigurationPanel.InitRender(const VRenderClass : TSRenderClass);
-begin
-{$IFDEF CONFIGURATION_DEBUG}
-	WriteLn('TSEngineConfigurationPanel__InitRender(const VRenderClass : TSRenderClass = ',SAddrStr(VRenderClass),') : Begining');
-	{$ENDIF}
-Context.SetRenderClass(VRenderClass);
-{$IFDEF CONFIGURATION_DEBUG}
-	WriteLn('TSEngineConfigurationPanel__InitRender(const VRenderClass : TSRenderClass) : End');
-	{$ENDIF}
-end;
-
 procedure TSEngineConfigurationPanel.InitContext(const VContextClass : TSContextClass);
 begin
 {$IFDEF CONFIGURATION_DEBUG}
@@ -120,6 +110,19 @@ var
 			(FClass : {$IFDEF DARWIN}   TSContextMacOSX  {$ELSE}nil{$ENDIF}; FName : 'Mac OS X (Carbon)' ),
 			(FClass : {$IFDEF WITH_GLUT}TSContextGLUT    {$ELSE}nil{$ENDIF}; FName : 'OpenGL Utility Toolkit (GLUT)' )
 			);
+
+procedure TSEngineConfigurationPanel.InitRender(const VRenderClass : TSRenderClass); overload;
+begin
+{$IFDEF CONFIGURATION_DEBUG}
+	WriteLn('TSEngineConfigurationPanel__InitRender(const VRenderClass : TSRenderClass = ',SAddrStr(VRenderClass),') : Begining');
+	{$ENDIF}
+//if True{IsOwnSystemIs64bit} then
+Context.NewContext := Contexts[FContextsComboBox.SelectedItemIndex].FClass;
+Context.SetRenderClass(VRenderClass);
+{$IFDEF CONFIGURATION_DEBUG}
+	WriteLn('TSEngineConfigurationPanel__InitRender(const VRenderClass : TSRenderClass) : End');
+	{$ENDIF}
+end;
 
 const
 	FontHeight = 20;

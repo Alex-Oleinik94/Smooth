@@ -43,7 +43,7 @@ uses
 	// Видимо нет потому что эти компоненты относятся к внешним (External)
 	procedure android_main(State: PAndroid_App); cdecl; export;
 	begin
-	SLog.Source('Entering "procedure android_main(state: Pandroid_app); cdecl; export;" in "Smooth"');
+	SLog.Source('Entering "procedure android_main(state: Pandroid_app); cdecl; export;" in "Smooth.pas"');
 	{$IFDEF WITHEXCEPTIONTRACEING}
 	try
 	{$ENDIF}
@@ -56,6 +56,7 @@ uses
 		end;
 	end;
 	{$ENDIF}
+	SLog.Source('Leaving "procedure android_main(state: Pandroid_app); cdecl; export;" in "Smooth.pas"');
 	end;
 
 	exports

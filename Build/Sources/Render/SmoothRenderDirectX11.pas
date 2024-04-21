@@ -30,6 +30,7 @@ uses
 	,DynLibs
 	
 	// DirectX unit
+	// Include D3D11 and DXGI units
 	,DX12.D3D11
 	,DX12.D3D11On12
 	//,DX12.D2D1//
@@ -38,6 +39,8 @@ uses
 	//,DX12.DWrite//
 	
 	,DX12.D3DX11
+	//We have to use DX10 unit for the matrix manipulation functions
+	,DX12.D3DX10
 	,DirectX.Math
 	;
 
@@ -48,27 +51,34 @@ type
 		destructor Destroy(); override;
 		class function RenderName() : TSString; override;
 			protected
-		m_vsync_enabled:Boolean;
-		m_videoCardMemory:Extended;
-		m_videoCardDescription:array[0..127] of Char;
-		m_swapChain:IDXGISwapChain;
-		m_device:ID3D11Device;
-		m_deviceContext:ID3D11DeviceContext;
-		m_renderTargetView:ID3D11RenderTargetView;
-		m_depthStencilBuffer:ID3D11Texture2D;
-		m_depthStencilState:ID3D11DepthStencilState;
-		m_depthStencilView:ID3D11DepthStencilView;
-		m_rasterState:ID3D11RasterizerState;
-		m_projectionMatrix:TXMMATRIX;
-		m_worldMatrix:TXMMATRIX;
-		m_orthoMatrix:TXMMATRIX;
-		m_viewport:TD3D11_VIEWPORT;
+		{ D3D11 Device and Device Context }
+		FDevice: ID3D11Device;
+		FDeviceContext: ID3D11DeviceContext;
+		FCurrentFeatureLevel: TD3D_FEATURE_LEVEL;
+		
+		{ Swapchain }
+		FSwapchain: IDXGISwapChain;
+		FRenderTargetView: ID3D11RenderTargetView;
+		
+		{ Depth, stencil and raster states }
+		FDepthStencilBuffer: ID3D11Texture2D;
+		FDepthStencilState: ID3D11DepthStencilState;
+		FDepthStencilView: ID3D11DepthStencilView;
+		FRasterizerState: ID3D11RasterizerState;
+		FViewport: TD3D11_VIEWPORT;
+		
+		{ Matrices }
+		FProjMatrix: TD3DMATRIX;
+		
+		{ Flag which signalizes that renderer is initialized }
+		FReady,
+		FEnableVSync: Boolean;
 		//цвет, в который окрашивается буфер при очистке
 		FClearColor:array[0..3]of Single;
 
 			protected
-		function Initialize(screenWidth:LongInt;screenHeight:LongInt; vsync:Boolean; hwnd:HWND;fullscreen:Boolean; screenDepth:Single; screenNear:Single):HRESULT;
-		procedure Shutdown();
+		Function Initialize(aHWND: HWND; aWidth, aHeight: Integer): HRESULT;
+		Function Uninitialize: HRESULT;
 			public
 		class function Supported() : TSBoolean;override;
 		function SetPixelFormat():Boolean;override;overload;
@@ -183,349 +193,219 @@ FClearColor[2] := b;
 FClearColor[3] := a;
 end;
 
-function TSRenderDirectX11.Initialize(screenWidth:LongInt;screenHeight:LongInt; vsync:Boolean; hwnd:HWND;fullscreen:Boolean; screenDepth:Single; screenNear:Single):HRESULT;
+
+function TSRenderDirectX11.Initialize(aHWND: HWND; aWidth, aHeight: Integer): HRESULT;
 var
-	factory:IDXGIFactory;
-	adapter:IDXGIAdapter;
-	adapterOutput:IDXGIOutput;
-	numModes, i, numerator, denominator:LongWord;
-	stringLength:QWord;
-	displayModeList:^TDXGI_MODE_DESC;
-	adapterDesc:TDXGI_ADAPTER_DESC;
-	error:LongInt = 0;
-	swapChainDesc:TDXGI_SWAP_CHAIN_DESC;
-	featureLevel:TD3D_FEATURE_LEVEL;
-	backBufferPtr:ID3D11Texture2D;
-	depthBufferDesc:TD3D11_TEXTURE2D_DESC;
-	depthStencilDesc:TD3D11_DEPTH_STENCIL_DESC;
-	depthStencilViewDesc:TD3D11_DEPTH_STENCIL_VIEW_DESC;
-	rasterDesc:TD3D11_RASTERIZER_DESC;
-	fieldOfView, screenAspect:Single;
+  feature_level: Array[0..0] of TD3D_FEATURE_LEVEL;
+  pBackbuffer: ID3D11Texture2D;
+
+  swapchain_desc: TDXGI_SWAP_CHAIN_DESC;
+  depth_desc: TD3D11_TEXTURE2D_DESC;
+  depth_state_desc: TD3D11_DEPTH_STENCIL_DESC;
+  depth_view_desc: TD3D11_DEPTH_STENCIL_VIEW_DESC;
+  rast_state_desc: TD3D11_RASTERIZER_DESC;
 begin
-Result := 1;
+  //If we are already initialized, then call Uninitialize() before proceeding.
+  If FReady then Begin
+    Result := Uninitialize;
+    If Failed(Result) then Exit;
+  end;
 
-// Store the vsync setting.
-m_vsync_enabled := vsync;
+  //Configure swapchain descriptor
+  {$HINTS off}
+  FillChar(swapchain_desc, SizeOf(TDXGI_SWAP_CHAIN_DESC), 0);
+  {$HINTS on}
+  With swapchain_desc do Begin
+    BufferCount := 1;
 
-// Create a DirectX graphics interface factory.
-if CreateDXGIFactory <> nil then
-	begin
-	Result := CreateDXGIFactory(IDXGIFactory, factory);
-	if(FAILED(result))then
-		exit;
+    BufferDesc.Width := aWidth;
+    BufferDesc.Height := aHeight;
+    BufferDesc.Format := DXGI_FORMAT_R8G8B8A8_UNORM;
+    BufferDesc.RefreshRate.Numerator := 0;
+    BufferDesc.RefreshRate.Denominator := 1;
+    BufferDesc.ScanlineOrdering := DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+    BufferDesc.Scaling := DXGI_MODE_SCALING_UNSPECIFIED;
 
-	// Use the factory to create an adapter for the primary graphics interface (video card).
-	Result := factory.EnumAdapters(0, adapter);
-	if(FAILED(result))then
-		exit;
+    BufferUsage := DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    OutputWindow := aHWND;
+    SampleDesc.Count := 1;
+    SampleDesc.Quality := 0;
+    Windowed := True;
 
-	// Enumerate the primary adapter output (monitor).
-	Result := adapter.EnumOutputs(0, adapterOutput);
-	if(FAILED(result))then
-		exit;
+    SwapEffect := DXGI_SWAP_EFFECT_DISCARD;
+    Flags := 0;
+  End;
 
-	// Get the number of modes that fit the DXGI_FORMAT_R8G8B8A8_UNORM display format for the adapter output (monitor).
-	Result := adapterOutput.GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, numModes, nil);
-	if(FAILED(result))then
-		exit;
+  //Decide feature level
+  feature_level[0] := D3D_FEATURE_LEVEL_11_0;
 
-	// Create a list to hold all the possible display modes for this monitor/video card combination.
-	GetMem(displayModeList, SizeOf(TDXGI_MODE_DESC) * numModes);
-	if(displayModeList=nil)then
-		exit;
+  //Create Direct3D 11 device and a swap chain
+  Result := D3D11CreateDeviceAndSwapChain(
+      nil,
+      D3D_DRIVER_TYPE_HARDWARE,
+      0,
+      0,
+      @feature_level[0],
+      1,
+      D3D11_SDK_VERSION,
+      @swapchain_desc,
+      FSwapchain,
+      FDevice,
+      FCurrentFeatureLevel,
+      FDeviceContext
+  );
+  If Failed(Result) then Exit;
 
-	// Now fill the display mode list structures.
-	Result := adapterOutput.GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, numModes, displayModeList);
-	if(FAILED(result))then
-		exit;
+  //Get first backbuffer from the chain
+  Result := FSwapchain.GetBuffer(0, ID3D11Texture2D, pBackbuffer);
+  If Failed(Result) then Exit;
 
-	// Now go through all the display modes and find the one that matches the screen width and height.
-	// When a match is found store the numerator and denominator of the refresh rate for that monitor.
-	for i := 0 to numModes - 1 do
-		if(displayModeList[i].Width = screenWidth) and (displayModeList[i].Height = screenHeight)then
-			begin
-			numerator := displayModeList[i].RefreshRate.Numerator;
-			denominator := displayModeList[i].RefreshRate.Denominator;
-			end;
+  //Create render target view from backbuffer
+  Result := FDevice.CreateRenderTargetView(pBackbuffer, nil, FRenderTargetView);
+  If Failed(Result) then Exit;
 
-	// Get the adapter (video card) description.
-	Result := adapter.GetDesc(adapterDesc);
-	if(FAILED(result))then
-		exit;
+  //Release backbuffer reference
+  pBackbuffer := nil;
 
-	// Store the dedicated video card memory in megabytes.
-	m_videoCardMemory := adapterDesc.DedicatedVideoMemory / 1024 / 1024;
+  //Setup a depth buffer desc
+  {$HINTS off}
+  FillChar(depth_desc, SizeOf(depth_desc), 0);
+  {$HINTS on}
+  With depth_desc do Begin
+    Width := aWidth;
+    Height := aHeight;
+    MipLevels := 1;
+    ArraySize := 1;
+    Format := DXGI_FORMAT_D24_UNORM_S8_UINT;
+    SampleDesc.Count := 1;
+    SampleDesc.Quality := 0;
+    Usage := D3D11_USAGE_DEFAULT;
+    BindFlags := Ord(D3D11_BIND_DEPTH_STENCIL);
+    CPUAccessFlags := 0;
+    MiscFlags := 0;
+  End;
 
-	// Convert the name of the video card to a character array and store it.
-	for i := 0 to 127 do
-		m_videoCardDescription[i] := adapterDesc.Description[i];
+  //Create depth buffer
+  Result := FDevice.CreateTexture2D(depth_desc, nil, FDepthStencilBuffer);
+  If Failed(Result) then Exit;
 
-	// Release the display mode list.
-	FreeMem(displayModeList);
-	displayModeList := nil;
+  //Setup depth-stencil state desc
+  {$HINTS off}
+  FillChar(depth_state_desc, SizeOf(depth_state_desc), 0);
+  {$HINTS on}
+  With depth_state_desc do Begin
+    DepthEnable := True;
+    DepthWriteMask := D3D11_DEPTH_WRITE_MASK_ALL;
+    DepthFunc := D3D11_COMPARISON_LESS;
 
-	// Release the adapter output.
-	adapterOutput._Release();
-	adapterOutput := nil;
+    StencilEnable := True;
+    StencilReadMask := $FF;
+    StencilWriteMask := $FF;
 
-	// Release the adapter.
-	adapter._Release();
-	adapter := nil;
+    FrontFace.StencilFailOp := D3D11_STENCIL_OP_KEEP;
+    FrontFace.StencilDepthFailOp := D3D11_STENCIL_OP_INCR;
+    FrontFace.StencilPassOp := D3D11_STENCIL_OP_KEEP;
+    FrontFace.StencilFunc := D3D11_COMPARISON_ALWAYS;
 
-	// Release the factory.
-	factory._Release();
-	factory := nil;
-	end
-else
-	begin
-	SLog.Source(['TSRenderDirectX11.Initialize : CreateDXGIFactory is nil!']); WriteLn('TSRenderDirectX11.Initialize : CreateDXGIFactory is nil!');
-	numerator := 0;
-	denominator := 1;
-	end;
+    BackFace.StencilFailOp := D3D11_STENCIL_OP_KEEP;
+    BackFace.StencilDepthFailOp := D3D11_STENCIL_OP_DECR;
+    BackFace.StencilPassOp := D3D11_STENCIL_OP_KEEP;
+    BackFace.StencilFunc := D3D11_COMPARISON_ALWAYS;
+  End;
 
-// Initialize the swap chain description.
-FillChar(swapChainDesc, sizeof(swapChainDesc), 0);
+  //Create depth-stencil state object
+  Result := FDevice.CreateDepthStencilState(depth_state_desc, FDepthStencilState);
+  If Failed(Result) then Exit;
 
-// Set to a single back buffer.
-swapChainDesc.BufferCount := 1;
+  //Set depth-stencil state
+  FDeviceContext.OMSetDepthStencilState(FDepthStencilState, 1);
 
-// Set the width and height of the back buffer.
-swapChainDesc.BufferDesc.Width := screenWidth;
-swapChainDesc.BufferDesc.Height := screenHeight;
+  //Setup depth-stencil view desc
+  {$HINTS off}
+  FillChar(depth_view_desc, SizeOf(depth_view_desc), 0);
+  {$HINTS on}
+  With depth_view_desc do Begin
+    Format := DXGI_FORMAT_D24_UNORM_S8_UINT;
+    ViewDimension := D3D11_DSV_DIMENSION_TEXTURE2D;
+    Texture2D.MipSlice := 0;
+  End;
 
-// Set regular 32-bit surface for the back buffer.
-swapChainDesc.BufferDesc.Format := DXGI_FORMAT_R8G8B8A8_UNORM;
+  //Create depth-stencil view
+  Result := FDevice.CreateDepthStencilView(FDepthStencilBuffer, @depth_view_desc, FDepthStencilView);
+  If Failed(Result) then Exit;
 
-// Set the refresh rate of the back buffer.
-if(m_vsync_enabled)then
-	begin
-	swapChainDesc.BufferDesc.RefreshRate.Numerator := numerator;
-	swapChainDesc.BufferDesc.RefreshRate.Denominator := denominator;
-	end
-else
-	begin
-	swapChainDesc.BufferDesc.RefreshRate.Numerator := 0;
-	swapChainDesc.BufferDesc.RefreshRate.Denominator := 1;
-	end;
+  //Bind render target view and depth-stencil view to pipeline
+  FDeviceContext.OMSetRenderTargets(1, @FRenderTargetView, FDepthStencilView);
 
-// Set the usage of the back buffer.
-swapChainDesc.BufferUsage := DXGI_USAGE_RENDER_TARGET_OUTPUT;
+  //Setup rasterizer state desc
+  {$HINTS off}
+  FillChar(rast_state_desc, SizeOf(rast_state_desc), 0);
+  {$HINTS on}
+  With rast_state_desc do Begin
+    AntialiasedLineEnable := True;
+    CullMode := D3D11_CULL_BACK;
+    DepthBias := 0;
+    DepthBiasClamp := 0;
+    DepthClipEnable := True;
+    FillMode := D3D11_FILL_SOLID;
+    FrontCounterClockwise := False;
+    MultisampleEnable := False;
+    ScissorEnable := False;
+    SlopeScaledDepthBias := 0;
+  End;
 
-// Set the handle for the window to render to.
-swapChainDesc.OutputWindow := hwnd;
+  //Create rasterizer state object
+  Result := FDevice.CreateRasterizerState(rast_state_desc, FRasterizerState);
+  If Failed(Result) then Exit;
 
-// Turn multisampling off.
-swapChainDesc.SampleDesc.Count := 1;
-swapChainDesc.SampleDesc.Quality := 0;
+  //Set rasterizer state to device context
+  FDeviceContext.RSSetState(FRasterizerState);
 
-// Set to full screen or windowed mode.
-swapChainDesc.Windowed := not fullscreen;
+  //Set up viewport
+  {$HINTS off}
+  FillChar(FViewport, SizeOf(FViewport), 0);
+  {$HINTS on}
+  With FViewport do Begin
+    Width := aWidth;
+    Height := aHeight;
+    MinDepth := 0;
+    MaxDepth := 1;
+    TopLeftX := 0;
+    TopLeftY := 0;
+  End;
 
-// Set the scan line ordering and scaling to unspecified.
-swapChainDesc.BufferDesc.ScanlineOrdering := DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-swapChainDesc.BufferDesc.Scaling := DXGI_MODE_SCALING_UNSPECIFIED;
+  //Set viewport
+  FDeviceContext.RSSetViewports(1, @FViewport);
 
-// Discard the back buffer contents after presenting.
-swapChainDesc.SwapEffect := DXGI_SWAP_EFFECT_DISCARD;
+  //Create projection matrix
+  D3DXMatrixPerspectiveFovLH(@FProjMatrix, 2*Pi/4, aWidth/aHeight,  TSRenderNear, TSRenderFar);
 
-// Don't set the advanced flags.
-swapChainDesc.Flags := 0;
-
-// Set the feature level to DirectX 11.
-featureLevel := D3D_FEATURE_LEVEL_11_0;
-
-// Create the swap chain, Direct3D device, and Direct3D device context.
-Result := D3D11CreateDeviceAndSwapChain(nil, D3D_DRIVER_TYPE_HARDWARE, 0, 0, @featureLevel, 1, 
-										D3D11_SDK_VERSION, swapChainDesc, m_swapChain, m_device, featureLevel, m_deviceContext);
-if(FAILED(result))then
-	begin
-	SLog.Source(['TSRenderDirectX11.Initialize : D3D11CreateDeviceAndSwapChain return', Result]); WriteLn('TSRenderDirectX11.Initialize : D3D11CreateDeviceAndSwapChain return "', Result, '"');
-	exit;
-	end;
-
-// Get the pointer to the back buffer.
-Result := m_swapChain.GetBuffer(0, ID3D11Texture2D, backBufferPtr);
-if(FAILED(result))then
-	exit;
-
-// Create the render target view with the back buffer pointer.
-Result := m_device.CreateRenderTargetView(backBufferPtr, nil, m_renderTargetView);
-if(FAILED(result))then
-	exit;
-
-// Release pointer to the back buffer as we no longer need it.
-backBufferPtr._Release();
-backBufferPtr := nil;
-
-// Initialize the description of the depth buffer.
-FillChar(depthBufferDesc, SizeOf(depthBufferDesc), 0);
-
-// Set up the description of the depth buffer.
-depthBufferDesc.Width := screenWidth;
-depthBufferDesc.Height := screenHeight;
-depthBufferDesc.MipLevels := 1;
-depthBufferDesc.ArraySize := 1;
-depthBufferDesc.Format := DXGI_FORMAT_D24_UNORM_S8_UINT;
-depthBufferDesc.SampleDesc.Count := 1;
-depthBufferDesc.SampleDesc.Quality := 0;
-depthBufferDesc.Usage := D3D11_USAGE_DEFAULT;
-depthBufferDesc.BindFlags := LongWord(D3D11_BIND_DEPTH_STENCIL);
-depthBufferDesc.CPUAccessFlags := 0;
-depthBufferDesc.MiscFlags := 0;
-
-// Create the texture for the depth buffer using the filled out description.
-Result := m_device.CreateTexture2D(depthBufferDesc, nil, m_depthStencilBuffer);
-if(FAILED(result))then
-	exit;
-
-// Initialize the description of the stencil state.
-FillChar(depthStencilDesc, SizeOf(depthStencilDesc), 0);
-
-// Set up the description of the stencil state.
-depthStencilDesc.DepthEnable := True;
-depthStencilDesc.DepthWriteMask := D3D11_DEPTH_WRITE_MASK_ALL;
-depthStencilDesc.DepthFunc := D3D11_COMPARISON_LESS;
-
-depthStencilDesc.StencilEnable := True;
-depthStencilDesc.StencilReadMask := $FF;
-depthStencilDesc.StencilWriteMask := $FF;
-
-// Stencil operations if pixel is front-facing.
-depthStencilDesc.FrontFace.StencilFailOp := D3D11_STENCIL_OP_KEEP;
-depthStencilDesc.FrontFace.StencilDepthFailOp := D3D11_STENCIL_OP_INCR;
-depthStencilDesc.FrontFace.StencilPassOp := D3D11_STENCIL_OP_KEEP;
-depthStencilDesc.FrontFace.StencilFunc := D3D11_COMPARISON_ALWAYS;
-
-// Stencil operations if pixel is back-facing.
-depthStencilDesc.BackFace.StencilFailOp := D3D11_STENCIL_OP_KEEP;
-depthStencilDesc.BackFace.StencilDepthFailOp := D3D11_STENCIL_OP_DECR;
-depthStencilDesc.BackFace.StencilPassOp := D3D11_STENCIL_OP_KEEP;
-depthStencilDesc.BackFace.StencilFunc := D3D11_COMPARISON_ALWAYS;
-
-// Create the depth stencil state.
-Result := m_device.CreateDepthStencilState(depthStencilDesc, m_depthStencilState);
-if(FAILED(result))then
-	exit;
-
-// Set the depth stencil state.
-m_deviceContext.OMSetDepthStencilState(m_depthStencilState, 1);
-
-// Initialize the depth stencil view.
-FillChar(depthStencilViewDesc, SizeOf(depthStencilViewDesc), 0);
-
-// Set up the depth stencil view description.
-depthStencilViewDesc.Format := DXGI_FORMAT_D24_UNORM_S8_UINT;
-depthStencilViewDesc.ViewDimension := D3D11_DSV_DIMENSION_TEXTURE2D;
-depthStencilViewDesc.Texture2D.MipSlice := 0;
-
-// Create the depth stencil view.
-Result := m_device.CreateDepthStencilView(m_depthStencilBuffer, @depthStencilViewDesc, m_depthStencilView);
-if(FAILED(result))then
-	exit;
-
-// Bind the render target view and depth stencil buffer to the output render pipeline.
-m_deviceContext.OMSetRenderTargets(1, @m_renderTargetView, m_depthStencilView);
-
-// Setup the raster description which will determine how and what polygons will be drawn.
-rasterDesc.AntialiasedLineEnable := false;
-rasterDesc.CullMode := D3D11_CULL_BACK;
-rasterDesc.DepthBias := 0;
-rasterDesc.DepthBiasClamp := 0.0;
-rasterDesc.DepthClipEnable := true;
-rasterDesc.FillMode := D3D11_FILL_SOLID;
-rasterDesc.FrontCounterClockwise := false;
-rasterDesc.MultisampleEnable := false;
-rasterDesc.ScissorEnable := false;
-rasterDesc.SlopeScaledDepthBias := 0.0;
-
-// Create the rasterizer state from the description we just filled out.
-Result := m_device.CreateRasterizerState(rasterDesc, m_rasterState);
-if(FAILED(result))then
-	exit;
-
-// Now set the rasterizer state.
-m_deviceContext.RSSetState(m_rasterState);
-
-// Setup the viewport for rendering.
-m_viewport.Width := screenWidth;
-m_viewport.Height := screenHeight;
-m_viewport.MinDepth := 0.0;
-m_viewport.MaxDepth := 1.0;
-m_viewport.TopLeftX := 0.0;
-m_viewport.TopLeftY := 0.0;
-
-// Create the viewport.
-m_deviceContext.RSSetViewports(1, @m_viewport);
-
-// Setup the projection matrix.
-fieldOfView := 3.141592654 / 4.0;
-screenAspect := screenWidth / screenHeight;
-
-// Create the projection matrix for 3D rendering.
-m_projectionMatrix := XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, screenNear, screenDepth);
-
-// Initialize the world matrix to the identity matrix.
-m_worldMatrix := XMMatrixIdentity();
-
-// Create an orthographic projection matrix for 2D rendering.
-m_orthoMatrix := XMMatrixOrthographicLH(screenWidth, screenHeight, screenNear, screenDepth);
-
-Result := 0;
+  //Set ready flag
+  FReady := True;
 end;
 
-procedure TSRenderDirectX11.Shutdown();
+function TSRenderDirectX11.Uninitialize: HRESULT;
 begin
-// Before shutting down set to windowed mode or when you release the swap chain it will throw an exception.
-if(m_swapChain<>nil)then
-	m_swapChain.SetFullscreenState(false, nil);
+  If not FReady then
+     Exit(E_FAIL);
 
-if(m_rasterState<>nil)then
-	begin
-	SDestroyInterface(m_rasterState);//._Release();
-	m_rasterState := nil;
-	end;
+  { Release references to every interface we hold }
+  FRasterizerState := nil;
+  FDepthStencilState := nil;
+  FDepthStencilView := nil;
+  FDepthStencilBuffer := nil;
 
-if(m_depthStencilView<>nil)then
-	begin
-	SDestroyInterface(m_depthStencilView);//._Release();
-	m_depthStencilView := nil;
-	end;
+  FRenderTargetView := nil;
+  FDeviceContext := nil;
+  FDevice := nil;
 
-if(m_depthStencilState<>nil)then
-	begin
-	SDestroyInterface(m_depthStencilState);//^._Release();
-	m_depthStencilState := nil;
-	end;
+  FSwapchain := nil;
 
-if(m_depthStencilBuffer<>nil)then
-	begin
-	SDestroyInterface(m_depthStencilBuffer);//^._Release();
-	m_depthStencilBuffer := nil;
-	end;
+  { Clear ready flag }
+  FReady := False;
 
-if(m_renderTargetView<>nil)then
-	begin
-	SDestroyInterface(m_renderTargetView);//^._Release();
-	m_renderTargetView := nil;
-	end;
-
-if(m_deviceContext<>nil)then
-	begin
-	SDestroyInterface(m_deviceContext);//^._Release();
-	m_deviceContext := nil;
-	end;
-
-if(m_device<>nil)then
-	begin
-	SDestroyInterface(m_device);//^._Release();
-	m_device := nil;
-	end;
-
-if(m_swapChain<>nil)then
-	begin
-	SDestroyInterface(m_swapChain);//^._Release();
-	m_swapChain := nil;
-	end;
+  { Success }
+  Result := S_OK;
 end;
 
 class function TSRenderDirectX11.RenderName() : TSString;
@@ -603,12 +483,12 @@ end;
 procedure TSRenderDirectX11.SwapBuffers();
 begin
 // Present the back buffer to the screen since rendering is complete.
-if(m_vsync_enabled)then
-	// Lock to screen refresh rate.
-	m_swapChain.Present(1, 0)
+if(FEnableVSync)then
+    //Enforce vertical sync refresh rate
+    FSwapchain.Present(1, 0)
 else
-	// Present as fast as possible.
-	m_swapChain.Present(0, 0);
+    //Present as soon as possible
+    FSwapchain.Present(0, 0);
 end;
 
 function TSRenderDirectX11.SupportedMemoryBuffers():Boolean;
@@ -808,11 +688,11 @@ end;
 procedure TSRenderDirectX11.Clear(const VParam:Cardinal); 
 begin 
 if (SR_COLOR_BUFFER_BIT and VParam > 0)then
-	// Clear the back buffer.
-	m_deviceContext.ClearRenderTargetView(m_renderTargetView, FClearColor);
+  //Clear the render target view (frame buffer)
+  FDeviceContext.ClearRenderTargetView(FRenderTargetView, FClearColor);
 if (SR_DEPTH_BUFFER_BIT and VParam > 0)then
-	// Clear the depth buffer.
-	m_deviceContext.ClearDepthStencilView(m_depthStencilView, LongWord(D3D11_CLEAR_DEPTH), 1.0, 0);
+  //Clear depth buffer
+  FDeviceContext.ClearDepthStencilView(FDepthStencilView, Ord(D3D11_CLEAR_DEPTH), 1, 0);
 end;
 
 procedure TSRenderDirectX11.BeginScene(const VPrimitiveType:TSPrimtiveType);
@@ -833,14 +713,6 @@ end;
 constructor TSRenderDirectX11.Create();
 begin
 inherited Create();
-m_swapChain := nil;
-m_device := nil;
-m_deviceContext := nil;
-m_renderTargetView := nil;
-m_depthStencilBuffer := nil;
-m_depthStencilState := nil;
-m_depthStencilView := nil;
-m_rasterState := nil;
 FClearColor[0]:=1;
 FClearColor[1]:=0;
 FClearColor[2]:=0;
@@ -849,7 +721,7 @@ end;
 
 procedure TSRenderDirectX11.Kill();
 begin
-Shutdown();
+
 end;
 
 destructor TSRenderDirectX11.Destroy();
@@ -910,7 +782,8 @@ function TSRenderDirectX11.CreateContext():Boolean;
 begin
 WriteLn('=');
 if Context <> nil then
-	Result := Initialize(Context.Width, Context.Height, True, TSMaxEnum(Context.Window), Context.Fullscreen, TSRenderFar, TSRenderNear) = 0
+	//Result := Initialize(Context.Width, Context.Height, True, TSMaxEnum(Context.Window), Context.Fullscreen, TSRenderFar, TSRenderNear) = 0
+	Result := Initialize(TSMaxEnum(Context.Window), Context.Width, Context.Height) = 0
 else
 	Result := False;
 end;

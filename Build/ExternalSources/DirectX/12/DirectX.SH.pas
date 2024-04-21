@@ -1,72 +1,47 @@
-unit DirectX.SH;
 //-------------------------------------------------------------------------------------
 // DirectXSH.h -- C++ Spherical Harmonics Math Library
 
-// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 // http://go.microsoft.com/fwlink/p/?LinkId=262885
 //-------------------------------------------------------------------------------------
+unit DirectX.SH;
 
-{$mode delphi}{$H+}
+{$mode Delphi}
 
 interface
 
 uses
-    Windows, Classes, SysUtils,
-    DX12.D3D11,
+    Classes, SysUtils, Windows,
+    Math,
     DirectX.Math;
 
 const
-    DIRECTX_SHMATH_VERSION = 102;
+    DIRECTX_SHMATH_VERSION = 106;
 
-    XM_SH_MINORDER: size_t = 2;
-    XM_SH_MAXORDER: size_t = 6;
+    XM_SH_MINORDER = 2;
+    XM_SH_MAXORDER = 6;
 
-
-// computes the integral of a constant function over a solid angular
-// extent.  No error checking - only used internaly.  This function
-// only returns the Yl0 coefficients, since the rest are zero for
-// circularly symmetric functions.
 const
-    fExtraNormFac: array [0..6{XM_SH_MAXORDER} - 1] of single = (2.0 * sqrt(3.141592654), 2.0 / 3.0 * sqrt(3.0 * 3.141592654), 2.0 / 5.0 * sqrt(5.0 * 3.141592654),
-        2.0 / 7.0 * sqrt(7.0 * 3.141592654), 2.0 / 3.0 * sqrt(3.141592654), 2.0 / 11.0 * sqrt(11.0 * 3.141592654));
+    fExtraNormFac: array [0..XM_SH_MAXORDER - 1] of single = (2.0 * sqrt(XM_PI), 2.0 / 3.0 * sqrt(3.0 * XM_PI),
+        2.0 / 5.0 * sqrt(5.0 * XM_PI), 2.0 / 7.0 * sqrt(7.0 * XM_PI), 2.0 / 3.0 * sqrt(XM_PI), 2.0 / 11.0 * sqrt(11.0 * XM_PI));
+
+    // computes the integral of a constant function over a solid angular
+    // extent.  No error checking - only used internaly.  This function
+    // only returns the Yl0 coefficients, since the rest are zero for
+    // circularly symmetric functions.
     ComputeCapInt_t1: single = sqrt(0.3141593E1);
     ComputeCapInt_t5: single = sqrt(3.0);
     ComputeCapInt_t11: single = sqrt(5.0);
     ComputeCapInt_t18: single = sqrt(7.0);
     ComputeCapInt_t32: single = sqrt(11.0);
 
-    SHEvalHemisphereLight_fSqrtPi: single = sqrt(3.141592654);
-    SHEvalHemisphereLight_fSqrtPi3: single = sqrt(3.141592654 / 3.0);
-
+    SHEvalHemisphereLight_fSqrtPi: single = sqrt(XM_PI);
+    SHEvalHemisphereLight_fSqrtPi3: single = sqrt(XM_PI / 3.0);
 
     M_PIjs: single = (4.0 * arctan(1.0));
     maxang: single = ((4.0 * arctan(1.0)) / 2);
-    NSH0: int32 = 1;
-    NSH1: int32 = 4;
-    NSH2: int32 = 9;
-    NSH3: int32 = 16;
-    NSH4: int32 = 25;
-    NSH5: int32 = 36;
-    NSH6: int32 = 49;
-    NSH7: int32 = 64;
-    NSH8: int32 = 81;
-    NSH9: int32 = 100;
-    NL0: int32 = 1;
-    NL1: int32 = 3;
-    NL2: int32 = 5;
-    NL3: int32 = 7;
-    NL4: int32 = 9;
-    NL5: int32 = 11;
-    NL6: int32 = 13;
-    NL7: int32 = 15;
-    NL8: int32 = 17;
-    NL9: int32 = 19;
 
     fx_1_001: single = (sqrt(1.0) / 1.0); // 1
     fx_1_002: single = (-sqrt(1.0) / 1.0); // -1.00000030843
@@ -100,6 +75,7 @@ const
     fx_4_012: single = (sqrt(1.0) / 8.0); // 0.125
     fx_4_013: single = (sqrt(56.0) / 8.0); // 0.935414346692
 
+
     fx_5_001: single = (sqrt(126.0) / 16.0); // 0.70156076002
     fx_5_002: single = (-sqrt(120.0) / 16.0); // -0.684653196882
     fx_5_003: single = (sqrt(10.0) / 16.0); // 0.197642353761
@@ -127,38 +103,53 @@ const
 
     ROT_TOL = 1e-4;
 
-type
-    TScopedAlignedArrayXMVECTOR = PXMVECTOR; // or array of TXMVECTOR ??? ToDo
+    NSH0 = 1;
+    NSH1 = 4;
+    NSH2 = 9;
+    NSH3 = 16;
+    NSH4 = 25;
+    NSH5 = 36;
+    NSH6 = 49;
+    NSH7 = 64;
+    NSH8 = 81;
+    NSH9 = 100;
+    NL0 = 1;
+    NL1 = 3;
+    NL2 = 5;
+    NL3 = 7;
+    NL4 = 9;
+    NL5 = 11;
+    NL6 = 13;
+    NL7 = 15;
+    NL8 = 17;
+    NL9 = 19;
 
-
-function XMSHEvalDirection({out} AResult: PSingle; order: size_t; dir: TXMVECTOR): PSingle;
-function XMSHRotate(out AResult: Psingle; order: size_t; rotMatrix: TXMMATRIX; const input: Psingle): PSingle;
-function XMSHRotateZ(out Aresult: PSingle; order: size_t; angle: single; const input: Psingle): PSingle;
-function XMSHAdd({out} Aresult: Psingle; order: size_t; const inputA: Psingle; const inputB: Psingle): PSingle;
-
-function XMSHScale({out} Aresult: Psingle; order: size_t; const input: Psingle; scale: single): PSingle;
+function XMSHEvalDirection({var} AResult: PSingle; order: size_t; dir: TXMVECTOR): PSingle;
+function XMSHRotate({var} Aresult: Psingle; order: size_t; rotMatrix: TXMMATRIX; const input: Psingle): PSingle;
+function XMSHRotateZ({var} AResult: Psingle; order: size_t; angle: single; const input: Psingle): Psingle;
+function XMSHAdd({var} AResult: Psingle; order: size_t; const inputA: Psingle; const inputB: Psingle): Psingle;
+function XMSHScale({var} AResult: Psingle; order: size_t; const input: Psingle; scale: single): Psingle;
 function XMSHDot(order: size_t; const inputA: Psingle; const inputB: Psingle): single;
-function XMSHMultiply({out} Aresult: Psingle; order: size_t; const inputF: Psingle; const inputG: Psingle): PSingle;
-
-function XMSHMultiply2(out y: PSingle; const f: PSingle; const g: Psingle): PSingle;
-function XMSHMultiply3(out y: PSingle; const f: PSingle; const g: Psingle): PSingle;
-function XMSHMultiply4(out y: PSingle; const f: PSingle; const g: Psingle): PSingle;
-function XMSHMultiply5(out y: PSingle; const f: PSingle; const g: Psingle): PSingle;
-function XMSHMultiply6(out y: PSingle; const f: PSingle; const g: Psingle): PSingle;
-
-function XMSHEvalDirectionalLight(order: size_t; dir: TXMVECTOR; color: TXMVECTOR; resultR: Psingle; resultG: Psingle; resultB: Psingle): boolean;
-function XMSHEvalSphericalLight(order: size_t; pos: TXMVECTOR; radius: single; color: TXMVECTOR; resultR: Psingle; resultG: Psingle; resultB: Psingle): boolean;
-function XMSHEvalConeLight(order: size_t; dir: TXMVECTOR; radius: single; color: TXMVECTOR; resultR: Psingle; resultG: Psingle; resultB: Psingle): boolean;
-function XMSHEvalHemisphereLight(order: size_t; dir: TXMVECTOR; topColor: TXMVECTOR; bottomColor: TXMVECTOR; resultR: Psingle; resultG: Psingle; resultB: Psingle): boolean;
-
-function SHProjectCubeMap(context: ID3D11DeviceContext; order: size_t; cubeMap: ID3D11Texture2D; resultR: Psingle; resultG: Psingle; resultB: Psingle): HRESULT;
+function XMSHMultiply(AResult: PSingle; order: size_t; const inputF: PSingle; const inputG: PSingle): PSingle;
+function XMSHMultiply2(var y: PSingle; const f: PSingle; const g: PSingle): PSingle;
+function XMSHMultiply3(var y: PSingle; const f: PSingle; const g: PSingle): PSingle;
+function XMSHMultiply4(var y: PSingle; const f: PSingle; const g: PSingle): PSingle;
+function XMSHMultiply5(var y: PSingle; const f: PSingle; const g: PSingle): PSingle;
+function XMSHMultiply6(var y: PSingle; const f: PSingle; const g: PSingle): PSingle;
+function XMSHEvalDirectionalLight(order: size_t; dir: TFXMVECTOR; color: TFXMVECTOR; var resultR: Psingle;
+    var resultG: Psingle; var resultB: Psingle): boolean;
+function XMSHEvalSphericalLight(order: size_t; pos: TXMVECTOR; radius: single; color: TXMVECTOR;    {var} resultR: Psingle;
+    {var} resultG: Psingle;    {var} resultB: Psingle): boolean;
+function XMSHEvalConeLight(order: size_t; dir: TFXMVECTOR; radius: single; color: TFXMVECTOR;    {var} resultR: psingle;
+    {var} resultG: Psingle;    {var} resultB: Psingle): boolean;
+function XMSHEvalHemisphereLight(order: size_t; dir: TFXMVECTOR; topColor: TFXMVECTOR; bottomColor: TFXMVECTOR;
+    {var} resultR: Psingle;    {var} resultG: Psingle;    {var} resultB: Psingle): boolean;
 
 implementation
 
-uses
-    Math, DX12.D3DCommon, DX12.DXGI;
 
-procedure ComputeCapInt(const order: size_t; angle: single; {out}pR: PSingle); inline;
+
+procedure ComputeCapInt(order: size_t; angle: single; {var} pR: PSingle);
 var
     t2, t3, t7, t8, t13, t19, t20, t33: single;
 begin
@@ -166,7 +157,6 @@ begin
     t3 := ComputeCapInt_t1 * t2;
     t7 := sin(angle);
     t8 := t7 * t7;
-
 
     pR[0] := -t3 + ComputeCapInt_t1;
     pR[1] := ComputeCapInt_t5 * ComputeCapInt_t1 * t8 / 2.0;
@@ -184,7 +174,6 @@ begin
             pR[3] := -5.0 / 8.0 * t19 * t20 + 3.0 / 4.0 * t19 * t13 - t19 / 8.0;
             if (order > 4) then
             begin
-
                 pR[4] := -3.0 / 8.0 * t3 * (7.0 * t20 - 10.0 * t13 + 3.0);
                 if (order > 5) then
                 begin
@@ -198,45 +187,49 @@ end;
 
 // input pF only consists of Yl0 values, normalizes coefficients for directional
 // lights.
-function CosWtInt(const order: size_t): single; inline;
-const
-    fCW0: single = 0.25;
-    fCW1: single = 0.5;
-    fCW2: single = 5.0 / 16.0;
-    //  fCW3 :single= 0.0;
-    fCW4: single = -3.0 / 32.0;
-    //  fCW5 :single= 0.0;
+function CosWtInt(order: size_t): single;
+var
+    fCW0, fCW1, fCW2, fCW4, fRet: single;
 begin
+    fCW0 := 0.25;
+    fCW1 := 0.5;
+    fCW2 := 5.0 / 16.0;
+    //const single fCW3 := 0.0;
+    fCW4 := -3.0 / 32.0;
+    //const single fCW5 := 0.0;
+
     // order has to be at least linear...
-    Result := fCW0 + fCW1;
-    if (order > 2) then
-        Result := Result + fCW2;
-    if (order > 4) then
-        Result := Result + fCW4;
+
+    fRet := fCW0 + fCW1;
+
+    if (order > 2) then fRet := fRet + fCW2;
+    if (order > 4) then fRet := fRet + fCW4;
+
     // odd degrees >= 3 evaluate to zero integrated against cosine...
+
+    Result := fRet;
 end;
 
 // routine generated programmatically for evaluating SH basis for degree 1
 // inputs (x,y,z) are a point on the sphere (i.e., must be unit length)
 // output is vector b with SH basis evaluated at (x,y,z).
 
-procedure sh_eval_basis_1(x, y, z: single; b: PSingle{[4]}); inline;
-const
-    p_0_0: single = 0.282094791773878140;
-    p_1_0: single = 0.488602511902919920;
-    p_1_1: single = -0.488602511902919920;
+procedure sh_eval_basis_1(x, y, z: single; {var} b: PSingle);
 var
-    s1, c1: single;
+    p_0_0, p_1_0, s1, c1, p_1_1: single;
 begin
-    { m=0 }
-    // l=0
+    // l:=0
+    p_0_0 := (0.282094791773878140);
     b[0] := p_0_0; // l:=0,m:=0
-    // l=1
-    b[2] := p_1_0 * z; // l:=1,m:=0
-    { m=1 }
+    // l:=1
+    p_1_0 := (0.488602511902919920) * z;
+    b[2] := p_1_0; // l:=1,m:=0
+
     s1 := y;
     c1 := x;
-    // l=1
+
+    // l:=1
+    p_1_1 := (-0.488602511902919920);
     b[1] := p_1_1 * s1; // l:=1,m=-1
     b[3] := p_1_1 * c1; // l:=1,m=+1
 end;
@@ -245,19 +238,18 @@ end;
 // inputs (x,y,z) are a point on the sphere (i.e., must be unit length)
 // output is vector b with SH basis evaluated at (x,y,z).
 
-procedure sh_eval_basis_2(x, y, z: single; b: PSingle {[9]}); inline;
-const
-    p_0_0: single = 0.282094791773878140;
+procedure sh_eval_basis_2(x, y, z: single; {var} b: Psingle);
 var
-    z2, s1, c1, s2, c2: single;
-    p_1_0, p_1_1: single;
-    p_2_0, p_2_1, p_2_2: single;
+    z2, p_0_0, p_1_0, p_2_0: single;
+    s1, c1, p_1_1, p_2_1, s2, c2, p_2_2: single;
 begin
     z2 := z * z;
+
+
     { m:=0 }
 
     // l:=0
-
+    p_0_0 := (0.282094791773878140);
     b[0] := p_0_0; // l:=0,m:=0
     // l:=1
     p_1_0 := (0.488602511902919920) * z;
@@ -298,18 +290,18 @@ end;
 // inputs (x,y,z) are a point on the sphere (i.e., must be unit length)
 // output is vector b with SH basis evaluated at (x,y,z).
 
-procedure sh_eval_basis_3(x, y, z: single; b: PSingle{[16]}); inline;
+procedure sh_eval_basis_3(x, y, z: single; {var} b: PSingle);
 var
     z2: single;
-    p_0_0, p_1_0, p_2_0, p_3_0: single;
-
+    p_0_0, p_1_0, p_2_0: single;
     s1, c1: single;
-    p_1_1, p_2_1, p_3_1: single;
-    p_2_2, p_3_2, p_3_3: single;
-    s2, c2, s3, c3: single;
+    s2, c2: single;
+    s3, c3: single;
+    p_1_1, p_2_1, p_2_2: single;
+    p_3_0, p_3_1, p_3_2, p_3_3: single;
+
 begin
     z2 := z * z;
-
 
     { m:=0 }
 
@@ -376,18 +368,19 @@ end;
 // inputs (x,y,z) are a point on the sphere (i.e., must be unit length)
 // output is vector b with SH basis evaluated at (x,y,z).
 
-procedure sh_eval_basis_4(x, y, z: single; b: PSingle {[25]}); inline;
+procedure sh_eval_basis_4(x, y, z: single;{var} b: Psingle);
 var
     z2: single;
-    p_0_0, p_1_0, p_2_0, p_3_0, p_4_0: single;
-    p_1_1, p_2_1, p_3_1, p_4_1: single;
-    p_2_2, p_3_2, p_4_2: single;
-    s1, c1, s2, c2, s3, c3: single;
-    p_3_3, p_4_3, p_4_4: single;
+    p_0_0, p_1_0, p_2_0: single;
+    s1, c1: single;
+    s2, c2: single;
+    s3, c3: single;
     s4, c4: single;
+    p_1_1, p_2_1, p_2_2: single;
+    p_3_0, p_3_1, p_3_2, p_3_3: single;
+    p_4_0, p_4_1, p_4_2, p_4_3, p_4_4: single;
 begin
     z2 := z * z;
-
 
     { m:=0 }
 
@@ -480,19 +473,21 @@ end;
 // inputs (x,y,z) are a point on the sphere (i.e., must be unit length)
 // output is vector b with SH basis evaluated at (x,y,z).
 
-procedure sh_eval_basis_5(x, y, z: single; b: PSingle{[36]}); inline;
+procedure sh_eval_basis_5(x, y, z: single; {var} b: Psingle);
 var
     z2: single;
-    p_0_0, p_1_0, p_2_0, p_3_0, p_4_0, p_5_0: single;
-    s1, c1, s2, c2, s3, c3: single;
-    p_1_1, p_2_1, p_3_1, p_4_1, p_5_1: single;
-    p_2_2, p_3_2, p_4_2, p_5_2: single;
-    p_3_3, p_4_3, p_5_3: single;
-    s4, c4, s5, c5: single;
-    p_4_4, p_5_4, p_5_5: single;
+    p_0_0, p_1_0, p_2_0: single;
+    s1, c1: single;
+    s2, c2: single;
+    s3, c3: single;
+    s4, c4: single;
+    s5, c5: single;
+    p_1_1, p_2_1, p_2_2: single;
+    p_3_0, p_3_1, p_3_2, p_3_3: single;
+    p_4_0, p_4_1, p_4_2, p_4_3, p_4_4: single;
+    p_5_0, p_5_1, p_5_2, p_5_3, p_5_4, p_5_5: single;
 begin
     z2 := z * z;
-
 
     { m:=0 }
 
@@ -517,7 +512,6 @@ begin
 
 
     { m:=1 }
-
 
     s1 := y;
     c1 := x;
@@ -572,7 +566,6 @@ begin
     s3 := x * s2 + y * c2;
     c3 := x * c2 - y * s2;
 
-
     // l:=3
     p_3_3 := (-0.590043589926643520);
     b[9] := p_3_3 * s3; // l:=3,m=-3
@@ -614,32 +607,35 @@ begin
 end;
 
 
-procedure rot(ct, st, x, y: single; out xout, yout: single); inline;
+
+procedure rot(ct, st, x, y: single; var xout, yout: single);
 begin
     xout := x * ct - y * st;
     yout := y * ct + x * st;
 end;
 
-procedure rot_inv(ct, st, x, y: single; out xout, yout: single); inline;
+
+
+procedure rot_inv(ct, st, x, y: single; var xout, yout: single);
 begin
     xout := x * ct + y * st;
     yout := y * ct - x * st;
 end;
 
-procedure rot_1(ct, st: single; out ctm, stm: PSingle {[1]}); inline;
+
+
+procedure rot_1(ct, st: single; var ctm, stm: Psingle);
 begin
-    GetMem(ctm, 1 * SizeOf(single));
-    GetMem(stm, 1 * SizeOf(single));
     ctm[0] := ct;
     stm[0] := st;
 end;
 
-procedure rot_2(ct, st: single; out ctm, stm: PSingle {[2]}); inline;
+
+
+procedure rot_2(ct, st: single; ctm, stm: Psingle);
 var
     ct2: single;
 begin
-    GetMem(ctm, 2 * SizeOf(single));
-    GetMem(stm, 2 * SizeOf(single));
     ct2 := (2.0) * ct;
     ctm[0] := ct;
     stm[0] := st;
@@ -647,12 +643,12 @@ begin
     stm[1] := ct2 * st;
 end;
 
-procedure rot_3(ct, st: single; out ctm, stm: PSingle {[3]}); inline;
+
+
+procedure rot_3(ct, st: single; {var} ctm, stm: Psingle);
 var
     ct2: single;
 begin
-    GetMem(ctm, 3 * SizeOf(single));
-    GetMem(stm, 3 * SizeOf(single));
     ct2 := (2.0) * ct;
     ctm[0] := ct;
     stm[0] := st;
@@ -662,12 +658,12 @@ begin
     stm[2] := ct2 * stm[1] - st;
 end;
 
-procedure rot_4(ct, st: single; out ctm, stm: PSingle {[4]}); inline;
+
+
+procedure rot_4(ct, st: single; {var} ctm, stm: PSingle);
 var
     ct2: single;
 begin
-    GetMem(ctm, 4 * SizeOf(single));
-    GetMem(stm, 4 * SizeOf(single));
     ct2 := (2.0) * ct;
     ctm[0] := ct;
     stm[0] := st;
@@ -679,12 +675,12 @@ begin
     stm[3] := ct2 * stm[2] - stm[1];
 end;
 
-procedure rot_5(ct, st: single; out ctm, stm: PSingle {[5]}); inline;
+
+
+procedure rot_5(ct, st: single; {var} ctm, stm: Psingle);
 var
     ct2: single;
 begin
-    GetMem(ctm, 5 * SizeOf(single));
-    GetMem(stm, 5 * SizeOf(single));
     ct2 := (2.0) * ct;
     ctm[0] := ct;
     stm[0] := st;
@@ -698,20 +694,26 @@ begin
     stm[4] := ct2 * stm[3] - stm[2];
 end;
 
-procedure sh_rotz_1(ctm, stm: Psingle{[1]}; y, yr: Psingle{[NL1]}); inline;
+
+
+procedure sh_rotz_1(ctm, stm: Psingle; {var}  y, yr: Psingle);
 begin
     yr[1] := y[1];
     rot_inv(ctm[0], stm[0], y[0], y[2], yr[0], yr[2]);
 end;
 
-procedure sh_rotz_2(ctm, stm: Psingle{[2]}; y, yr: Psingle{[NL2]}); inline;
+
+
+procedure sh_rotz_2(ctm, stm, y: Psingle;  {var}  yr: Psingle);
 begin
     yr[2] := y[2];
     rot_inv(ctm[0], stm[0], y[1], y[3], yr[1], yr[3]);
     rot_inv(ctm[1], stm[1], y[0], y[4], yr[0], yr[4]);
 end;
 
-procedure sh_rotz_3(ctm, stm: Psingle{[3]}; y, yr: Psingle{[NL3]}); inline;
+
+
+procedure sh_rotz_3(ctm, stm, y: Psingle; {var}   yr: Psingle);
 begin
     yr[3] := y[3];
     rot_inv(ctm[0], stm[0], y[2], y[4], yr[2], yr[4]);
@@ -719,7 +721,9 @@ begin
     rot_inv(ctm[2], stm[2], y[0], y[6], yr[0], yr[6]);
 end;
 
-procedure sh_rotz_4(ctm, stm: Psingle{[4]}; y, yr: Psingle{[NL4]}); inline;
+
+
+procedure sh_rotz_4(ctm, stm, y: Psingle; {var}    yr: Psingle);
 begin
     yr[4] := y[4];
     rot_inv(ctm[0], stm[0], y[3], y[5], yr[3], yr[5]);
@@ -728,7 +732,9 @@ begin
     rot_inv(ctm[3], stm[3], y[0], y[8], yr[0], yr[8]);
 end;
 
-procedure sh_rotz_5(ctm, stm: Psingle{[5]}; y, yr: Psingle{[NL5]}); inline;
+
+
+procedure sh_rotz_5(ctm, stm, y: Psingle;  {var}  yr: Psingle);
 begin
     yr[5] := y[5];
     rot_inv(ctm[0], stm[0], y[4], y[6], yr[4], yr[6]);
@@ -738,18 +744,21 @@ begin
     rot_inv(ctm[4], stm[4], y[0], y[10], yr[0], yr[10]);
 end;
 
+
 // rotation code generated programmatically by rotatex (2000x4000 samples, eps:=1e-008)
 
 
 
-procedure sh_rotx90_1(y, yr: PSingle); inline;
+procedure sh_rotx90_1(y: Psingle; {var} yr: Psingle);
 begin
     yr[0] := fx_1_001 * y[1];
     yr[1] := fx_1_002 * y[0];
     yr[2] := fx_1_001 * y[2];
 end;
 
-procedure sh_rotx90_inv_1(y, yr: PSingle); inline;
+
+
+procedure sh_rotx90_inv_1(y: Psingle; {var} yr: Psingle);
 begin
     yr[0] := fx_1_002 * y[1];
     yr[1] := fx_1_001 * y[0];
@@ -758,7 +767,7 @@ end;
 
 
 
-procedure sh_rotx90_2(y, yr: PSingle); inline;
+procedure sh_rotx90_2(y: Psingle; var yr: Psingle);
 begin
     yr[0] := fx_2_001 * y[3];
     yr[1] := fx_2_002 * y[1];
@@ -767,7 +776,9 @@ begin
     yr[4] := fx_2_004 * y[2] + fx_2_005 * y[4];
 end;
 
-procedure sh_rotx90_inv_2(y, yr: PSingle); inline;
+
+
+procedure sh_rotx90_inv_2(y: Psingle; var yr: Psingle);
 begin
     yr[0] := fx_2_002 * y[3];
     yr[1] := fx_2_002 * y[1];
@@ -776,7 +787,9 @@ begin
     yr[4] := fx_2_004 * y[2] + fx_2_005 * y[4];
 end;
 
-procedure sh_rotx90_3(y, yr: PSingle); inline;
+
+
+procedure sh_rotx90_3(y: Psingle; var yr: Psingle);
 begin
     yr[0] := fx_3_001 * y[3] + fx_3_002 * y[5];
     yr[1] := fx_3_003 * y[1];
@@ -787,7 +800,9 @@ begin
     yr[6] := fx_3_006 * y[4] + fx_3_007 * y[6];
 end;
 
-procedure sh_rotx90_inv_3(y, yr: PSingle); inline;
+
+
+procedure sh_rotx90_inv_3(y: Psingle; var yr: Psingle);
 begin
     yr[0] := fx_3_008 * y[3] + fx_3_004 * y[5];
     yr[1] := fx_3_003 * y[1];
@@ -800,7 +815,7 @@ end;
 
 
 
-procedure sh_rotx90_4(y, yr: PSingle); inline;
+procedure sh_rotx90_4(y: Psingle; var yr: Psingle);
 begin
     yr[0] := fx_4_001 * y[5] + fx_4_002 * y[7];
     yr[1] := fx_4_003 * y[1] + fx_4_004 * y[3];
@@ -813,7 +828,9 @@ begin
     yr[8] := fx_4_009 * y[4] + fx_4_011 * y[6] + fx_4_012 * y[8];
 end;
 
-procedure sh_rotx90_inv_4(y, yr: PSingle); inline;
+
+
+procedure sh_rotx90_inv_4(y: Psingle; var yr: Psingle);
 begin
     yr[0] := fx_4_013 * y[5] + fx_4_005 * y[7];
     yr[1] := fx_4_003 * y[1] + fx_4_004 * y[3];
@@ -828,7 +845,7 @@ end;
 
 
 
-procedure sh_rotx90_5(y, yr: PSingle); inline;
+procedure sh_rotx90_5(y: Psingle; var yr: Psingle);
 begin
     yr[0] := fx_5_001 * y[5] + fx_5_002 * y[7] + fx_5_003 * y[9];
     yr[1] := fx_5_004 * y[1] + fx_5_005 * y[3];
@@ -843,7 +860,9 @@ begin
     yr[10] := fx_5_015 * y[6] + fx_5_017 * y[8] + fx_5_018 * y[10];
 end;
 
-procedure sh_rotx90_inv_5(y, yr: PSingle); inline;
+
+
+procedure sh_rotx90_inv_5(y: Psingle; var yr: Psingle);
 begin
     yr[0] := fx_5_019 * y[5] + fx_5_020 * y[7] + fx_5_021 * y[9];
     yr[1] := fx_5_004 * y[1] + fx_5_005 * y[3];
@@ -858,7 +877,9 @@ begin
     yr[10] := fx_5_015 * y[6] + fx_5_017 * y[8] + fx_5_018 * y[10];
 end;
 
-procedure sh_rot_1(m: PSingle{[3*3]}; y, yr: PSingle{[NL1]}); inline;
+
+
+procedure sh_rot_1(m, y: Psingle; {var} yr: PSingle);
 var
     yr0, yr1, yr2: single;
 begin
@@ -871,53 +892,69 @@ begin
     yr[2] := yr2;
 end;
 
-procedure sh_roty_1(ctm, stm: PSingle{[1]}; y, yr: Psingle{[NL1]}); inline;
+
+
+procedure sh_roty_1(ctm, stm: Psingle; y: Psingle; {var}  yr: Psingle);
 begin
     yr[0] := y[0];
     rot_inv(ctm[0], stm[0], y[1], y[2], yr[1], yr[2]);
 end;
 
-procedure sh_roty_2(ctm, stm: PSingle{[2]}; y, yr: Psingle{[NL2]}); inline;
+
+
+procedure sh_roty_2(ctm, stm: Psingle; y: Psingle; {var}  yr: Psingle);
 var
-    ytmp: array [0..(5) - 1] of single;
+    ytmp: array[0..NL2 - 1] of single;
 begin
+
     sh_rotx90_2(y, yr);
-    sh_rotz_2(ctm, stm, yr, ytmp);
+    sh_rotz_2(ctm, stm, yr, @ytmp[0]);
     sh_rotx90_inv_2(ytmp, yr);
 end;
 
-procedure sh_roty_3(ctm, stm: PSingle{[3]}; y, yr: Psingle{[NL3]}); inline;
+
+
+procedure sh_roty_3(ctm, stm: Psingle; y: Psingle; {var}  yr: Psingle);
 var
-    ytmp: array [0..(7) - 1] of single;
+    ytmp: array[0..NL3 - 1] of single;
 begin
+
     sh_rotx90_3(y, yr);
     sh_rotz_3(ctm, stm, yr, ytmp);
     sh_rotx90_inv_3(ytmp, yr);
 end;
 
-procedure sh_roty_4(ctm, stm: PSingle{[4]}; y, yr: Psingle{[NL4]}); inline;
+
+
+procedure sh_roty_4(ctm, stm: Psingle; y: Psingle; {var}  yr: Psingle);
 var
-    ytmp: array [0..(9) - 1] of single;
+    ytmp: array[0..NL4 - 1] of single;
 begin
+
     sh_rotx90_4(y, yr);
     sh_rotz_4(ctm, stm, yr, ytmp);
     sh_rotx90_inv_4(ytmp, yr);
 end;
 
-procedure sh_roty_5(ctm, stm: PSingle{[5]}; y, yr: Psingle{[NL5]}); inline;
+
+
+procedure sh_roty_5(ctm, stm: Psingle; y: Psingle; {var} yr: Psingle);
 var
-    ytmp: array [0..(11) - 1] of single;
+    ytmp: array [0..NL5 - 1] of single;
 begin
+
     sh_rotx90_5(y, yr);
     sh_rotz_5(ctm, stm, yr, ytmp);
     sh_rotx90_inv_5(ytmp, yr);
 end;
 
-{
+
+
+    {
     Finds cosine,sine pairs for zyz rotation (i.e. rotation R_z2 R_y R_z1 v).
     The rotation is one which maps mx to (1,0,0) and mz to (0,0,1).
     }
-procedure zyz(m: Psingle{[3*3]}; Out zc1, zs1, yc, ys, zc2, zs2: single); inline;
+procedure zyz(m: Psingle; var zc1, zs1, yc, ys, zc2, zs2: single);
 var
     cz, cxylen, len67inv, len25inv: single;
 begin
@@ -945,54 +982,69 @@ begin
         ys := 0.0;           // identity
         zc2 := m[0] * cz;
         zs2 := -m[1];  // align x axis (mx[0],mx[1],0) to (1,0,0)
+
     end;
 end;
 
 
-procedure sh_rotzyz_2(zc1m, zs1m, ycm, ysm, zc2m, zs2m: PSingle {[2]}; y, yr: Psingle{[NL2]}); inline;
+
+procedure sh_rotzyz_2(zc1m, zs1m, ycm, ysm, zc2m, zs2m, y, yr: Psingle);
 var
-    ytmp: array [0..5 - 1] of single;
+    ytmp: array [0..NL2 - 1] of single;
 begin
+
     sh_rotz_2(zc1m, zs1m, y, yr);
     sh_roty_2(ycm, ysm, yr, ytmp);
     sh_rotz_2(zc2m, zs2m, ytmp, yr);
 end;
 
-procedure sh_rotzyz_3(zc1m, zs1m, ycm, ysm, zc2m, zs2m: PSingle {[3]}; y, yr: Psingle{[NL3]}); inline;
+
+
+procedure sh_rotzyz_3(zc1m, zs1m, ycm, ysm, zc2m, zs2m, y, yr: Psingle);
 var
-    ytmp: array [0..7 - 1] of single;
+    ytmp: array [0..NL3 - 1] of single;
 begin
+
     sh_rotz_3(zc1m, zs1m, y, yr);
     sh_roty_3(ycm, ysm, yr, ytmp);
     sh_rotz_3(zc2m, zs2m, ytmp, yr);
 end;
 
-procedure sh_rotzyz_4(zc1m, zs1m, ycm, ysm, zc2m, zs2m: PSingle {[4]}; y, yr: Psingle{[NL4]}); inline;
+
+
+procedure sh_rotzyz_4(zc1m, zs1m, ycm, ysm, zc2m, zs2m, y, yr: Psingle);
 var
-    ytmp: array [0..9 - 1] of single;
+    ytmp: array [0..NL4 - 1] of single;
 begin
+
     sh_rotz_4(zc1m, zs1m, y, yr);
     sh_roty_4(ycm, ysm, yr, ytmp);
     sh_rotz_4(zc2m, zs2m, ytmp, yr);
 end;
 
-procedure sh_rotzyz_5(zc1m, zs1m, ycm, ysm, zc2m, zs2m: PSingle {[5]}; y, yr: Psingle{[NL5]}); inline;
+
+
+procedure sh_rotzyz_5(zc1m, zs1m, ycm, ysm, zc2m, zs2m, y, yr: Psingle);
 var
-    ytmp: array [0..11 - 1] of single;
+    ytmp: array [0..NL5 - 1] of single;
 begin
+
     sh_rotz_5(zc1m, zs1m, y, yr);
-    sh_roty_5(ycm, ysm, yr, ytmp);
+    sh_roty_5(ycm, ysm, yr, @ytmp[0]);
     sh_rotz_5(zc2m, zs2m, ytmp, yr);
 end;
 
-procedure sh3_rot(m: Psingle{[3*3]}; zc1, zs1, yc, ys, zc2, zs2: single; y, yr: Psingle{[NSH3]}); inline; overload;
+
+
+procedure sh3_rot(m: PSingle; zc1, zs1, yc, ys, zc2, zs2: single; y, yr: PSingle); overload;
 var
-    ycm, ysm, zc2m, zs2m: PSingle; // array [0..2] of single;
-    zc1m, zs1m: PSingle;
+    zc1m, zs1m: array [0..2] of single;
+    ycm, ysm: array [0..2] of single;
+    zc2m, zs2m: array [0..2] of single;
 begin
-    rot_3(zc1, zs1, zc1m, zs1m);
-    rot_3(yc, ys, ycm, ysm);
-    rot_3(zc2, zs2, zc2m, zs2m);
+    rot_3(zc1, zs1, @zc1m[0], @zs1m[0]);
+    rot_3(yc, ys, ycm, @ysm[0]);
+    rot_3(zc2, zs2, zc2m, @zs2m[0]);
 
     yr[0] := y[0];
     sh_rot_1(m, y + NSH0, yr + NSH0);
@@ -1000,12 +1052,17 @@ begin
     sh_rotzyz_3(zc1m, zs1m, ycm, ysm, zc2m, zs2m, y + NSH2, yr + NSH2);
 end;
 
-procedure sh4_rot(m: Psingle{[3*3]}; zc1, zs1, yc, ys, zc2, zs2: single; y, yr: Psingle{[NSH4]}); inline; overload;
+
+
+procedure sh4_rot(m: PSingle; zc1, zs1, yc, ys, zc2, zs2: single; y, yr: PSingle); overload;
 var
-    zc1m, zs1m, ycm, ysm, zc2m, zs2m: PSingle; // array [0..3] of single;
+    zc1m, zs1m: array [0..3] of single;
+    ycm, ysm: array [0..3] of single;
+    zc2m, zs2m: array [0..3] of single;
 begin
 
     rot_4(zc1, zs1, zc1m, zs1m);
+
     rot_4(yc, ys, ycm, ysm);
 
     rot_4(zc2, zs2, zc2m, zs2m);
@@ -1017,12 +1074,20 @@ begin
     sh_rotzyz_4(zc1m, zs1m, ycm, ysm, zc2m, zs2m, y + NSH3, yr + NSH3);
 end;
 
-procedure sh5_rot(m: Psingle{[3*3]}; zc1, zs1, yc, ys, zc2, zs2: single; y, yr: Psingle{[NSH5]}); inline; overload;
+
+
+procedure sh5_rot(m: PSingle; zc1, zs1, yc, ys, zc2, zs2: single; y, yr: PSingle); overload;
 var
-    zc1m, zs1m, ycm, ysm, zc2m, zs2m: PSingle; // array [0..5] of single;
+    zc1m, zs1m: array [0..4] of single;
+    ycm, ysm: array [0..4] of single;
+    zc2m, zs2m: array [0..4] of single;
+
 begin
+
     rot_5(zc1, zs1, zc1m, zs1m);
+
     rot_5(yc, ys, ycm, ysm);
+
     rot_5(zc2, zs2, zc2m, zs2m);
 
     yr[0] := y[0];
@@ -1034,61 +1099,84 @@ begin
 end;
 
 
-procedure sh1_rot(m: Psingle{[3*3]}; y, yr: Psingle{[NSH1]}); inline;
+
+procedure sh1_rot(m: PSingle; y, yr: PSingle);
 begin
     yr[0] := y[0];
     sh_rot_1(m, y + NSH0, yr + NSH0);
 end;
 
-procedure sh3_rot(m: Psingle{[3*3]}; y, yr: Psingle{[NSH3]}); inline; overload;
+
+
+procedure sh3_rot(m: PSingle; y, yr: PSingle); overload;
 var
     zc1, zs1, yc, ys, zc2, zs2: single;
 begin
+
     zyz(m, zc1, zs1, yc, ys, zc2, zs2);
     sh3_rot(m, zc1, zs1, yc, ys, zc2, zs2, y, yr);
 end;
 
-procedure sh4_rot(m: Psingle{[3*3]}; y, yr: Psingle{[NSH4]}); inline; overload;
+
+
+procedure sh4_rot(m: PSingle; y, yr: PSingle); overload;
 var
     zc1, zs1, yc, ys, zc2, zs2: single;
 begin
+
     zyz(m, zc1, zs1, yc, ys, zc2, zs2);
     sh4_rot(m, zc1, zs1, yc, ys, zc2, zs2, y, yr);
 end;
 
-procedure sh5_rot(m: Psingle{[3*3]}; y, yr: Psingle{[NSH5]}); inline; overload;
+
+
+procedure sh5_rot(m: PSingle; y, yr: PSingle); overload;
 var
     zc1, zs1, yc, ys, zc2, zs2: single;
 begin
+
     zyz(m, zc1, zs1, yc, ys, zc2, zs2);
     sh5_rot(m, zc1, zs1, yc, ys, zc2, zs2, y, yr);
 end;
 
+// here was vor XMSHMultiply5
+
+
+
 // simple matrix vector multiply for a square matrix (only used by ZRotation)
-procedure SimpMatMul(dim: size_t; const matrix: Psingle; const input: Psingle; {out} Result: Psingle); inline;
+procedure SimpMatMul(dim: size_t; const matrix: Psingle; const input: Psingle; {var} Result: Psingle);
 var
     iR, iC: size_t;
 begin
-    for iR := 0 to dim - 1 do
+    for  iR := 0 to dim - 1 do
     begin
         Result[iR + 0] := matrix[iR * dim + 0] * input[0];
-        for iC := 1 to dim - 1 do
+        for  iC := 1 to dim - 1 do
         begin
-            Result[iR] += matrix[iR * dim + iC] * input[iC];
+            Result[iR] := Result[iR] + matrix[iR * dim + iC] * input[iC];
         end;
     end;
 end;
+
+
+
 
 //-------------------------------------------------------------------------------------
 // Evaluates the Spherical Harmonic basis functions
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb205448.aspx
 //-------------------------------------------------------------------------------------
-function XMSHEvalDirection({out} AResult: PSingle; order: size_t; dir: TXMVECTOR): PSingle;
+
+function XMSHEvalDirection({var} AResult: PSingle; order: size_t; dir: TXMVECTOR): PSingle;
 var
     dv: TXMFLOAT4A;
     fX, fY, fZ: single;
 begin
+    Result := nil;
+    if (AResult = nil) then
+        Exit;
+
+
 
     XMStoreFloat4A(dv, dir);
 
@@ -1097,37 +1185,37 @@ begin
     fZ := dv.z;
 
     case (order) of
+
         2:
         begin
-            sh_eval_basis_1(fX, fY, fZ, Result);
+            sh_eval_basis_1(fX, fY, fZ, AResult);
         end;
 
         3:
         begin
-            sh_eval_basis_2(fX, fY, fZ, Result);
+            sh_eval_basis_2(fX, fY, fZ, AResult);
         end;
 
         4:
         begin
-            sh_eval_basis_3(fX, fY, fZ, Result);
+            sh_eval_basis_3(fX, fY, fZ, AResult);
         end;
 
         5:
         begin
-            sh_eval_basis_4(fX, fY, fZ, Result);
+            sh_eval_basis_4(fX, fY, fZ, AResult);
         end;
 
         6:
         begin
-            sh_eval_basis_5(fX, fY, fZ, Result);
+            sh_eval_basis_5(fX, fY, fZ, AResult);
         end;
 
         else
         begin
             assert((order < XM_SH_MINORDER) or (order > XM_SH_MAXORDER));
-            AResult := nil;
+            Exit;
         end;
-
     end;
 
     Result := AResult;
@@ -1141,37 +1229,26 @@ end;
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb204992.aspx
 //-------------------------------------------------------------------------------------
-function XMSHRotate(out AResult: Psingle; {(order*order)}
-    order: size_t; rotMatrix: TXMMATRIX; const input: Psingle{(order*order)}): PSingle;
-const
-    v173: single = 0.1732050808e1;
-    v577: single = 0.5773502693e0;
-    v115: single = 0.1154700539e1;
-    v288: single = 0.2886751347e0;
-    v866: single = 0.8660254040e0;
-var
-    t41, t43, t48, t50, t55, t57, t58, t61, t63, t68, t70, t72, t74, t76, t78: single;
 
+function XMSHRotate({var} Aresult: Psingle; order: size_t; rotMatrix: TXMMATRIX; const input: Psingle): PSingle;
+var
     mat: TXMFLOAT3X3;
     mRot: array [0..3 * 3 - 1] of single;
-    r00, r10, r20, r01, r11, r21, r02, r12, r22: single;
-
     R: array [0..25 - 1] of single;
-    iR, uBase: UINT;
+    iR, uBase: integer;
+    r00, r01, r02, r10, r11, r12, r20, r21, r22: single;
+    t41, t43, t48, t50, t55, t57, t58, t61, t63, t68, t70, t72, t74, t76, t78, v173, v577, v115, v288, v866: single;
 begin
+    Result := nil;
     if (Aresult = nil) or (input = nil) then
-    begin
-        Result := nil;
         Exit;
-    end;
 
     if (AResult = input) then
-    begin
-        Result := nil;
         Exit;
-    end;
+
 
     XMStoreFloat3x3(mat, rotMatrix);
+
 
     r00 := mat._11;
     mRot[0 * 3 + 0] := mat._11;
@@ -1194,24 +1271,28 @@ begin
     r22 := mat._33;
     mRot[2 * 3 + 2] := mat._33;
 
-    Result[0] := input[0]; // rotate the constant term
+    AResult[0] := input[0]; // rotate the constant term
 
     case (order) of
+
         2:
         begin
             // do linear by hand...
-            Result[1] := r11 * input[1] - r12 * input[2] + r10 * input[3];
-            Result[2] := -r21 * input[1] + r22 * input[2] - r20 * input[3];
-            Result[3] := r01 * input[1] - r02 * input[2] + r00 * input[3];
+
+            AResult[1] := r11 * input[1] - r12 * input[2] + r10 * input[3];
+            AResult[2] := -r21 * input[1] + r22 * input[2] - r20 * input[3];
+            AResult[3] := r01 * input[1] - r02 * input[2] + r00 * input[3];
         end;
+
+
         3:
         begin
 
             // do linear by hand...
 
-            Result[1] := r11 * input[1] - r12 * input[2] + r10 * input[3];
-            Result[2] := -r21 * input[1] + r22 * input[2] - r20 * input[3];
-            Result[3] := r01 * input[1] - r02 * input[2] + r00 * input[3];
+            AResult[1] := r11 * input[1] - r12 * input[2] + r10 * input[3];
+            AResult[2] := -r21 * input[1] + r22 * input[2] - r20 * input[3];
+            AResult[3] := r01 * input[1] - r02 * input[2] + r00 * input[3];
 
             // direct code for quadratics is faster than ZYZ reccurence relations
 
@@ -1230,6 +1311,12 @@ begin
             t74 := r00 * r00;
             t76 := r21 * r21;
             t78 := r20 * r20;
+
+            v173 := 0.1732050808e1;
+            v577 := 0.5773502693e0;
+            v115 := 0.1154700539e1;
+            v288 := 0.2886751347e0;
+            v866 := 0.8660254040e0;
 
             R[0] := r11 * r00 + r01 * r10;
             R[1] := -r01 * r12 - r11 * r02;
@@ -1261,25 +1348,38 @@ begin
             for iR := 0 to 4 do
             begin
                 uBase := iR * 5;
-                Result[4 + iR] := R[uBase + 0] * input[4] + R[uBase + 1] * input[5] + R[uBase + 2] * input[6] + R[uBase + 3] * input[7] + R[uBase + 4] * input[8];
+                AResult[4 + iR] := R[uBase + 0] * input[4] + R[uBase + 1] * input[5] + R[uBase + 2] * input[6] +
+                    R[uBase + 3] * input[7] + R[uBase + 4] * input[8];
             end;
         end;
+
+
         4:
-            sh3_rot(mRot, input, Result);
+        begin
+            sh3_rot(mRot, input, AResult);
+        end;
+
         5:
-            sh4_rot(mRot, (input), Result);
+        begin
+            sh4_rot(mRot, (input), AResult);
+        end;
+
         6:
-            sh5_rot(mRot, (input), Result);
+        begin
+            sh5_rot(mRot, (input), AResult);
+        end;
+
         else
         begin
             assert((order < XM_SH_MINORDER) or (order > XM_SH_MAXORDER));
             Result := nil;
             Exit;
+
         end;
     end;
-    AResult := Result;
-end;
 
+    Result := AResult;
+end;
 
 
 
@@ -1288,31 +1388,25 @@ end;
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb205461.aspx
 //-------------------------------------------------------------------------------------
-function XMSHRotateZ(out Aresult: PSingle{(order*order)}; order: size_t; angle: single; const input: Psingle{(order*order)}): PSingle;
+
+function XMSHRotateZ({var} AResult: Psingle; order: size_t; angle: single; const input: Psingle): Psingle;
 var
-    R: array of single; // used to store rotation matrices...
-    ca, sa, t1, t2, t3, t4, t5, t6, t7: single;
-    t8, t9, t10, t11, t12, t13, t14, t15, t17, t20, t21, t23, t26, t29, t32, t33, t35: single;
+    R: array [0..(2 * (XM_SH_MAXORDER - 1) + 1) * (2 * (XM_SH_MAXORDER - 1) + 1) - 1] of single; // used to store rotation matrices...
+    ca, sa, t1, t2: single;
     j: integer;
+    t3, t4, t5, t6, t7, t8, t9, t12, t13, t15: single;
+    t10, t11, t14, t17, t20, t23, t21, t26, t29, t30, t35, t32, t33: single;
 begin
+    Result := nil;
     if (Aresult = nil) or (input = nil) then
-    begin
-        Result := nil;
         Exit;
-    end;
+
     if (Result = input) then
-    begin
-        Result := nil;
         Exit;
-    end;
 
     if (order < XM_SH_MINORDER) or (order > XM_SH_MAXORDER) then
-    begin
-        Result := nil;
         Exit;
-    end;
 
-    SetLength(R, (2 * (XM_SH_MAXORDER - 1) + 1) * (2 * (XM_SH_MAXORDER - 1) + 1));
 
     // these are actually very sparse matrices, most of the entries are zero's...
 
@@ -1332,12 +1426,12 @@ begin
     R[8] := t1;
 
     Result[0] := input[0];
-    SimpMatMul(3, @R[0], @input[1], @Result[1]);
+    SimpMatMul(3, R, input + 1, AResult + 1);
 
     if (order > 2) then
     begin
-        for j := 0 to 5 * 5 - 1 do
-            R[j] := 0.0;
+
+        for j := 0 to 5 * 5 - 1 do R[j] := 0.0;
         t1 := sa;
         t2 := t1 * t1;
         t3 := ca;
@@ -1354,11 +1448,10 @@ begin
         R[20] := -t7;
         R[24] := t5;
 
-        SimpMatMul(5, @R[0], @input[4], @Result[4]); // un-roll matrix/vector multiply
+        SimpMatMul(5, R, input + 4, AResult + 4); // un-roll matrix/vector multiply
         if (order > 3) then
         begin
-            for j := 0 to 7 * 7 - 1 do
-                R[j] := 0.0;
+            for j := 0 to 7 * 7 - 1 do R[j] := 0.0;
             t1 := ca;
             t2 := t1 * t1;
             t4 := sa;
@@ -1380,11 +1473,10 @@ begin
             R[40] := t13;
             R[42] := -t12;
             R[48] := t8;
-            SimpMatMul(7, @R[0], @input[9], @Result[9]);
+            SimpMatMul(7, R, input + 9, AResult + 9);
             if (order > 4) then
             begin
-                for  j := 0 to 9 * 9 - 1 do
-                    R[j] := 0.0;
+                for j := 0 to 9 * 9 do R[j] := 0.0;
                 t1 := ca;
                 t2 := t1 * t1;
                 t3 := t2 * t2;
@@ -1417,11 +1509,10 @@ begin
                 R[72] := -4.0 * t14;
                 R[80] := t9;
 
-                SimpMatMul(9, @R[0], @input[16], @Result[16]);
+                SimpMatMul(9, R, input + 16, AResult + 16);
                 if (order > 5) then
                 begin
-                    for j := 0 to 11 * 11 - 1 do
-                        R[j] := 0.0;
+                    for j := 0 to 11 * 11 - 1 do R[j] := 0.0;
                     t1 := ca;
                     t2 := sa;
                     t3 := t2 * t2;
@@ -1459,17 +1550,14 @@ begin
                     R[108] := t23;
                     R[110] := -t20;
                     R[120] := t13;
-                    SimpMatMul(11, @R[0], @input[25], @Result[25]);
+                    SimpMatMul(11, R, input + 25, AResult + 25);
                 end;
             end;
         end;
     end;
 
-    AResult := Result;
-    SetLength(R, 0);
+    Result := AResult;
 end;
-
-
 
 
 //-------------------------------------------------------------------------------------
@@ -1477,21 +1565,21 @@ end;
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb205438.aspx
 //-------------------------------------------------------------------------------------
-function XMSHAdd(  {out}  Aresult: Psingle{ (order*order)}; order: size_t; const inputA: Psingle; const inputB: Psingle): PSingle;
+
+function XMSHAdd({var} AResult: Psingle; order: size_t; const inputA: Psingle; const inputB: Psingle): Psingle;
 var
     numcoeff, i: size_t;
 begin
+    Result := nil;
     if (AResult = nil) or (inputA = nil) or (inputB = nil) then
-    begin
-        Result := nil;
         Exit;
-    end;
+
 
     numcoeff := order * order;
 
     for i := 0 to numcoeff - 1 do
     begin
-        Aresult[i] := inputA[i] + inputB[i];
+        AResult[i] := inputA[i] + inputB[i];
     end;
 
     Result := AResult;
@@ -1503,21 +1591,20 @@ end;
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb204994.aspx
 //-------------------------------------------------------------------------------------
-function XMSHScale(  {out (order*order)}  Aresult: Psingle; order: size_t; const input: Psingle; scale: single): PSingle;
+
+function XMSHScale({var} AResult: Psingle; order: size_t; const input: Psingle; scale: single): Psingle;
 var
     numcoeff, i: size_t;
 begin
-    if (Aresult = nil) or (input = nil) then
-    begin
-        Result := nil;
+    Result := nil;
+    if (AResult = nil) or (input = nil) then
         Exit;
-    end;
 
     numcoeff := order * order;
 
-    for i := 0 to numcoeff - 1 do
+    for  i := 0 to numcoeff - 1 do
     begin
-        Aresult[i] := scale * input[i];
+        AResult[i] := scale * input[i];
     end;
 
     Result := AResult;
@@ -1529,6 +1616,7 @@ end;
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb205446.aspx
 //-------------------------------------------------------------------------------------
+
 function XMSHDot(order: size_t; const inputA: Psingle; const inputB: Psingle): single;
 var
     numcoeff, i: size_t;
@@ -1536,6 +1624,7 @@ begin
     Result := 0.0;
     if (inputA = nil) or (inputB = nil) then
         Exit;
+
     Result := inputA[0] * inputB[0];
 
     numcoeff := order * order;
@@ -1545,6 +1634,7 @@ begin
         Result := Result + inputA[i] * inputB[i];
     end;
 end;
+
 
 
 //-------------------------------------------------------------------------------------
@@ -1557,46 +1647,42 @@ end;
 // that the product commutes (f*g == g*f) but doesn't associate
 // (f*(g*h) != (f*g)*h.
 //-------------------------------------------------------------------------------------
-function XMSHMultiply( { out (order*order)}  Aresult: Psingle; order: size_t; const inputF: Psingle; const inputG: Psingle): PSingle;
-
+function XMSHMultiply(AResult: PSingle; order: size_t; const inputF: PSingle; const inputG: PSingle): PSingle;
 begin
     case (order) of
-
         2:
-            Result := XMSHMultiply2(Result, inputF, inputG);
-
+            Result := XMSHMultiply2(AResult, inputF, inputG);
         3:
-            Result := XMSHMultiply3(Result, inputF, inputG);
-
+            Result := XMSHMultiply3(AResult, inputF, inputG);
         4:
-            Result := XMSHMultiply4(Result, inputF, inputG);
-
+            Result := XMSHMultiply4(AResult, inputF, inputG);
         5:
-            Result := XMSHMultiply5(Result, inputF, inputG);
-
+            Result := XMSHMultiply5(AResult, inputF, inputG);
         6:
-            Result := XMSHMultiply6(Result, inputF, inputG);
-
+            Result := XMSHMultiply6(AResult, inputF, inputG);
         else
+        begin
             assert((order < XM_SH_MINORDER) or (order > XM_SH_MAXORDER));
             Result := nil;
-            Exit;
+
+        end;
     end;
 end;
+
+
 
 
 //-------------------------------------------------------------------------------------
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb205454.aspx
 //-------------------------------------------------------------------------------------
-function XMSHMultiply2(out y: PSingle{(4)}; const f: PSingle; const g: Psingle): PSingle;
+
+function XMSHMultiply2(var y: PSingle; const f: PSingle; const g: PSingle): PSingle;
 var
     tf, tg, t: single;
 begin
-    if (f = nil) or (g = nil) then
-    begin
-        Result := nil;
+    Result := nil;
+    if (y = nil) or (f = nil) or (g = nil) then
         Exit;
-    end;
 
     // [0,0]: 0,
     y[0] := (0.282094792935999980) * f[0] * g[0];
@@ -1628,20 +1714,17 @@ begin
 end;
 
 
-
-
 //-------------------------------------------------------------------------------------
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb232906.aspx
 //-------------------------------------------------------------------------------------
-function XMSHMultiply3(out y: PSingle{(9)}; const f: PSingle; const g: Psingle): PSingle;
+function XMSHMultiply3(var y: PSingle; const f: PSingle; const g: PSingle): PSingle;
 var
     tf, tg, t: single;
 begin
-    if (f = nil) or (g = nil) then
-    begin
-        Result := nil;
+    Result := nil;
+    if (y = nil) or (f = nil) or (g = nil) then
         Exit;
-    end;
+
 
     // [0,0]: 0,
     y[0] := (0.282094792935999980) * f[0] * g[0];
@@ -1752,20 +1835,18 @@ begin
 end;
 
 
-
-
 //-------------------------------------------------------------------------------------
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb232907.aspx
 //-------------------------------------------------------------------------------------
-function XMSHMultiply4(out y: PSingle{(16)}; const f: PSingle; const g: Psingle): PSingle;
+function XMSHMultiply4(var y: PSingle; const f: PSingle; const g: PSingle): PSingle;
 var
     tf, tg, t: single;
 begin
-    if (f = nil) or (g = nil) then
-    begin
-        Result := nil;
-        Exit;
-    end;
+    Result := nil;
+    if (y = nil) or (f = nil) or (g = nil) then
+        exit;
+
+
 
     // [0,0]: 0,
     y[0] := (0.282094792935999980) * f[0] * g[0];
@@ -2088,18 +2169,19 @@ begin
     Result := y;
 end;
 
+
+
+
 //-------------------------------------------------------------------------------------
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb232908.aspx
 //-------------------------------------------------------------------------------------
-function XMSHMultiply5(out y: PSingle{(25)}; const f: PSingle; const g: Psingle): PSingle;
+function XMSHMultiply5(var y: PSingle; const f: PSingle; const g: PSingle): PSingle;
 var
     tf, tg, t: single;
 begin
-    if (f = nil) or (g = nil) then
-    begin
-        Result := nil;
+    Result := nil;
+    if ((y = nil) or (f = nil) or (g = nil)) then
         Exit;
-    end;
 
 
     // [0,0]: 0,
@@ -2371,8 +2453,10 @@ begin
     y[23] += (0.112621225039000000) * t;
 
     // [5,5]: 0,6,8,20,22,
-    tf := (0.282094791773999990) * f[0] + (0.090111875786499998) * f[6] + (-0.156078347227999990) * f[8] + (-0.161197023870999990) * f[20] + (-0.180223751574000000) * f[22];
-    tg := (0.282094791773999990) * g[0] + (0.090111875786499998) * g[6] + (-0.156078347227999990) * g[8] + (-0.161197023870999990) * g[20] + (-0.180223751574000000) * g[22];
+    tf := (0.282094791773999990) * f[0] + (0.090111875786499998) * f[6] + (-0.156078347227999990) * f[8] +
+        (-0.161197023870999990) * f[20] + (-0.180223751574000000) * f[22];
+    tg := (0.282094791773999990) * g[0] + (0.090111875786499998) * g[6] + (-0.156078347227999990) * g[8] +
+        (-0.161197023870999990) * g[20] + (-0.180223751574000000) * g[22];
     y[5] += tf * g[5] + tg * f[5];
     t := f[5] * g[5];
     y[0] += (0.282094791773999990) * t;
@@ -2432,8 +2516,10 @@ begin
     y[20] += (0.241795553185999990) * t;
 
     // [7,7]: 6,0,8,20,22,
-    tf := (0.090111875786499998) * f[6] + (0.282094791773999990) * f[0] + (0.156078347227999990) * f[8] + (-0.161197023870999990) * f[20] + (0.180223751574000000) * f[22];
-    tg := (0.090111875786499998) * g[6] + (0.282094791773999990) * g[0] + (0.156078347227999990) * g[8] + (-0.161197023870999990) * g[20] + (0.180223751574000000) * g[22];
+    tf := (0.090111875786499998) * f[6] + (0.282094791773999990) * f[0] + (0.156078347227999990) * f[8] +
+        (-0.161197023870999990) * f[20] + (0.180223751574000000) * f[22];
+    tg := (0.090111875786499998) * g[6] + (0.282094791773999990) * g[0] + (0.156078347227999990) * g[8] +
+        (-0.161197023870999990) * g[20] + (0.180223751574000000) * g[22];
     y[7] += tf * g[7] + tg * f[7];
     t := f[7] * g[7];
     y[6] += (0.090111875786499998) * t;
@@ -2615,8 +2701,10 @@ begin
     y[19] += (0.099322584599600000) * t;
 
     // [11,11]: 0,6,8,20,22,
-    tf := (0.282094791773999990) * f[0] + (0.126156626101000010) * f[6] + (-0.145673124078999990) * f[8] + (0.025644981070299999) * f[20] + (-0.114687841910000000) * f[22];
-    tg := (0.282094791773999990) * g[0] + (0.126156626101000010) * g[6] + (-0.145673124078999990) * g[8] + (0.025644981070299999) * g[20] + (-0.114687841910000000) * g[22];
+    tf := (0.282094791773999990) * f[0] + (0.126156626101000010) * f[6] + (-0.145673124078999990) * f[8] +
+        (0.025644981070299999) * f[20] + (-0.114687841910000000) * f[22];
+    tg := (0.282094791773999990) * g[0] + (0.126156626101000010) * g[6] + (-0.145673124078999990) * g[8] +
+        (0.025644981070299999) * g[20] + (-0.114687841910000000) * g[22];
     y[11] += tf * g[11] + tg * f[11];
     t := f[11] * g[11];
     y[0] += (0.282094791773999990) * t;
@@ -2680,8 +2768,10 @@ begin
     y[22] += (-0.044418410173299998) * t;
 
     // [13,13]: 0,8,6,20,22,
-    tf := (0.282094791773999990) * f[0] + (0.145673124078999990) * f[8] + (0.126156626101000010) * f[6] + (0.025644981070299999) * f[20] + (0.114687841910000000) * f[22];
-    tg := (0.282094791773999990) * g[0] + (0.145673124078999990) * g[8] + (0.126156626101000010) * g[6] + (0.025644981070299999) * g[20] + (0.114687841910000000) * g[22];
+    tf := (0.282094791773999990) * f[0] + (0.145673124078999990) * f[8] + (0.126156626101000010) * f[6] +
+        (0.025644981070299999) * f[20] + (0.114687841910000000) * f[22];
+    tg := (0.282094791773999990) * g[0] + (0.145673124078999990) * g[8] + (0.126156626101000010) * g[6] +
+        (0.025644981070299999) * g[20] + (0.114687841910000000) * g[22];
     y[13] += tf * g[13] + tg * f[13];
     t := f[13] * g[13];
     y[0] += (0.282094791773999990) * t;
@@ -2831,8 +2921,10 @@ begin
     y[23] += (-0.045015157794399997) * t;
 
     // [19,19]: 6,8,0,20,22,
-    tf := (0.139263808033999990) * f[6] + (-0.141889406570999990) * f[8] + (0.282094791773999990) * f[0] + (0.068480553847200004) * f[20] + (-0.102084782360000000) * f[22];
-    tg := (0.139263808033999990) * g[6] + (-0.141889406570999990) * g[8] + (0.282094791773999990) * g[0] + (0.068480553847200004) * g[20] + (-0.102084782360000000) * g[22];
+    tf := (0.139263808033999990) * f[6] + (-0.141889406570999990) * f[8] + (0.282094791773999990) * f[0] +
+        (0.068480553847200004) * f[20] + (-0.102084782360000000) * f[22];
+    tg := (0.139263808033999990) * g[6] + (-0.141889406570999990) * g[8] + (0.282094791773999990) * g[0] +
+        (0.068480553847200004) * g[20] + (-0.102084782360000000) * g[22];
     y[19] += tf * g[19] + tg * f[19];
     t := f[19] * g[19];
     y[6] += (0.139263808033999990) * t;
@@ -2851,8 +2943,10 @@ begin
     y[20] += (0.136961139005999990) * t;
 
     // [21,21]: 6,20,0,8,22,
-    tf := (0.139263808033999990) * f[6] + (0.068480553847200004) * f[20] + (0.282094791773999990) * f[0] + (0.141889406570999990) * f[8] + (0.102084782360000000) * f[22];
-    tg := (0.139263808033999990) * g[6] + (0.068480553847200004) * g[20] + (0.282094791773999990) * g[0] + (0.141889406570999990) * g[8] + (0.102084782360000000) * g[22];
+    tf := (0.139263808033999990) * f[6] + (0.068480553847200004) * f[20] + (0.282094791773999990) * f[0] +
+        (0.141889406570999990) * f[8] + (0.102084782360000000) * f[22];
+    tg := (0.139263808033999990) * g[6] + (0.068480553847200004) * g[20] + (0.282094791773999990) * g[0] +
+        (0.141889406570999990) * g[8] + (0.102084782360000000) * g[22];
     y[21] += tf * g[21] + tg * f[21];
     t := f[21] * g[21];
     y[6] += (0.139263808033999990) * t;
@@ -2908,17 +3002,13 @@ end;
 //-------------------------------------------------------------------------------------
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb232909.aspx
 //-------------------------------------------------------------------------------------
-function XMSHMultiply6(out y: PSingle{(36)}; const f: PSingle; const g: Psingle): PSingle;
-
+function XMSHMultiply6(var y: Psingle; const f: Psingle; const g: Psingle): PSingle;
 var
     tf, tg, t: single;
 begin
-    if (f = nil) or (g = nil) then
-    begin
-        Result := nil;
+    Result := nil;
+    if (y = nil) or (f = nil) or (g = nil) then
         Exit;
-    end;
-
 
     // [0,0]: 0,
     y[0] := (0.282094792935999980) * f[0] * g[0];
@@ -3150,8 +3240,10 @@ begin
     y[34] := (-0.190188269816000010) * t;
 
     // [4,11]: 3,13,15,31,33,
-    tf := (-0.058399170082300000) * f[3] + (0.145673124078000010) * f[13] + (0.094031597258400004) * f[15] + (-0.065621187395699998) * f[31] + (-0.141757966610000010) * f[33];
-    tg := (-0.058399170082300000) * g[3] + (0.145673124078000010) * g[13] + (0.094031597258400004) * g[15] + (-0.065621187395699998) * g[31] + (-0.141757966610000010) * g[33];
+    tf := (-0.058399170082300000) * f[3] + (0.145673124078000010) * f[13] + (0.094031597258400004) * f[15] +
+        (-0.065621187395699998) * f[31] + (-0.141757966610000010) * f[33];
+    tg := (-0.058399170082300000) * g[3] + (0.145673124078000010) * g[13] + (0.094031597258400004) * g[15] +
+        (-0.065621187395699998) * g[31] + (-0.141757966610000010) * g[33];
     y[4] += tf * g[11] + tg * f[11];
     y[11] += tf * g[4] + tg * f[4];
     t := f[4] * g[11] + f[11] * g[4];
@@ -3240,8 +3332,10 @@ begin
     y[33] += (0.121034582549000000) * t;
 
     // [5,5]: 0,6,8,20,22,
-    tf := (0.282094791773999990) * f[0] + (0.090111875786499998) * f[6] + (-0.156078347227999990) * f[8] + (-0.161197023870999990) * f[20] + (-0.180223751574000000) * f[22];
-    tg := (0.282094791773999990) * g[0] + (0.090111875786499998) * g[6] + (-0.156078347227999990) * g[8] + (-0.161197023870999990) * g[20] + (-0.180223751574000000) * g[22];
+    tf := (0.282094791773999990) * f[0] + (0.090111875786499998) * f[6] + (-0.156078347227999990) * f[8] +
+        (-0.161197023870999990) * f[20] + (-0.180223751574000000) * f[22];
+    tg := (0.282094791773999990) * g[0] + (0.090111875786499998) * g[6] + (-0.156078347227999990) * g[8] +
+        (-0.161197023870999990) * g[20] + (-0.180223751574000000) * g[22];
     y[5] += tf * g[5] + tg * f[5];
     t := f[5] * g[5];
     y[0] += (0.282094791773999990) * t;
@@ -3251,8 +3345,10 @@ begin
     y[22] += (-0.180223751574000000) * t;
 
     // [5,10]: 3,13,15,31,33,
-    tf := (0.184674390919999990) * f[3] + (0.115164716490000000) * f[13] + (-0.148677009678999990) * f[15] + (-0.083004965974099995) * f[31] + (-0.179311220383999990) * f[33];
-    tg := (0.184674390919999990) * g[3] + (0.115164716490000000) * g[13] + (-0.148677009678999990) * g[15] + (-0.083004965974099995) * g[31] + (-0.179311220383999990) * g[33];
+    tf := (0.184674390919999990) * f[3] + (0.115164716490000000) * f[13] + (-0.148677009678999990) * f[15] +
+        (-0.083004965974099995) * f[31] + (-0.179311220383999990) * f[33];
+    tg := (0.184674390919999990) * g[3] + (0.115164716490000000) * g[13] + (-0.148677009678999990) * g[15] +
+        (-0.083004965974099995) * g[31] + (-0.179311220383999990) * g[33];
     y[5] += tf * g[10] + tg * f[10];
     y[10] += tf * g[5] + tg * f[5];
     t := f[5] * g[10] + f[10] * g[5];
@@ -3263,8 +3359,10 @@ begin
     y[33] += (-0.179311220383999990) * t;
 
     // [5,11]: 2,12,14,30,32,
-    tf := (0.233596680327000010) * f[2] + (0.059470803871800003) * f[12] + (-0.115164716491000000) * f[14] + (-0.169433177294000010) * f[30] + (-0.173617342585000000) * f[32];
-    tg := (0.233596680327000010) * g[2] + (0.059470803871800003) * g[12] + (-0.115164716491000000) * g[14] + (-0.169433177294000010) * g[30] + (-0.173617342585000000) * g[32];
+    tf := (0.233596680327000010) * f[2] + (0.059470803871800003) * f[12] + (-0.115164716491000000) * f[14] +
+        (-0.169433177294000010) * f[30] + (-0.173617342585000000) * f[32];
+    tg := (0.233596680327000010) * g[2] + (0.059470803871800003) * g[12] + (-0.115164716491000000) * g[14] +
+        (-0.169433177294000010) * g[30] + (-0.173617342585000000) * g[32];
     y[5] += tf * g[11] + tg * f[11];
     y[11] += tf * g[5] + tg * f[5];
     t := f[5] * g[11] + f[11] * g[5];
@@ -3376,8 +3474,10 @@ begin
     y[20] += (0.241795553185999990) * t;
 
     // [7,7]: 6,0,8,20,22,
-    tf := (0.090111875786499998) * f[6] + (0.282094791773999990) * f[0] + (0.156078347227999990) * f[8] + (-0.161197023870999990) * f[20] + (0.180223751574000000) * f[22];
-    tg := (0.090111875786499998) * g[6] + (0.282094791773999990) * g[0] + (0.156078347227999990) * g[8] + (-0.161197023870999990) * g[20] + (0.180223751574000000) * g[22];
+    tf := (0.090111875786499998) * f[6] + (0.282094791773999990) * f[0] + (0.156078347227999990) * f[8] +
+        (-0.161197023870999990) * f[20] + (0.180223751574000000) * f[22];
+    tg := (0.090111875786499998) * g[6] + (0.282094791773999990) * g[0] + (0.156078347227999990) * g[8] +
+        (-0.161197023870999990) * g[20] + (0.180223751574000000) * g[22];
     y[7] += tf * g[7] + tg * f[7];
     t := f[7] * g[7];
     y[6] += (0.090111875786499998) * t;
@@ -3387,8 +3487,10 @@ begin
     y[22] += (0.180223751574000000) * t;
 
     // [7,10]: 9,1,11,27,29,
-    tf := (0.148677009678999990) * f[9] + (0.184674390919999990) * f[1] + (0.115164716490000000) * f[11] + (0.179311220383999990) * f[27] + (-0.083004965974099995) * f[29];
-    tg := (0.148677009678999990) * g[9] + (0.184674390919999990) * g[1] + (0.115164716490000000) * g[11] + (0.179311220383999990) * g[27] + (-0.083004965974099995) * g[29];
+    tf := (0.148677009678999990) * f[9] + (0.184674390919999990) * f[1] + (0.115164716490000000) * f[11] +
+        (0.179311220383999990) * f[27] + (-0.083004965974099995) * f[29];
+    tg := (0.148677009678999990) * g[9] + (0.184674390919999990) * g[1] + (0.115164716490000000) * g[11] +
+        (0.179311220383999990) * g[27] + (-0.083004965974099995) * g[29];
     y[7] += tf * g[10] + tg * f[10];
     y[10] += tf * g[7] + tg * f[7];
     t := f[7] * g[10] + f[10] * g[7];
@@ -3399,8 +3501,10 @@ begin
     y[29] += (-0.083004965974099995) * t;
 
     // [7,13]: 12,2,14,30,32,
-    tf := (0.059470803871800003) * f[12] + (0.233596680327000010) * f[2] + (0.115164716491000000) * f[14] + (-0.169433177294000010) * f[30] + (0.173617342585000000) * f[32];
-    tg := (0.059470803871800003) * g[12] + (0.233596680327000010) * g[2] + (0.115164716491000000) * g[14] + (-0.169433177294000010) * g[30] + (0.173617342585000000) * g[32];
+    tf := (0.059470803871800003) * f[12] + (0.233596680327000010) * f[2] + (0.115164716491000000) * f[14] +
+        (-0.169433177294000010) * f[30] + (0.173617342585000000) * f[32];
+    tg := (0.059470803871800003) * g[12] + (0.233596680327000010) * g[2] + (0.115164716491000000) * g[14] +
+        (-0.169433177294000010) * g[30] + (0.173617342585000000) * g[32];
     y[7] += tf * g[13] + tg * f[13];
     y[13] += tf * g[7] + tg * f[7];
     t := f[7] * g[13] + f[13] * g[7];
@@ -3695,8 +3799,10 @@ begin
     y[34] += (-0.101358691177000000) * t;
 
     // [10,19]: 3,15,13,31,33,
-    tf := (-0.075393004386799994) * f[3] + (0.099322584599600000) * f[15] + (0.102579924281000000) * f[13] + (0.097749909976500002) * f[31] + (-0.025339672794100002) * f[33];
-    tg := (-0.075393004386799994) * g[3] + (0.099322584599600000) * g[15] + (0.102579924281000000) * g[13] + (0.097749909976500002) * g[31] + (-0.025339672794100002) * g[33];
+    tf := (-0.075393004386799994) * f[3] + (0.099322584599600000) * f[15] + (0.102579924281000000) * f[13] +
+        (0.097749909976500002) * f[31] + (-0.025339672794100002) * f[33];
+    tg := (-0.075393004386799994) * g[3] + (0.099322584599600000) * g[15] + (0.102579924281000000) * g[13] +
+        (0.097749909976500002) * g[31] + (-0.025339672794100002) * g[33];
     y[10] += tf * g[19] + tg * f[19];
     y[19] += tf * g[10] + tg * f[10];
     t := f[10] * g[19] + f[19] * g[10];
@@ -3707,8 +3813,10 @@ begin
     y[33] += (-0.025339672794100002) * t;
 
     // [10,21]: 11,1,9,27,29,
-    tf := (0.102579924281000000) * f[11] + (-0.075393004386799994) * f[1] + (-0.099322584599600000) * f[9] + (0.025339672794100002) * f[27] + (0.097749909976500002) * f[29];
-    tg := (0.102579924281000000) * g[11] + (-0.075393004386799994) * g[1] + (-0.099322584599600000) * g[9] + (0.025339672794100002) * g[27] + (0.097749909976500002) * g[29];
+    tf := (0.102579924281000000) * f[11] + (-0.075393004386799994) * f[1] + (-0.099322584599600000) * f[9] +
+        (0.025339672794100002) * f[27] + (0.097749909976500002) * f[29];
+    tg := (0.102579924281000000) * g[11] + (-0.075393004386799994) * g[1] + (-0.099322584599600000) * g[9] +
+        (0.025339672794100002) * g[27] + (0.097749909976500002) * g[29];
     y[10] += tf * g[21] + tg * f[21];
     y[21] += tf * g[10] + tg * f[10];
     t := f[10] * g[21] + f[21] * g[10];
@@ -3740,8 +3848,10 @@ begin
     y[24] += (0.077413979109600004) * t;
 
     // [11,11]: 0,6,8,20,22,
-    tf := (0.282094791773999990) * f[0] + (0.126156626101000010) * f[6] + (-0.145673124078999990) * f[8] + (0.025644981070299999) * f[20] + (-0.114687841910000000) * f[22];
-    tg := (0.282094791773999990) * g[0] + (0.126156626101000010) * g[6] + (-0.145673124078999990) * g[8] + (0.025644981070299999) * g[20] + (-0.114687841910000000) * g[22];
+    tf := (0.282094791773999990) * f[0] + (0.126156626101000010) * f[6] + (-0.145673124078999990) * f[8] +
+        (0.025644981070299999) * f[20] + (-0.114687841910000000) * f[22];
+    tg := (0.282094791773999990) * g[0] + (0.126156626101000010) * g[6] + (-0.145673124078999990) * g[8] +
+        (0.025644981070299999) * g[20] + (-0.114687841910000000) * g[22];
     y[11] += tf * g[11] + tg * f[11];
     t := f[11] * g[11];
     y[0] += (0.282094791773999990) * t;
@@ -3761,8 +3871,10 @@ begin
     y[35] += (0.134084945035999990) * t;
 
     // [11,18]: 3,13,15,31,33,
-    tf := (0.168583882834000000) * f[3] + (0.114687841909000000) * f[13] + (-0.133255230519000010) * f[15] + (0.075189952564900006) * f[31] + (-0.101990215611000000) * f[33];
-    tg := (0.168583882834000000) * g[3] + (0.114687841909000000) * g[13] + (-0.133255230519000010) * g[15] + (0.075189952564900006) * g[31] + (-0.101990215611000000) * g[33];
+    tf := (0.168583882834000000) * f[3] + (0.114687841909000000) * f[13] + (-0.133255230519000010) * f[15] +
+        (0.075189952564900006) * f[31] + (-0.101990215611000000) * f[33];
+    tg := (0.168583882834000000) * g[3] + (0.114687841909000000) * g[13] + (-0.133255230519000010) * g[15] +
+        (0.075189952564900006) * g[31] + (-0.101990215611000000) * g[33];
     y[11] += tf * g[18] + tg * f[18];
     y[18] += tf * g[11] + tg * f[11];
     t := f[11] * g[18] + f[18] * g[11];
@@ -3773,8 +3885,10 @@ begin
     y[33] += (-0.101990215611000000) * t;
 
     // [11,19]: 2,14,12,30,32,
-    tf := (0.238413613504000000) * f[2] + (-0.102579924282000000) * f[14] + (0.099322584599300004) * f[12] + (0.009577496073830001) * f[30] + (-0.104682806112000000) * f[32];
-    tg := (0.238413613504000000) * g[2] + (-0.102579924282000000) * g[14] + (0.099322584599300004) * g[12] + (0.009577496073830001) * g[30] + (-0.104682806112000000) * g[32];
+    tf := (0.238413613504000000) * f[2] + (-0.102579924282000000) * f[14] + (0.099322584599300004) * f[12] +
+        (0.009577496073830001) * f[30] + (-0.104682806112000000) * f[32];
+    tg := (0.238413613504000000) * g[2] + (-0.102579924282000000) * g[14] + (0.099322584599300004) * g[12] +
+        (0.009577496073830001) * g[30] + (-0.104682806112000000) * g[32];
     y[11] += tf * g[19] + tg * f[19];
     y[19] += tf * g[11] + tg * f[11];
     t := f[11] * g[19] + f[19] * g[11];
@@ -3824,8 +3938,10 @@ begin
     y[6] += (0.239614719999000000) * t;
 
     // [13,13]: 0,8,6,20,22,
-    tf := (0.282094791773999990) * f[0] + (0.145673124078999990) * f[8] + (0.126156626101000010) * f[6] + (0.025644981070299999) * f[20] + (0.114687841910000000) * f[22];
-    tg := (0.282094791773999990) * g[0] + (0.145673124078999990) * g[8] + (0.126156626101000010) * g[6] + (0.025644981070299999) * g[20] + (0.114687841910000000) * g[22];
+    tf := (0.282094791773999990) * f[0] + (0.145673124078999990) * f[8] + (0.126156626101000010) * f[6] +
+        (0.025644981070299999) * f[20] + (0.114687841910000000) * f[22];
+    tg := (0.282094791773999990) * g[0] + (0.145673124078999990) * g[8] + (0.126156626101000010) * g[6] +
+        (0.025644981070299999) * g[20] + (0.114687841910000000) * g[22];
     y[13] += tf * g[13] + tg * f[13];
     t := f[13] * g[13];
     y[0] += (0.282094791773999990) * t;
@@ -3845,8 +3961,10 @@ begin
     y[27] += (0.119929220739999990) * t;
 
     // [13,21]: 2,12,14,30,32,
-    tf := (0.238413613504000000) * f[2] + (0.099322584599300004) * f[12] + (0.102579924282000000) * f[14] + (0.009577496073830001) * f[30] + (0.104682806112000000) * f[32];
-    tg := (0.238413613504000000) * g[2] + (0.099322584599300004) * g[12] + (0.102579924282000000) * g[14] + (0.009577496073830001) * g[30] + (0.104682806112000000) * g[32];
+    tf := (0.238413613504000000) * f[2] + (0.099322584599300004) * f[12] + (0.102579924282000000) * f[14] +
+        (0.009577496073830001) * f[30] + (0.104682806112000000) * f[32];
+    tg := (0.238413613504000000) * g[2] + (0.099322584599300004) * g[12] + (0.102579924282000000) * g[14] +
+        (0.009577496073830001) * g[30] + (0.104682806112000000) * g[32];
     y[13] += tf * g[21] + tg * f[21];
     y[21] += tf * g[13] + tg * f[13];
     t := f[13] * g[21] + f[21] * g[13];
@@ -4196,8 +4314,10 @@ begin
     y[31] += (0.097043558538999999) * t;
 
     // [19,19]: 6,8,0,20,22,
-    tf := (0.139263808033999990) * f[6] + (-0.141889406570999990) * f[8] + (0.282094791773999990) * f[0] + (0.068480553847200004) * f[20] + (-0.102084782360000000) * f[22];
-    tg := (0.139263808033999990) * g[6] + (-0.141889406570999990) * g[8] + (0.282094791773999990) * g[0] + (0.068480553847200004) * g[20] + (-0.102084782360000000) * g[22];
+    tf := (0.139263808033999990) * f[6] + (-0.141889406570999990) * f[8] + (0.282094791773999990) * f[0] +
+        (0.068480553847200004) * f[20] + (-0.102084782360000000) * f[22];
+    tg := (0.139263808033999990) * g[6] + (-0.141889406570999990) * g[8] + (0.282094791773999990) * g[0] +
+        (0.068480553847200004) * g[20] + (-0.102084782360000000) * g[22];
     y[19] += tf * g[19] + tg * f[19];
     t := f[19] * g[19];
     y[6] += (0.139263808033999990) * t;
@@ -4233,8 +4353,10 @@ begin
     y[32] += (0.084042186967699994) * t;
 
     // [19,28]: 13,3,15,31,33,
-    tf := (0.104682806111000000) * f[13] + (0.159122922869999990) * f[3] + (-0.126698363970000010) * f[15] + (0.090775936911399999) * f[31] + (-0.084042186968400004) * f[33];
-    tg := (0.104682806111000000) * g[13] + (0.159122922869999990) * g[3] + (-0.126698363970000010) * g[15] + (0.090775936911399999) * g[31] + (-0.084042186968400004) * g[33];
+    tf := (0.104682806111000000) * f[13] + (0.159122922869999990) * f[3] + (-0.126698363970000010) * f[15] +
+        (0.090775936911399999) * f[31] + (-0.084042186968400004) * f[33];
+    tg := (0.104682806111000000) * g[13] + (0.159122922869999990) * g[3] + (-0.126698363970000010) * g[15] +
+        (0.090775936911399999) * g[31] + (-0.084042186968400004) * g[33];
     y[19] += tf * g[28] + tg * f[28];
     y[28] += tf * g[19] + tg * f[19];
     t := f[19] * g[28] + f[28] * g[19];
@@ -4245,8 +4367,10 @@ begin
     y[33] += (-0.084042186968400004) * t;
 
     // [19,29]: 12,14,2,30,32,
-    tf := (0.115089467124000010) * f[12] + (-0.097749909977199997) * f[14] + (0.240571246744999990) * f[2] + (0.053152946072499999) * f[30] + (-0.090775936912099994) * f[32];
-    tg := (0.115089467124000010) * g[12] + (-0.097749909977199997) * g[14] + (0.240571246744999990) * g[2] + (0.053152946072499999) * g[30] + (-0.090775936912099994) * g[32];
+    tf := (0.115089467124000010) * f[12] + (-0.097749909977199997) * f[14] + (0.240571246744999990) * f[2] +
+        (0.053152946072499999) * f[30] + (-0.090775936912099994) * f[32];
+    tg := (0.115089467124000010) * g[12] + (-0.097749909977199997) * g[14] + (0.240571246744999990) * g[2] +
+        (0.053152946072499999) * g[30] + (-0.090775936912099994) * g[32];
     y[19] += tf * g[29] + tg * f[29];
     y[29] += tf * g[19] + tg * f[19];
     t := f[19] * g[29] + f[29] * g[19];
@@ -4266,8 +4390,10 @@ begin
     y[20] += (0.136961139005999990) * t;
 
     // [21,21]: 6,20,0,8,22,
-    tf := (0.139263808033999990) * f[6] + (0.068480553847200004) * f[20] + (0.282094791773999990) * f[0] + (0.141889406570999990) * f[8] + (0.102084782360000000) * f[22];
-    tg := (0.139263808033999990) * g[6] + (0.068480553847200004) * g[20] + (0.282094791773999990) * g[0] + (0.141889406570999990) * g[8] + (0.102084782360000000) * g[22];
+    tf := (0.139263808033999990) * f[6] + (0.068480553847200004) * f[20] + (0.282094791773999990) * f[0] +
+        (0.141889406570999990) * f[8] + (0.102084782360000000) * f[22];
+    tg := (0.139263808033999990) * g[6] + (0.068480553847200004) * g[20] + (0.282094791773999990) * g[0] +
+        (0.141889406570999990) * g[8] + (0.102084782360000000) * g[22];
     y[21] += tf * g[21] + tg * f[21];
     t := f[21] * g[21];
     y[6] += (0.139263808033999990) * t;
@@ -4296,8 +4422,10 @@ begin
     y[25] += (-0.130197596204999990) * t;
 
     // [21,28]: 27,1,11,9,29,
-    tf := (0.084042186968400004) * f[27] + (0.159122922869999990) * f[1] + (0.104682806111000000) * f[11] + (0.126698363970000010) * f[9] + (0.090775936911399999) * f[29];
-    tg := (0.084042186968400004) * g[27] + (0.159122922869999990) * g[1] + (0.104682806111000000) * g[11] + (0.126698363970000010) * g[9] + (0.090775936911399999) * g[29];
+    tf := (0.084042186968400004) * f[27] + (0.159122922869999990) * f[1] + (0.104682806111000000) * f[11] +
+        (0.126698363970000010) * f[9] + (0.090775936911399999) * f[29];
+    tg := (0.084042186968400004) * g[27] + (0.159122922869999990) * g[1] + (0.104682806111000000) * g[11] +
+        (0.126698363970000010) * g[9] + (0.090775936911399999) * g[29];
     y[21] += tf * g[28] + tg * f[28];
     y[28] += tf * g[21] + tg * f[21];
     t := f[21] * g[28] + f[28] * g[21];
@@ -4308,8 +4436,10 @@ begin
     y[29] += (0.090775936911399999) * t;
 
     // [21,31]: 14,2,30,12,32,
-    tf := (0.097749909977199997) * f[14] + (0.240571246744999990) * f[2] + (0.053152946072499999) * f[30] + (0.115089467124000010) * f[12] + (0.090775936912099994) * f[32];
-    tg := (0.097749909977199997) * g[14] + (0.240571246744999990) * g[2] + (0.053152946072499999) * g[30] + (0.115089467124000010) * g[12] + (0.090775936912099994) * g[32];
+    tf := (0.097749909977199997) * f[14] + (0.240571246744999990) * f[2] + (0.053152946072499999) * f[30] +
+        (0.115089467124000010) * f[12] + (0.090775936912099994) * f[32];
+    tg := (0.097749909977199997) * g[14] + (0.240571246744999990) * g[2] + (0.053152946072499999) * g[30] +
+        (0.115089467124000010) * g[12] + (0.090775936912099994) * g[32];
     y[21] += tf * g[31] + tg * f[31];
     y[31] += tf * g[21] + tg * f[21];
     t := f[21] * g[31] + f[31] * g[21];
@@ -4524,8 +4654,10 @@ begin
     y[24] += (-0.128376561118000000) * t;
 
     // [29,29]: 20,6,0,22,8,
-    tf := (0.086798397468799998) * f[20] + (0.145565337808999990) * f[6] + (0.282094791773999990) * f[0] + (-0.097043558539500002) * f[22] + (-0.140070311615000000) * f[8];
-    tg := (0.086798397468799998) * g[20] + (0.145565337808999990) * g[6] + (0.282094791773999990) * g[0] + (-0.097043558539500002) * g[22] + (-0.140070311615000000) * g[8];
+    tf := (0.086798397468799998) * f[20] + (0.145565337808999990) * f[6] + (0.282094791773999990) * f[0] +
+        (-0.097043558539500002) * f[22] + (-0.140070311615000000) * f[8];
+    tg := (0.086798397468799998) * g[20] + (0.145565337808999990) * g[6] + (0.282094791773999990) * g[0] +
+        (-0.097043558539500002) * g[22] + (-0.140070311615000000) * g[8];
     y[29] += tf * g[29] + tg * f[29];
     t := f[29] * g[29];
     y[20] += (0.086798397468799998) * t;
@@ -4544,8 +4676,10 @@ begin
     y[6] += (0.161739292769000010) * t;
 
     // [31,31]: 6,8,20,22,0,
-    tf := (0.145565337808999990) * f[6] + (0.140070311615000000) * f[8] + (0.086798397468799998) * f[20] + (0.097043558539500002) * f[22] + (0.282094791773999990) * f[0];
-    tg := (0.145565337808999990) * g[6] + (0.140070311615000000) * g[8] + (0.086798397468799998) * g[20] + (0.097043558539500002) * g[22] + (0.282094791773999990) * g[0];
+    tf := (0.145565337808999990) * f[6] + (0.140070311615000000) * f[8] + (0.086798397468799998) * f[20] +
+        (0.097043558539500002) * f[22] + (0.282094791773999990) * f[0];
+    tg := (0.145565337808999990) * g[6] + (0.140070311615000000) * g[8] + (0.086798397468799998) * g[20] +
+        (0.097043558539500002) * g[22] + (0.282094791773999990) * g[0];
     y[31] += tf * g[31] + tg * f[31];
     t := f[31] * g[31];
     y[6] += (0.145565337808999990) * t;
@@ -4596,9 +4730,6 @@ begin
     Result := y;
 end;
 
-
-
-
 //-------------------------------------------------------------------------------------
 // Evaluates a directional light and returns spectral SH data.  The output
 // vector is computed so that if the intensity of R/G/B is unit the resulting
@@ -4608,31 +4739,26 @@ end;
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb204988.aspx
 //-------------------------------------------------------------------------------------
-function XMSHEvalDirectionalLight(order: size_t; dir: TXMVECTOR; color: TXMVECTOR;
-    {out (order*order)}  resultR: Psingle;
-    {out (order*order) } resultG: Psingle;
-    {out(order*order)} resultB: Psingle): boolean;
 
+function XMSHEvalDirectionalLight(order: size_t; dir: TFXMVECTOR; color: TFXMVECTOR; var resultR: Psingle;
+    var resultG: Psingle; var resultB: Psingle): boolean;
 var
     clr: TXMFLOAT3A;
-    fTmp: array of single;
-    fNorm, fRScale, fGScale, fBScale: single;
+    fTmp: array [0..XM_SH_MAXORDER * XM_SH_MAXORDER - 1] of single;
+    fNorm: single;
     numcoeff, i: size_t;
+    fRScale, fGScale, fBScale: single;
 begin
     Result := False;
     if (resultR = nil) then
         Exit;
 
-
     if (order < XM_SH_MINORDER) or (order > XM_SH_MAXORDER) then
         Exit;
 
-
     XMStoreFloat3A(clr, color);
 
-    setLength(fTmp, XM_SH_MAXORDER * XM_SH_MAXORDER);
-
-    XMSHEvalDirection(@fTmp[0], order, dir); // evaluate the BF in this direction...
+    XMSHEvalDirection(fTmp, order, dir); // evaluate the BF in this direction...
 
     // now compute "normalization" and scale vector for each valid spectral band
     fNorm := XM_PI / CosWtInt(order);
@@ -4641,7 +4767,7 @@ begin
 
     fRScale := fNorm * clr.x;
 
-    for i := 0 to numcoeff - 1 do
+    for  i := 0 to numcoeff - 1 do
     begin
         resultR[i] := fTmp[i] * fRScale;
     end;
@@ -4667,9 +4793,7 @@ begin
     end;
 
     Result := True;
-    setLength(fTmp, 0);
 end;
-
 
 
 //------------------------------------------------------------------------------------
@@ -4681,25 +4805,27 @@ end;
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb205451.aspx
 //-------------------------------------------------------------------------------------
-function XMSHEvalSphericalLight(order: size_t; pos: TXMVECTOR; radius: single; color: TXMVECTOR;
 
-    { out (order*order)} resultR: Psingle;
-    {out(order*order)} resultG: Psingle;
-    {out(order*order)} resultB: Psingle): boolean;
+function XMSHEvalSphericalLight(order: size_t; pos: TXMVECTOR; radius: single; color: TXMVECTOR;
+    {var} resultR: Psingle;
+    {var} resultG: Psingle;
+    {var} resultB: Psingle): boolean;
 var
-    fDist, fConeAngle: single;
     dir: TXMVECTOR;
-    fTmpDir, fTmpL0: array of single;
-    fNewNorm: single;
-    vd: TXMFLOAT3; // ToDo TXMFLOAT3A ???
-    fX, fY, fZ: single;
+    fTmpDir: array [0..XM_SH_MAXORDER * XM_SH_MAXORDER - 1] of single;  // rotation "vector"
+    fTmpL0: array[0..XM_SH_MAXORDER - 1] of single;
+    vd: TXMFLOAT3A;
+    fDist, fConeAngle: single;
+    fNewNorm, fX, fY, fZ: single;
     clr: TXMFLOAT3A;
-    cNumCoefs, cStart, j, i: size_t;
+    i, j: integer;
+    cNumCoefs, cStart: size_t;
     fValUse: single;
 begin
     Result := False;
     if (resultR = nil) then
         Exit;
+
 
     if (radius < 0.0) then
         Exit;
@@ -4709,15 +4835,14 @@ begin
     // WARNING: fDist should not be < radius - otherwise light contains origin
 
     //const single fSinConeAngle := (fDist <= radius) ? 0.99999f : radius/fDist;
-    if (fDist <= radius) then
-        fConeAngle := (XM_PIDIV2)
+
+    if (fDist <= radius) then fConeAngle := (XM_PIDIV2)
     else
         fConeAngle := arcsin(radius / fDist);
 
     dir := XMVector3Normalize(pos);
 
-    SetLength(fTmpDir, XM_SH_MAXORDER * XM_SH_MAXORDER);  // rotation "vector"
-    SetLength(fTmpL0, XM_SH_MAXORDER);
+
 
 
     // Sphere at distance fDist, the cone angle is determined by looking at the
@@ -4728,22 +4853,20 @@ begin
     // through the origin - we want to find the angle of this cone) and the final
     // side being from the center of the sphere to the point of tagency (the two
     // sides conected to this are at a right angle by construction.)
-    // From trig we know that sin(theta) :=  OR opposite||/||hypotenuse||, where
-    //  OR opposite OR  := Radius,  OR hypotenuse OR  := fDist
+    // From trig we know that sin(theta) := ||opposite||/||hypotenuse||, where
+    // ||opposite|| := Radius, ||hypotenuse|| := fDist
     // theta is the angle of the cone that subtends the sphere from the origin
 
 
     // no default normalization is done for this case, have to be careful how
     // you represent the coefficients...
 
-
-
     fNewNorm := 1.0;///(fSinConeAngle*fSinConeAngle);
 
     ComputeCapInt(order, fConeAngle, @fTmpL0[0]);
 
 
-    XMStoreFloat3(vd, dir);
+    XMStoreFloat3A(vd, dir);
 
     fX := vd.x;
     fY := vd.y;
@@ -4772,8 +4895,10 @@ begin
 
 
         else
+        begin
             assert((order < XM_SH_MINORDER) or (order > XM_SH_MAXORDER));
             Exit;
+        end;
     end;
 
 
@@ -4785,39 +4910,32 @@ begin
         cNumCoefs := 2 * i + 1;
         cStart := i * i;
         fValUse := fTmpL0[i] * clr.x * fNewNorm * fExtraNormFac[i];
-        for  j := 0 to cNumCoefs - 1 do
-            resultR[cStart + j] := fTmpDir[cStart + j] * fValUse;
+        for j := 0 to cNumCoefs - 1 do resultR[cStart + j] := fTmpDir[cStart + j] * fValUse;
     end;
 
     if (resultG <> nil) then
     begin
-        for i := 0 to order - 1 do
+        for  i := 0 to order - 1 do
         begin
             cNumCoefs := 2 * i + 1;
             cStart := i * i;
             fValUse := fTmpL0[i] * clr.y * fNewNorm * fExtraNormFac[i];
-            for j := 0 to cNumCoefs - 1 do
-                resultG[cStart + j] := fTmpDir[cStart + j] * fValUse;
+            for j := 0 to cNumCoefs - 1 do resultG[cStart + j] := fTmpDir[cStart + j] * fValUse;
         end;
     end;
 
     if (resultB <> nil) then
     begin
-        for i := 0 to order - 1 do
+        for  i := 0 to order - 1 do
         begin
             cNumCoefs := 2 * i + 1;
             cStart := i * i;
             fValUse := fTmpL0[i] * clr.z * fNewNorm * fExtraNormFac[i];
-            for j := 0 to cNumCoefs - 1 do
-                resultB[cStart + j] := fTmpDir[cStart + j] * fValUse;
+            for j := 0 to cNumCoefs - 1 do resultB[cStart + j] := fTmpDir[cStart + j] * fValUse;
         end;
     end;
 
     Result := True;
-
-    SetLength(fTmpDir, 0);
-    SetLength(fTmpL0, 0);
-
 end;
 
 
@@ -4832,47 +4950,47 @@ end;
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb204986.aspx
 //-------------------------------------------------------------------------------------
-function XMSHEvalConeLight(order: size_t; dir: TXMVECTOR; radius: single; color: TXMVECTOR;
-    { out (order*order)}  resultR: Psingle; resultG: Psingle; resultB: Psingle): boolean;
-var
-    fTmpDir, fTmpL0: array of single;
 
-    fConeAngle, fAngCheck, fNewNorm: single;
-    fX, fY, fZ: single;
-    vd: TXMFLOAT3; // Todo TXMFLOAT3A
+function XMSHEvalConeLight(order: size_t; dir: TFXMVECTOR; radius: single; color: TFXMVECTOR;
+    {var} resultR: psingle;
+    {var} resultG: Psingle;
+    {var} resultB: Psingle): boolean;
+var
+    fTmpL0: array [0..XM_SH_MAXORDER - 1] of single;
+    fTmpDir: array [0..XM_SH_MAXORDER * XM_SH_MAXORDER - 1] of single;
     clr: TXMFLOAT3A;
-    cNumCoefs, cStart, j, i: size_t;
-    fValUse: single;
+    i, j: integer;
+    cNumCoefs, cStart: size_t;
+    fConeAngle, fAngCheck, fNewNorm, fValUse: single;
+    vd: TXMFLOAT3A;
+    fX, fY, fZ: single;
 begin
     Result := False;
     if (resultR = nil) then
-        Exit;
+        exit;
 
     if (radius < 0.0) or (radius > (XM_PI * 1.00001)) then
-        Exit;
+        exit;
 
     if (radius < 0.0001) then
     begin
         // turn it into a pure directional light...
         Result := XMSHEvalDirectionalLight(order, dir, color, resultR, resultG, resultB);
+        Exit;
     end
     else
     begin
-        SetLength(fTmpL0, XM_SH_MAXORDER);
-        SetLength(fTmpDir, XM_SH_MAXORDER * XM_SH_MAXORDER);
 
         fConeAngle := radius;
-        if (fConeAngle > XM_PIDIV2) then
-            fAngCheck := (XM_PIDIV2)
+        if (fConeAngle > XM_PIDIV2) then fAngCheck := (XM_PIDIV2)
         else
             fAngCheck := fConeAngle;
 
         fNewNorm := 1.0 / (sin(fAngCheck) * sin(fAngCheck));
 
-        ComputeCapInt(order, fConeAngle, @fTmpL0[0]);
+        ComputeCapInt(order, fConeAngle, fTmpL0);
 
-
-        XMStoreFloat3(vd, dir);
+        XMStoreFloat3A(vd, dir);
 
         fX := vd.x;
         fY := vd.y;
@@ -4891,6 +5009,7 @@ begin
             4:
                 sh_eval_basis_3(fX, fY, fZ, @fTmpDir[0]);
 
+
             5:
                 sh_eval_basis_4(fX, fY, fZ, @fTmpDir[0]);
 
@@ -4900,9 +5019,12 @@ begin
 
 
             else
+            begin
                 assert((order < XM_SH_MINORDER) or (order > XM_SH_MAXORDER));
                 Exit;
+            end;
         end;
+
 
 
         XMStoreFloat3A(clr, color);
@@ -4942,9 +5064,6 @@ begin
     end;
 
     Result := True;
-
-    SetLength(fTmpDir, 0);
-    SetLength(fTmpL0, 0);
 end;
 
 
@@ -4961,49 +5080,49 @@ end;
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb204989.aspx
 //-------------------------------------------------------------------------------------
-function XMSHEvalHemisphereLight(order: size_t; dir: TXMVECTOR; topColor: TXMVECTOR; bottomColor: TXMVECTOR;
-    { out (order*order)} resultR: Psingle; resultG: Psingle; resultB: Psingle): boolean;
+
+function XMSHEvalHemisphereLight(order: size_t; dir: TFXMVECTOR; topColor: TFXMVECTOR; bottomColor: TFXMVECTOR;
+    {var} resultR: Psingle;
+    {var} resultG: Psingle;
+    {var} resultB: Psingle): boolean;
 var
-    fTmpDir, fTmpL0: array of single;
-    fNewNorm: single;
-    vd: TXMFLOAT3;
+    fTmpDir: array[0..XM_SH_MAXORDER * XM_SH_MAXORDER - 1] of single;  // rotation "vector"
+    fTmpL0: array [0..XM_SH_MAXORDER - 1] of single;
+    vd: TXMFLOAT3A;
     fX, fY, fZ: single;
+    fNewNorm: single;
     clrTop: TXMFLOAT3A;
     clrBottom: TXMFLOAT3A;
-    fA, fAvrg: single;
+    fA, fAvrg, fValUse: single;
+    i, j: integer;
+    cNumCoefs, cStart: size_t;
 
-    cNumCoefs, cStart, j, i: size_t;
-    fValUse: single;
 begin
     Result := False;
     if (resultR = nil) then
         Exit;
 
-    if (order < XM_SH_MINORDER) or (order > XM_SH_MAXORDER) then
+    if ((order < XM_SH_MINORDER) or (order > XM_SH_MAXORDER)) then
         Exit;
 
     // seperate "R/G/B colors...
 
-    SetLength(fTmpDir, XM_SH_MAXORDER * XM_SH_MAXORDER);  // rotation "vector"
-    SetLength(fTmpL0, XM_SH_MAXORDER);
 
     fNewNorm := 3.0 / 2.0; // normalizes things for 1 sky color, 0 ground color...
 
 
-    XMStoreFloat3(vd, dir);
+    XMStoreFloat3A(vd, dir);
 
     fX := vd.x;
     fY := vd.y;
     fZ := vd.z;
 
-    sh_eval_basis_1(fX, fY, fZ, @fTmpDir[0]);
+    sh_eval_basis_1(fX, fY, fZ, fTmpDir);
 
 
+    XMStoreFloat3A(&clrTop, topColor);
 
-    XMStoreFloat3A(clrTop, topColor);
-
-
-    XMStoreFloat3A(clrBottom, bottomColor);
+    XMStoreFloat3A(&clrBottom, bottomColor);
 
     fA := clrTop.x;
     fAvrg := (clrTop.x + clrBottom.x) * 0.5;
@@ -5018,16 +5137,14 @@ begin
         cNumCoefs := 2 * i + 1;
         cStart := i * i;
         fValUse := fTmpL0[i] * fNewNorm * fExtraNormFac[i];
-        for j := 0 to cNumCoefs - 1 do
-            resultR[cStart + j] := fTmpDir[cStart + j] * fValUse;
+        for  j := 0 to cNumCoefs - 1 do resultR[cStart + j] := fTmpDir[cStart + j] * fValUse;
     end;
 
     for i := 2 to order - 1 do
     begin
         cNumCoefs := 2 * i + 1;
         cStart := i * i;
-        for j := 0 to cNumCoefs - 1 do
-            resultR[cStart + j] := 0.0;
+        for  j := 0 to cNumCoefs - 1 do resultR[cStart + j] := 0.0;
     end;
 
     if (resultG <> nil) then
@@ -5040,20 +5157,17 @@ begin
 
         for i := 0 to 1 do
         begin
-
             cNumCoefs := 2 * i + 1;
             cStart := i * i;
             fValUse := fTmpL0[i] * fNewNorm * fExtraNormFac[i];
-            for j := 0 to cNumCoefs - 1 do
-                resultG[cStart + j] := fTmpDir[cStart + j] * fValUse;
+            for  j := 0 to cNumCoefs - 1 do resultG[cStart + j] := fTmpDir[cStart + j] * fValUse;
         end;
 
         for i := 2 to order - 1 do
         begin
             cNumCoefs := 2 * i + 1;
             cStart := i * i;
-            for j := 0 to cNumCoefs - 1 do
-                resultG[cStart + j] := 0.0;
+            for  j := 0 to cNumCoefs - 1 do resultG[cStart + j] := 0.0;
         end;
     end;
 
@@ -5071,284 +5185,21 @@ begin
             cNumCoefs := 2 * i + 1;
             cStart := i * i;
             fValUse := fTmpL0[i] * fNewNorm * fExtraNormFac[i];
-            for j := 0 to cNumCoefs - 1 do
-                resultB[cStart + j] := fTmpDir[cStart + j] * fValUse;
+            for  j := 0 to cNumCoefs - 1 do resultB[cStart + j] := fTmpDir[cStart + j] * fValUse;
         end;
 
         for i := 2 to order - 1 do
         begin
             cNumCoefs := 2 * i + 1;
             cStart := i * i;
-            for j := 0 to cNumCoefs - 1 do
-                resultB[cStart + j] := 0.0;
-
+            for  j := 0 to cNumCoefs - 1 do resultB[cStart + j] := 0.0;
         end;
     end;
 
     Result := True;
-
-    SetLength(fTmpDir, 0);
-    SetLength(fTmpL0, 0);
 end;
 
 
-//-------------------------------------------------------------------------------------
-// Projects a function represented in a cube map into spherical harmonics.
-
-// http://msdn.microsoft.com/en-us/library/windows/desktop/ff476300.aspx
-//-------------------------------------------------------------------------------------
-function SHProjectCubeMap(context: ID3D11DeviceContext; order: size_t; cubeMap: ID3D11Texture2D;
-    { _Out_writes_opt_(order*order) } resultR: Psingle;
-    {_Out_writes_opt_(order*order)  } resultG: Psingle;
-    {_Out_writes_opt_(order*order) }  resultB: Psingle): HRESULT;
-
-var
-    desc: TD3D11_TEXTURE2D_DESC;
-    texture: ID3D11Texture2D;
-    fV, fU: single;
-    ix, iy, iz: single;
-    dir: TXMVECTOR;
-    fDiffSolid: single;
-    clr: TXMFLOAT3A;
-    sdesc: TD3D11_TEXTURE2D_DESC;
-    face, dindex, y: UINT;
-    mapped: TD3D11_MAPPED_SUBRESOURCE;
-    staging: ID3D11Texture2D;
-    device: ID3D11Device;
-    fSize, fPicSize: single;
-    fB, fS, fWt: single;
-
-    scanline: TScopedAlignedArrayXMVECTOR;
-    shBuff: array of single;
-    shBuffB: array of single;
-    pSrc: PByte;
-    ptr, pixel: PXMVECTOR;
-    fNormProj: single;
-begin
-    Result := E_INVALIDARG;
-    if (context = nil) or (cubeMap = nil) then
-        Exit;
-
-    if (order < XM_SH_MINORDER) or (order > XM_SH_MAXORDER) then
-        Exit;
-
-
-    cubeMap.GetDesc(desc);
-
-    Result := E_FAIL;
-    if ((desc.ArraySize <> 6) or (desc.Width <> desc.Height) or (desc.SampleDesc.Count > 1)) then
-        Exit;
-
-    case (desc.Format) of
-
-        DXGI_FORMAT_R32G32B32A32_FLOAT,
-        DXGI_FORMAT_R32G32B32_FLOAT,
-        DXGI_FORMAT_R16G16B16A16_FLOAT,
-        DXGI_FORMAT_R32G32_FLOAT,
-        DXGI_FORMAT_R11G11B10_FLOAT,
-        DXGI_FORMAT_R16G16_FLOAT,
-        DXGI_FORMAT_R32_FLOAT,
-        DXGI_FORMAT_R16_FLOAT:
-
-        begin
-            // See _LoadScanline to support more pixel formats
-        end;
-
-        else
-            Exit;
-    end;
-
-    //--- Create a staging resource copy (if needed) to be able to read data
-
-
-
-    if ((desc.CPUAccessFlags and Ord(D3D11_CPU_ACCESS_READ)) = 0) then
-    begin
-        sdesc := desc;
-        sdesc.BindFlags := 0;
-        sdesc.CPUAccessFlags := Ord(D3D11_CPU_ACCESS_READ);
-        sdesc.Usage := D3D11_USAGE_STAGING;
-
-
-        context.GetDevice(device);
-        assert(device <> nil);
-
-        Result := device.CreateTexture2D(sdesc, nil, staging);
-        if (Result <> S_OK) then
-            exit;
-
-        context.CopyResource(staging, cubeMap);
-
-        texture := staging;
-    end
-    else
-        texture := cubeMap;
-
-    assert(texture <> nil);
-
-    //--- Setup for SH projection
-
-    // ToDO    scanline( reinterpret_cast<XMVECTOR*>( _aligned_malloc( sizeof(XMVECTOR)*desc.Width, 16 ) ) );
-
-    Result := E_OUTOFMEMORY;
-    if (scanline = nil) then
-        Exit;
-
-
-    assert(desc.Width > 0);
-    fSize := desc.Width;
-    fPicSize := 1.0 / fSize;
-
-    // index from [0,W-1], f(0) maps to -1 + 1/W, f(W-1) maps to 1 - 1/w
-    // linear function x*S +B, 1st constraint means B is (-1+1/W), plug into
-    // second and solve for S: S := 2*(1-1/W)/(W-1). The old code that did
-    // this was incorrect - but only for computing the differential solid
-    // angle, where the final value was 1.0 instead of 1-1/w...
-
-    fB := -1.0 + 1.0 / fSize;
-    if (desc.Width > 1) then
-        fS := (2.0 * (1.0 - 1.0 / fSize) / (fSize - 1.0))
-    else
-        fS := 0.0;
-
-    // clear out accumulation variables
-    fWt := 0.0;
-
-    if (resultR <> nil) then
-        ZeroMemory(resultR, sizeof(single) * order * order);
-    if (resultG <> nil) then
-        ZeroMemory(resultG, sizeof(single) * order * order);
-    if (resultB <> nil) then
-        ZeroMemory(resultB, sizeof(single) * order * order);
-
-    SetLength(shBuff, XM_SH_MAXORDER * XM_SH_MAXORDER);
-    SetLength(shBuffB, XM_SH_MAXORDER * XM_SH_MAXORDER);
-
-    //--- Process each face of the cubemap
-    for face := 0 to 5 do
-    begin
-        dindex := D3D11CalcSubresource(0, face, desc.MipLevels);
-
-
-        Result := context.Map(texture, dindex, D3D11_MAP_READ, 0, mapped);
-        if (Result <> s_OK) then
-        begin
-            SetLength(shBuff, 0);
-            SetLength(shBuffB, 0);
-            Exit;
-        end;
-
-        pSrc := (mapped.pData);
-        for y := 0 to desc.Height - 1 do
-        begin
-            // ToDo
-            (*
-             ptr := scanline.get();
-            if ( not _LoadScanline( ptr, desc.Width, pSrc, mapped.RowPitch, desc.Format ) )  then
-            begin
-                context.Unmap( texture, dindex );
-                Result:= E_FAIL;
-                SetLength(shBuff, 0);
-                SetLength(shBuffB, 0);
-                Exit;
-            end;
-
-             fV := y*fS + fB;
-
-             pixel := ptr;
-            for x:=0 to desc.Width-1 do; ++x, ++pixel )
-            begin
-                  fU := x*fS + fB;
-
-
-                case ( face ) of
-
-                 0: // Positive X
-                 begin
-                    iz := 1.0 - (2.0 * (single)x + 1.0) * fPicSize;
-                    iy := 1.0 - (2.0 * (single)y + 1.0) * fPicSize;
-                    ix := 1.0;
-                    end;
-
-                 1: // Negative X
-                          begin
-                    iz := -1.0 + (2.0 * (single)x + 1.0) * fPicSize;
-                    iy :=  1.0 - (2.0 * (single)y + 1.0) * fPicSize;
-                    ix := -1;
-                    end;
-
-                 2: // Positive Y
-                    begin
-                    iz := -1.0 + (2.0 * (single)y + 1.0) * fPicSize;
-                    iy :=  1.0;
-                    ix := -1.0 + (2.0 * (single)x + 1.0) * fPicSize;
-                    end;
-
-                 3: // Negative Y
-                begin
-                    iz :=  1.0 - (2.0 * (single)y + 1.0) * fPicSize;
-                    iy := -1.0;
-                    ix := -1.0 + (2.0 * (single)x + 1.0) * fPicSize;
-                    end;
-
-                 4: // Positive Z
-                begin
-                    iz :=  1.0;
-                    iy :=  1.0 - (2.0 * (single)y + 1.0) * fPicSize;
-                    ix := -1.0 + (2.0 * (single)x + 1.0) * fPicSize;
-                    end;
-
-                 5: // Negative Z
-                begin
-                    iz := -1.0;
-                    iy :=  1.0 - (2.0 * (single)y + 1.0) * fPicSize;
-                    ix :=  1.0 - (2.0 * (single)x + 1.0) * fPicSize;
-                    end;
-
-                else
-                begin
-                    ix := iy := iz := 0.0;
-                    assert(false);
-
-                end;
-
-                 dir := XMVectorSet( ix, iy, iz, 0 );
-                dir := XMVector3Normalize( dir );
-
-                  fDiffSolid := 4.0/((1.0 + fU*fU + fV*fV)*sqrtf(1.0 + fU*fU+fV*fV));
-                fWt += fDiffSolid;
-
-                XMSHEvalDirection(shBuff,order,dir);
-
-
-                XMStoreFloat3A( clr, pixel );
-
-                if ( resultR<>nil ) then XMSHAdd(resultR,order,resultR, XMSHScale(shBuffB,order,shBuff,clr.x*fDiffSolid) );
-                if ( resultG <>nil ) then XMSHAdd(resultG,order,resultG, XMSHScale(shBuffB,order,shBuff,clr.y*fDiffSolid) );
-                if ( resultB <>nil ) then XMSHAdd(resultB,order,resultB, XMSHScale(shBuffB,order,shBuff,clr.z*fDiffSolid) );
-           end;
-
-            pSrc += mapped.RowPitch;
-            *)
-        end;
-
-        context.Unmap(texture, dindex);
-    end;
-
-    fNormProj := (4.0 * XM_PI) / fWt;
-
-    if (resultR <> nil) then
-        XMSHScale(resultR, order, resultR, fNormProj);
-    if (resultG <> nil) then
-        XMSHScale(resultG, order, resultG, fNormProj);
-    if (resultB <> nil) then
-        XMSHScale(resultB, order, resultB, fNormProj);
-
-    Result := S_OK;
-
-    SetLength(shBuff, 0);
-    SetLength(shBuffB, 0);
-end;
 
 
 end.

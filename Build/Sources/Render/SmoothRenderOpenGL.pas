@@ -1419,8 +1419,8 @@ glEnable(GL_FOG);
 glHint (GL_FOG_HINT, GL_NICEST);
 //glHint(GL_FOG_HINT, GL_DONT_CARE);
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glFogf = nil then TSRenderOpenGL_DynLinkError('glFogf');{$ENDIF}
-glFogf (GL_FOG_START, 300);
-glFogf (GL_FOG_END, 400);
+glFogf (GL_FOG_START, 300.0);// strange bug android
+glFogf (GL_FOG_END, 400.0);
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glFogfv = nil then TSRenderOpenGL_DynLinkError('glFogfv');{$ENDIF}
 glFogfv(GL_FOG_COLOR, @fogColor);
 glFogf(GL_FOG_DENSITY, 0.55);

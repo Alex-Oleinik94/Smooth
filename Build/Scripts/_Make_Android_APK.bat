@@ -8,14 +8,18 @@ make build_files
 cd Scripts
 IF "%1"=="" (
 	CALL _Make_Android_ARM apk
-) ELSE (
+) ELSE IF "%1"=="e_arm" (
 	CALL _Make_Extensions android_arm false
+) ELSE IF "%1"=="i386" (
+	CALL _Make_Android_I386 apk
+) ELSE IF "%1"=="e_i386" (
+	CALL _Make_Extensions android_i386 false
 )
 cd ..
 make clear_files
 
 if exist "Output\AndroidApplication\libs\armeabi\libmain.so" set LIB="existed"
-rem if exist "Output\AndroidApplication\libs\i386eabi\libmain.so" set LIB="existed"
+if exist "Output\AndroidApplication\libs\i386eabi\libmain.so" set LIB="existed"
 
 if "%LIB%"==""existed"" (
 	echo "================"

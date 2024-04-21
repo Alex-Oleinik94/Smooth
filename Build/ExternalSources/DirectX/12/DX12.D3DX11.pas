@@ -55,7 +55,7 @@ const
 
 type
   {$IFNDEF FPC}
-  PHRESULT = ^HRESULT;
+    PHRESULT = ^HRESULT;
   {$ENDIF}
 
     TD3DX11_FILTER_FLAG = (
@@ -399,6 +399,7 @@ end;
 
 { TD3DX11_IMAGE_LOAD_INFO }
 
+{$R-}
 procedure TD3DX11_IMAGE_LOAD_INFO.Init;
 begin
     Width := D3DX11_DEFAULT;
@@ -410,11 +411,11 @@ begin
     BindFlags := D3DX11_DEFAULT;
     CpuAccessFlags := D3DX11_DEFAULT;
     MiscFlags := D3DX11_DEFAULT;
-    Format := TDXGI_FORMAT(0); //Format := DXGI_FORMAT_FROM_FILE;
+    Format := DXGI_FORMAT_FROM_FILE;
     Filter := D3DX11_DEFAULT;
     MipFilter := D3DX11_DEFAULT;
     pSrcInfo := nil;
 end;
 
+{$R+}
 end.
-

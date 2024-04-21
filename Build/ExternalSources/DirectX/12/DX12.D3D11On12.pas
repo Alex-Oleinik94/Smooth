@@ -1,3 +1,37 @@
+{ **************************************************************************
+  Copyright 2016 Norbert Sonnleitner
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.
+  ************************************************************************** }
+
+{ **************************************************************************
+  Additional Copyright (C) for this modul:
+
+  Copyright (c) Microsoft Corporation.  All rights reserved.
+
+  This unit consists of the following header files
+  File name: D3D11On12.h
+  Header version: 10.0.10586
+
+  ************************************************************************** }
 unit DX12.D3D11On12;
 
 {$IFDEF FPC}
@@ -12,8 +46,10 @@ uses
     Windows, Classes, SysUtils, DX12.D3D12, DX12.D3D11, DX12.D3DCommon;
 
 const
-	D3D11_DLL = 'd3d11.dll';
+    D3D11_DLL = 'd3d11.dll';
     IID_ID3D11On12Device: TGUID = '{85611e73-70a9-490e-9614-a9e302777904}';
+    IID_ID3D11On12Device1: TGUID = '{bdb64df4-ea2f-4c70-b861-aaab1258bb5d}';
+    IID_ID3D11On12Device2: TGUID = '{dc90f331-4740-43fa-866e-67f12cb58223}';
 
 type
     TD3D11_RESOURCE_FLAGS = record
@@ -31,6 +67,27 @@ type
         procedure ReleaseWrappedResources(ppResources: PID3D11Resource; NumResources: UINT); stdcall;
         procedure AcquireWrappedResources(ppResources: PID3D11Resource; NumResources: UINT); stdcall;
     end;
+
+    ID3D11On12Device1 = interface(ID3D11On12Device)
+        ['{bdb64df4-ea2f-4c70-b861-aaab1258bb5d}']
+        function GetD3D12Device(const riid: TGUID; out ppvDevice): HRESULT; stdcall;
+    end;
+
+
+
+    ID3D11On12Device2 = interface(ID3D11On12Device1)
+    ['{dc90f331-4740-43fa-866e-67f12cb58223}']
+        function UnwrapUnderlyingResource( pResource11:ID3D11Resource; pCommandQueue:ID3D12CommandQueue;
+            const riid: TGUID; out ppvResource12) :HResult; stdcall;
+
+        function ReturnUnderlyingResource(
+              pResource11:ID3D11Resource;
+             NumSync:UINT;
+               pSignalValues {array of NumSync}:PUINT64;
+                 ppFences{array of NumSync}: PID3D12Fence) :HResult; stdcall;
+
+     end;
+
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -89,6 +146,8 @@ function D3D11On12CreateDevice(pDevice: IUnknown; Flags: UINT; pFeatureLevels: P
 implementation
 
 end.
+
+
 
 
 
